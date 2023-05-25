@@ -256,7 +256,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                       return;
                     }
 
-                    context.pushNamedAuth('chatMain', context.mounted);
+                    context.pushNamedAuth('generationsMain', context.mounted);
                   },
                   text: 'Log In',
                   options: FFButtonOptions(
@@ -372,7 +372,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                       await currentUserReference!.update(usersUpdateData);
 
                       context.pushNamedAuth(
-                        'chatMain',
+                        'generationsMain',
                         context.mounted,
                         extra: <String, dynamic>{
                           kTransitionInfoKey: TransitionInfo(

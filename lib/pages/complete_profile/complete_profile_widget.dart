@@ -305,7 +305,7 @@ class _CompleteProfileWidgetState extends State<CompleteProfileWidget> {
                 );
                 await currentUserReference!.update(usersUpdateData);
 
-                context.pushNamed('chatMain');
+                context.pushNamed('generationsMain');
               },
               text: 'Save Profile',
               options: FFButtonOptions(

@@ -8,25 +8,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'chat_main_model.dart';
-export 'chat_main_model.dart';
+import 'generations_main_model.dart';
+export 'generations_main_model.dart';
 
-class ChatMainWidget extends StatefulWidget {
-  const ChatMainWidget({Key? key}) : super(key: key);
+class GenerationsMainWidget extends StatefulWidget {
+  const GenerationsMainWidget({Key? key}) : super(key: key);
 
   @override
-  _ChatMainWidgetState createState() => _ChatMainWidgetState();
+  _GenerationsMainWidgetState createState() => _GenerationsMainWidgetState();
 }
 
-class _ChatMainWidgetState extends State<ChatMainWidget> {
-  late ChatMainModel _model;
+class _GenerationsMainWidgetState extends State<GenerationsMainWidget> {
+  late GenerationsMainModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
     super.initState();
-    _model = createModel(context, () => ChatMainModel());
+    _model = createModel(context, () => GenerationsMainModel());
 
     WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
   }
@@ -56,14 +56,14 @@ class _ChatMainWidgetState extends State<ChatMainWidget> {
             ),
           );
         }
-        final chatMainUsersRecord = snapshot.data!;
+        final generationsMainUsersRecord = snapshot.data!;
         return Scaffold(
           key: scaffoldKey,
           backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
           floatingActionButton: FloatingActionButton(
             onPressed: () async {
               context.pushNamed(
-                'MyFriends',
+                'CreateGeneration',
                 extra: <String, dynamic>{
                   kTransitionInfoKey: TransitionInfo(
                     hasTransition: true,
@@ -85,7 +85,7 @@ class _ChatMainWidgetState extends State<ChatMainWidget> {
             backgroundColor: FlutterFlowTheme.of(context).primary,
             automaticallyImplyLeading: false,
             title: Text(
-              'All Chats',
+              'All Generations',
               style: FlutterFlowTheme.of(context).displaySmall.override(
                     fontFamily: 'Lexend Deca',
                     color: FlutterFlowTheme.of(context).tertiary,
@@ -100,7 +100,8 @@ class _ChatMainWidgetState extends State<ChatMainWidget> {
             child: StreamBuilder<List<GenerationsRecord>>(
               stream: queryGenerationsRecord(
                 queryBuilder: (generationsRecord) => generationsRecord
-                    .where('user', isEqualTo: chatMainUsersRecord.reference)
+                    .where('user',
+                        isEqualTo: generationsMainUsersRecord.reference)
                     .orderBy('timestamp', descending: true),
               ),
               builder: (context, snapshot) {
@@ -145,9 +146,18 @@ class _ChatMainWidgetState extends State<ChatMainWidget> {
                           itemBuilder: (context, allGenerationsIndex) {
                             final allGenerationsItem =
                                 allGenerations[allGenerationsIndex];
-                            return GenerationPreviewWidget(
-                              key: Key(
-                                  'Key4fu_${allGenerationsIndex}_of_${allGenerations.length}'),
+                            return InkWell(
+                              splashColor: Colors.transparent,
+                              focusColor: Colors.transparent,
+                              hoverColor: Colors.transparent,
+                              highlightColor: Colors.transparent,
+                              onTap: () async {
+                                context.pushNamed('VewGeneraton');
+                              },
+                              child: GenerationPreviewWidget(
+                                key: Key(
+                                    'Key4fu_${allGenerationsIndex}_of_${allGenerations.length}'),
+                              ),
                             );
                           },
                         );

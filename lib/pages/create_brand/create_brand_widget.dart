@@ -336,7 +336,7 @@ class _CreateBrandWidgetState extends State<CreateBrandWidget> {
                     );
                     await currentUserReference!.update(usersUpdateData);
 
-                    context.pushNamed('chatMain');
+                    context.pushNamed('generationsMain');
                   },
                   text: 'Complete Profile',
                   options: FFButtonOptions(

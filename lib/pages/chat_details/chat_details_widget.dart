@@ -251,7 +251,7 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
           highlightColor: Colors.transparent,
           onTap: () async {
             context.pushNamed(
-              'chatMain',
+              'generationsMain',
               extra: <String, dynamic>{
                 kTransitionInfoKey: TransitionInfo(
                   hasTransition: true,

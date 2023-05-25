@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:go_router/go_router.dart';
 import 'package:page_transition/page_transition.dart';
+import '/flutter_flow/flutter_flow_util.dart';
 import '../flutter_flow_theme.dart';
 import '/backend/backend.dart';
 
@@ -89,9 +90,9 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => RegisterWidget(),
         ),
         FFRoute(
-          name: 'MyFriends',
-          path: '/myFriends',
-          builder: (context, params) => MyFriendsWidget(),
+          name: 'CreateGeneration',
+          path: '/createGeneration',
+          builder: (context, params) => CreateGenerationWidget(),
         ),
         FFRoute(
           name: 'completeProfile',
@@ -116,11 +117,11 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           ),
         ),
         FFRoute(
-          name: 'chatMain',
-          path: '/chatMain',
+          name: 'generationsMain',
+          path: '/generationsMain',
           builder: (context, params) => params.isEmpty
-              ? NavBarPage(initialPage: 'chatMain')
-              : ChatMainWidget(),
+              ? NavBarPage(initialPage: 'generationsMain')
+              : GenerationsMainWidget(),
         ),
         FFRoute(
           name: 'changePassword',
@@ -157,9 +158,20 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           name: 'PersonaSelect',
           path: '/personaSelect',
           builder: (context, params) => PersonaSelectWidget(),
+        ),
+        FFRoute(
+          name: 'CreatePrompt',
+          path: '/createPrompt',
+          builder: (context, params) => CreatePromptWidget(),
+        ),
+        FFRoute(
+          name: 'VewGeneraton',
+          path: '/vewGeneraton',
+          builder: (context, params) => VewGeneratonWidget(),
         )
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
       urlPathStrategy: UrlPathStrategy.path,
+      observers: [routeObserver],
     );
 
 extension NavParamExtensions on Map<String, String?> {
@@ -341,12 +353,9 @@ class FFRoute {
           final child = appStateNotifier.loading
               ? Container(
                   color: Colors.transparent,
-                  child: Center(
-                    child: Image.asset(
-                      'assets/images/splash@2x.png',
-                      width: MediaQuery.of(context).size.width * 1.0,
-                      fit: BoxFit.fitWidth,
-                    ),
+                  child: Image.asset(
+                    'assets/images/logo.png',
+                    fit: BoxFit.contain,
                   ),
                 )
               : page;

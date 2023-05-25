@@ -429,7 +429,7 @@ class _RegisterWidgetState extends State<RegisterWidget> {
                       await currentUserReference!.update(usersUpdateData);
 
                       context.pushNamedAuth(
-                        'chatMain',
+                        'generationsMain',
                         context.mounted,
                         extra: <String, dynamic>{
                           kTransitionInfoKey: TransitionInfo(

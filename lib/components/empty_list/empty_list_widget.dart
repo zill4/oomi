@@ -90,7 +90,7 @@ class _EmptyListWidgetState extends State<EmptyListWidget> {
           child: FFButtonWidget(
             onPressed: () async {
               context.pushNamed(
-                'MyFriends',
+                'CreateGeneration',
                 extra: <String, dynamic>{
                   kTransitionInfoKey: TransitionInfo(
                     hasTransition: true,

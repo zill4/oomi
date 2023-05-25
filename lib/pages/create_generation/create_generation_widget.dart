@@ -7,25 +7,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'my_friends_model.dart';
-export 'my_friends_model.dart';
+import 'create_generation_model.dart';
+export 'create_generation_model.dart';
 
-class MyFriendsWidget extends StatefulWidget {
-  const MyFriendsWidget({Key? key}) : super(key: key);
+class CreateGenerationWidget extends StatefulWidget {
+  const CreateGenerationWidget({Key? key}) : super(key: key);
 
   @override
-  _MyFriendsWidgetState createState() => _MyFriendsWidgetState();
+  _CreateGenerationWidgetState createState() => _CreateGenerationWidgetState();
 }
 
-class _MyFriendsWidgetState extends State<MyFriendsWidget> {
-  late MyFriendsModel _model;
+class _CreateGenerationWidgetState extends State<CreateGenerationWidget> {
+  late CreateGenerationModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
     super.initState();
-    _model = createModel(context, () => MyFriendsModel());
+    _model = createModel(context, () => CreateGenerationModel());
 
     WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
   }
@@ -130,8 +130,8 @@ class _MyFriendsWidgetState extends State<MyFriendsWidget> {
                         color: FlutterFlowTheme.of(context).primaryText,
                         size: 24.0,
                       ),
-                      onPressed: () {
-                        print('IconButton pressed ...');
+                      onPressed: () async {
+                        context.pushNamed('CreatePrompt');
                       },
                     ),
                   ),
