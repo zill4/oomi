@@ -5,9 +5,9 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/upload_data.dart';
-import '/main.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'complete_profile_model.dart';
@@ -30,11 +30,10 @@ class _CompleteProfileWidgetState extends State<CompleteProfileWidget> {
     super.initState();
     _model = createModel(context, () => CompleteProfileModel());
 
-    logFirebaseEvent('screen_view',
-        parameters: {'screen_name': 'completeProfile'});
     _model.imageURLController ??= TextEditingController();
     _model.displayNameController ??= TextEditingController();
-    _model.yourTitleController ??= TextEditingController();
+    _model.yourBrandController ??= TextEditingController();
+    WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
   }
 
   @override
@@ -73,8 +72,6 @@ class _CompleteProfileWidgetState extends State<CompleteProfileWidget> {
                 hoverColor: Colors.transparent,
                 highlightColor: Colors.transparent,
                 onTap: () async {
-                  logFirebaseEvent('COMPLETE_PROFILE_CircleImage_tsll7vag_ON');
-                  logFirebaseEvent('CircleImage_upload_media_to_firebase');
                   final selectedMedia = await selectMedia(
                     maxWidth: 1000.00,
                     maxHeight: 1000.00,
@@ -247,12 +244,12 @@ class _CompleteProfileWidgetState extends State<CompleteProfileWidget> {
           Padding(
             padding: EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 0.0),
             child: TextFormField(
-              controller: _model.yourTitleController,
+              controller: _model.yourBrandController,
               obscureText: false,
               decoration: InputDecoration(
-                labelText: 'Your Title',
+                labelText: 'Brand Name',
                 labelStyle: FlutterFlowTheme.of(context).bodyMedium,
-                hintText: 'What do you do?',
+                hintText: 'What is your Brand?',
                 hintStyle: FlutterFlowTheme.of(context).bodyMedium,
                 enabledBorder: OutlineInputBorder(
                   borderSide: BorderSide(
@@ -290,33 +287,25 @@ class _CompleteProfileWidgetState extends State<CompleteProfileWidget> {
               style: FlutterFlowTheme.of(context).titleSmall,
               keyboardType: TextInputType.emailAddress,
               validator:
-                  _model.yourTitleControllerValidator.asValidator(context),
+                  _model.yourBrandControllerValidator.asValidator(context),
             ),
           ),
           Padding(
             padding: EdgeInsetsDirectional.fromSTEB(0.0, 24.0, 0.0, 0.0),
             child: FFButtonWidget(
               onPressed: () async {
-                logFirebaseEvent('COMPLETE_PROFILE_Button-Login_ON_TAP');
-                logFirebaseEvent('Button-Login_backend_call');
-
                 final usersUpdateData = createUsersRecordData(
                   photoUrl: valueOrDefault<String>(
                     _model.imageURLController.text,
                     'https://image.flaticon.com/icons/png/512/3135/3135715.png',
                   ),
                   displayName: _model.displayNameController.text,
-                  userRole: _model.yourTitleController.text,
                   createdTime: getCurrentTimestamp,
+                  brandName: _model.yourBrandController.text,
                 );
                 await currentUserReference!.update(usersUpdateData);
-                logFirebaseEvent('Button-Login_navigate_to');
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => NavBarPage(initialPage: 'chatMain'),
-                  ),
-                );
+
+                context.pushNamed('chatMain');
               },
               text: 'Save Profile',
               options: FFButtonOptions(

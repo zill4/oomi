@@ -4,10 +4,10 @@ import '/flutter_flow/chat/index.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/main.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'chat_details_model.dart';
@@ -47,7 +47,6 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
     super.initState();
     _model = createModel(context, () => ChatDetailsModel());
 
-    logFirebaseEvent('screen_view', parameters: {'screen_name': 'chatDetails'});
     FFChatManager.instance
         .getChatInfo(
       otherUserRecord: widget.chatUser,
@@ -58,6 +57,8 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
         setState(() => _chatInfo = info);
       }
     });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
   }
 
   @override
@@ -89,8 +90,9 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                   child: SizedBox(
                     width: 50.0,
                     height: 50.0,
-                    child: CircularProgressIndicator(
-                      color: FlutterFlowTheme.of(context).primary,
+                    child: SpinKitRipple(
+                      color: Color(0xFF77DEFF),
+                      size: 50.0,
                     ),
                   ),
                 );
@@ -115,9 +117,6 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                             size: 30.0,
                           ),
                           onPressed: () async {
-                            logFirebaseEvent(
-                                'CHAT_DETAILS_close_rounded_ICN_ON_TAP');
-                            logFirebaseEvent('IconButton_drawer');
                             if (scaffoldKey.currentState!.isDrawerOpen ||
                                 scaffoldKey.currentState!.isEndDrawerOpen) {
                               Navigator.pop(context);
@@ -201,42 +200,6 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                       Expanded(
                         child: Padding(
                           padding: EdgeInsetsDirectional.fromSTEB(
-                              20.0, 24.0, 16.0, 0.0),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.max,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Job Title',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                      fontFamily: 'Lexend Deca',
-                                      fontSize: 10.0,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                              ),
-                              Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 8.0, 0.0, 0.0),
-                                child: Text(
-                                  columnUsersRecord.userRole,
-                                  style:
-                                      FlutterFlowTheme.of(context).titleSmall,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Expanded(
-                        child: Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
                               20.0, 16.0, 16.0, 0.0),
                           child: Column(
                             mainAxisSize: MainAxisSize.max,
@@ -287,16 +250,15 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
           hoverColor: Colors.transparent,
           highlightColor: Colors.transparent,
           onTap: () async {
-            logFirebaseEvent('CHAT_DETAILS_PAGE_Icon_9226xkn8_ON_TAP');
-            logFirebaseEvent('Icon_navigate_to');
-            await Navigator.push(
-              context,
-              PageTransition(
-                type: PageTransitionType.leftToRight,
-                duration: Duration(milliseconds: 200),
-                reverseDuration: Duration(milliseconds: 200),
-                child: NavBarPage(initialPage: 'chatMain'),
-              ),
+            context.pushNamed(
+              'chatMain',
+              extra: <String, dynamic>{
+                kTransitionInfoKey: TransitionInfo(
+                  hasTransition: true,
+                  transitionType: PageTransitionType.leftToRight,
+                  duration: Duration(milliseconds: 200),
+                ),
+              },
             );
           },
           child: Icon(
@@ -321,8 +283,6 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
               hoverColor: Colors.transparent,
               highlightColor: Colors.transparent,
               onTap: () async {
-                logFirebaseEvent('CHAT_DETAILS_PAGE_Icon_ztaf5u2n_ON_TAP');
-                logFirebaseEvent('Icon_drawer');
                 scaffoldKey.currentState!.openEndDrawer();
               },
               child: Icon(
@@ -397,8 +357,9 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                   child: SizedBox(
                     width: 50.0,
                     height: 50.0,
-                    child: CircularProgressIndicator(
-                      color: FlutterFlowTheme.of(context).primary,
+                    child: SpinKitRipple(
+                      color: Color(0xFF77DEFF),
+                      size: 50.0,
                     ),
                   ),
                 ),

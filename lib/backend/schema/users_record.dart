@@ -44,30 +44,15 @@ class UsersRecord extends FirestoreRecord {
   String get phoneNumber => _phoneNumber ?? '';
   bool hasPhoneNumber() => _phoneNumber != null;
 
-  // "userRole" field.
-  String? _userRole;
-  String get userRole => _userRole ?? '';
-  bool hasUserRole() => _userRole != null;
-
-  // "password" field.
-  String? _password;
-  String get password => _password ?? '';
-  bool hasPassword() => _password != null;
+  // "brand_name" field.
+  String? _brandName;
+  String get brandName => _brandName ?? '';
+  bool hasBrandName() => _brandName != null;
 
   // "isGuest" field.
   bool? _isGuest;
   bool get isGuest => _isGuest ?? false;
   bool hasIsGuest() => _isGuest != null;
-
-  // "brandPhoto_url" field.
-  String? _brandPhotoUrl;
-  String get brandPhotoUrl => _brandPhotoUrl ?? '';
-  bool hasBrandPhotoUrl() => _brandPhotoUrl != null;
-
-  // "brand_name" field.
-  String? _brandName;
-  String get brandName => _brandName ?? '';
-  bool hasBrandName() => _brandName != null;
 
   // "brand_description" field.
   String? _brandDescription;
@@ -81,11 +66,8 @@ class UsersRecord extends FirestoreRecord {
     _uid = snapshotData['uid'] as String?;
     _createdTime = snapshotData['created_time'] as DateTime?;
     _phoneNumber = snapshotData['phone_number'] as String?;
-    _userRole = snapshotData['userRole'] as String?;
-    _password = snapshotData['password'] as String?;
-    _isGuest = snapshotData['isGuest'] as bool?;
-    _brandPhotoUrl = snapshotData['brandPhoto_url'] as String?;
     _brandName = snapshotData['brand_name'] as String?;
+    _isGuest = snapshotData['isGuest'] as bool?;
     _brandDescription = snapshotData['brand_description'] as String?;
   }
 
@@ -121,11 +103,8 @@ Map<String, dynamic> createUsersRecordData({
   String? uid,
   DateTime? createdTime,
   String? phoneNumber,
-  String? userRole,
-  String? password,
-  bool? isGuest,
-  String? brandPhotoUrl,
   String? brandName,
+  bool? isGuest,
   String? brandDescription,
 }) {
   final firestoreData = mapToFirestore(
@@ -136,11 +115,8 @@ Map<String, dynamic> createUsersRecordData({
       'uid': uid,
       'created_time': createdTime,
       'phone_number': phoneNumber,
-      'userRole': userRole,
-      'password': password,
-      'isGuest': isGuest,
-      'brandPhoto_url': brandPhotoUrl,
       'brand_name': brandName,
+      'isGuest': isGuest,
       'brand_description': brandDescription,
     }.withoutNulls,
   );

@@ -1,8 +1,8 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import '/pages/my_friends/my_friends_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'empty_list_model.dart';
@@ -28,6 +28,8 @@ class _EmptyListWidgetState extends State<EmptyListWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => EmptyListModel());
+
+    WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
   }
 
   @override
@@ -43,27 +45,6 @@ class _EmptyListWidgetState extends State<EmptyListWidget> {
       mainAxisSize: MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Container(
-          height: 200.0,
-          child: Stack(
-            children: [
-              if (Theme.of(context).brightness == Brightness.dark)
-                Image.asset(
-                  'assets/images/chatsEmptyDark@2x.png',
-                  width: 300.0,
-                  height: 200.0,
-                  fit: BoxFit.contain,
-                ),
-              if (!(Theme.of(context).brightness == Brightness.dark))
-                Image.asset(
-                  'assets/images/chatEmpty@2x.png',
-                  width: 300.0,
-                  height: 200.0,
-                  fit: BoxFit.contain,
-                ),
-            ],
-          ),
-        ),
         Padding(
           padding: EdgeInsetsDirectional.fromSTEB(0.0, 24.0, 0.0, 0.0),
           child: Row(
@@ -108,16 +89,15 @@ class _EmptyListWidgetState extends State<EmptyListWidget> {
           padding: EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
           child: FFButtonWidget(
             onPressed: () async {
-              logFirebaseEvent('EMPTY_LIST_COMP_FIND_FRIENDS_BTN_ON_TAP');
-              logFirebaseEvent('Button_navigate_to');
-              await Navigator.push(
-                context,
-                PageTransition(
-                  type: PageTransitionType.bottomToTop,
-                  duration: Duration(milliseconds: 220),
-                  reverseDuration: Duration(milliseconds: 220),
-                  child: MyFriendsWidget(),
-                ),
+              context.pushNamed(
+                'MyFriends',
+                extra: <String, dynamic>{
+                  kTransitionInfoKey: TransitionInfo(
+                    hasTransition: true,
+                    transitionType: PageTransitionType.bottomToTop,
+                    duration: Duration(milliseconds: 220),
+                  ),
+                },
               );
             },
             text: 'Find Friends',

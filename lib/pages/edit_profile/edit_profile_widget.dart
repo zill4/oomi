@@ -7,6 +7,7 @@ import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/upload_data.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'edit_profile_model.dart';
@@ -38,7 +39,7 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
     super.initState();
     _model = createModel(context, () => EditProfileModel());
 
-    logFirebaseEvent('screen_view', parameters: {'screen_name': 'editProfile'});
+    WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
   }
 
   @override
@@ -59,8 +60,9 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
             child: SizedBox(
               width: 50.0,
               height: 50.0,
-              child: CircularProgressIndicator(
-                color: FlutterFlowTheme.of(context).primary,
+              child: SpinKitRipple(
+                color: Color(0xFF77DEFF),
+                size: 50.0,
               ),
             ),
           );
@@ -78,9 +80,7 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
               hoverColor: Colors.transparent,
               highlightColor: Colors.transparent,
               onTap: () async {
-                logFirebaseEvent('EDIT_PROFILE_PAGE_Icon_7bxuwhxn_ON_TAP');
-                logFirebaseEvent('Icon_navigate_back');
-                Navigator.pop(context);
+                context.pop();
               },
               child: Icon(
                 Icons.arrow_back_rounded,
@@ -127,10 +127,6 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                               hoverColor: Colors.transparent,
                               highlightColor: Colors.transparent,
                               onTap: () async {
-                                logFirebaseEvent(
-                                    'EDIT_PROFILE_CircleImage_98a9otnw_ON_TAP');
-                                logFirebaseEvent(
-                                    'CircleImage_upload_media_to_firebase');
                                 final selectedMedia = await selectMedia(
                                   maxWidth: 1000.00,
                                   maxHeight: 1000.00,
@@ -195,8 +191,6 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                                   }
                                 }
 
-                                logFirebaseEvent('CircleImage_backend_call');
-
                                 final usersUpdateData = createUsersRecordData(
                                   photoUrl: _model.uploadedFileUrl,
                                 );
@@ -212,7 +206,7 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                                 ),
                                 child: Image.network(
                                   valueOrDefault<String>(
-                                    editProfileUsersRecord.brandPhotoUrl,
+                                    editProfileUsersRecord.photoUrl,
                                     'https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/dark-mode-chat-xk2sj6/assets/ails754ngloi/uiAvatar@2x.png',
                                   ),
                                 ),
@@ -268,7 +262,8 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                                       borderRadius: BorderRadius.circular(30.0),
                                     ),
                                     filled: true,
-                                    fillColor: Color(0xFF3124A1),
+                                    fillColor:
+                                        FlutterFlowTheme.of(context).alternate,
                                     contentPadding:
                                         EdgeInsetsDirectional.fromSTEB(
                                             16.0, 24.0, 16.0, 24.0),
@@ -336,7 +331,8 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                                       borderRadius: BorderRadius.circular(30.0),
                                     ),
                                     filled: true,
-                                    fillColor: Color(0xFF3124A1),
+                                    fillColor:
+                                        FlutterFlowTheme.of(context).alternate,
                                     contentPadding:
                                         EdgeInsetsDirectional.fromSTEB(
                                             16.0, 24.0, 16.0, 24.0),
@@ -403,7 +399,8 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                                       borderRadius: BorderRadius.circular(30.0),
                                     ),
                                     filled: true,
-                                    fillColor: Color(0xFF3124A1),
+                                    fillColor:
+                                        FlutterFlowTheme.of(context).alternate,
                                     contentPadding:
                                         EdgeInsetsDirectional.fromSTEB(
                                             16.0, 24.0, 16.0, 24.0),
@@ -427,20 +424,15 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                               0.0, 20.0, 0.0, 0.0),
                           child: FFButtonWidget(
                             onPressed: () async {
-                              logFirebaseEvent(
-                                  'EDIT_PROFILE_SAVE_CHANGES_BTN_ON_TAP');
-                              logFirebaseEvent('Button_backend_call');
-
                               final usersUpdateData = createUsersRecordData(
                                 email: _model.textController1.text,
                                 displayName: _model.textController2.text,
                                 photoUrl: _model.uploadedFileUrl,
-                                userRole: _model.textController3.text,
+                                brandName: _model.textController3.text,
                               );
                               await editProfileUsersRecord.reference
                                   .update(usersUpdateData);
-                              logFirebaseEvent('Button_navigate_back');
-                              Navigator.pop(context);
+                              context.pop();
                             },
                             text: 'Save Changes',
                             options: FFButtonOptions(

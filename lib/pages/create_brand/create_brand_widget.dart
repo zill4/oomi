@@ -5,9 +5,9 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/upload_data.dart';
-import '/main.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'create_brand_model.dart';
@@ -30,10 +30,10 @@ class _CreateBrandWidgetState extends State<CreateBrandWidget> {
     super.initState();
     _model = createModel(context, () => CreateBrandModel());
 
-    logFirebaseEvent('screen_view', parameters: {'screen_name': 'CreateBrand'});
     _model.displayNameController ??= TextEditingController();
     _model.brandNameController ??= TextEditingController();
     _model.brandDescriptionController ??= TextEditingController();
+    WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
   }
 
   @override
@@ -81,10 +81,6 @@ class _CreateBrandWidgetState extends State<CreateBrandWidget> {
                       hoverColor: Colors.transparent,
                       highlightColor: Colors.transparent,
                       onTap: () async {
-                        logFirebaseEvent(
-                            'CREATE_BRAND_PAGE_imageBorder_ON_TAP');
-                        logFirebaseEvent(
-                            'imageBorder_upload_media_to_firebase');
                         final selectedMedia = await selectMedia(
                           imageQuality: 80,
                           mediaSource: MediaSource.photoGallery,
@@ -331,26 +327,16 @@ class _CreateBrandWidgetState extends State<CreateBrandWidget> {
                 padding: EdgeInsetsDirectional.fromSTEB(0.0, 24.0, 0.0, 0.0),
                 child: FFButtonWidget(
                   onPressed: () async {
-                    logFirebaseEvent(
-                        'CREATE_BRAND_COMPLETE_PROFILE_BTN_ON_TAP');
-                    logFirebaseEvent('Button_backend_call');
-
                     final usersUpdateData = createUsersRecordData(
-                      brandPhotoUrl: _model.uploadedFileUrl,
                       displayName: _model.displayNameController.text,
                       brandName: _model.brandNameController.text,
                       brandDescription: _model.brandDescriptionController.text,
                       createdTime: getCurrentTimestamp,
+                      photoUrl: '',
                     );
                     await currentUserReference!.update(usersUpdateData);
-                    logFirebaseEvent('Button_navigate_to');
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            NavBarPage(initialPage: 'chatMain'),
-                      ),
-                    );
+
+                    context.pushNamed('chatMain');
                   },
                   text: 'Complete Profile',
                   options: FFButtonOptions(

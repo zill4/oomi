@@ -3,6 +3,7 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'change_password_model.dart';
@@ -25,9 +26,8 @@ class _ChangePasswordWidgetState extends State<ChangePasswordWidget> {
     super.initState();
     _model = createModel(context, () => ChangePasswordModel());
 
-    logFirebaseEvent('screen_view',
-        parameters: {'screen_name': 'changePassword'});
     _model.emailAddressController ??= TextEditingController();
+    WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
   }
 
   @override
@@ -51,9 +51,7 @@ class _ChangePasswordWidgetState extends State<ChangePasswordWidget> {
           hoverColor: Colors.transparent,
           highlightColor: Colors.transparent,
           onTap: () async {
-            logFirebaseEvent('CHANGE_PASSWORD_Icon_j3o17tyr_ON_TAP');
-            logFirebaseEvent('Icon_navigate_back');
-            Navigator.pop(context);
+            context.pop();
           },
           child: Icon(
             Icons.chevron_left_rounded,
@@ -141,8 +139,6 @@ class _ChangePasswordWidgetState extends State<ChangePasswordWidget> {
               padding: EdgeInsetsDirectional.fromSTEB(0.0, 24.0, 0.0, 0.0),
               child: FFButtonWidget(
                 onPressed: () async {
-                  logFirebaseEvent('CHANGE_PASSWORD_PAGE_Button-Login_ON_TAP');
-                  logFirebaseEvent('Button-Login_auth');
                   if (_model.emailAddressController.text.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
@@ -157,8 +153,7 @@ class _ChangePasswordWidgetState extends State<ChangePasswordWidget> {
                     email: _model.emailAddressController.text,
                     context: context,
                   );
-                  logFirebaseEvent('Button-Login_navigate_back');
-                  Navigator.pop(context);
+                  context.pop();
                 },
                 text: 'Send Reset Link',
                 options: FFButtonOptions(

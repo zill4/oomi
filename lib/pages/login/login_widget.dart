@@ -3,11 +3,9 @@ import '/backend/backend.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import '/main.dart';
-import '/pages/forgot_password/forgot_password_widget.dart';
-import '/pages/register/register_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'login_model.dart';
@@ -30,9 +28,9 @@ class _LoginWidgetState extends State<LoginWidget> {
     super.initState();
     _model = createModel(context, () => LoginModel());
 
-    logFirebaseEvent('screen_view', parameters: {'screen_name': 'Login'});
     _model.emailTextController ??= TextEditingController();
     _model.passwordTextController ??= TextEditingController();
+    WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
   }
 
   @override
@@ -46,21 +44,13 @@ class _LoginWidgetState extends State<LoginWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: scaffoldKey,
-      backgroundColor: FlutterFlowTheme.of(context).dark900,
+      backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
       body: Align(
         alignment: AlignmentDirectional(-0.14, -0.08),
         child: Container(
           width: double.infinity,
           height: double.infinity,
-          decoration: BoxDecoration(
-            color: Color(0x19444D59),
-            image: DecorationImage(
-              fit: BoxFit.fitWidth,
-              image: Image.asset(
-                'assets/images/launchScreen@3x.png',
-              ).image,
-            ),
-          ),
+          decoration: BoxDecoration(),
           child: Padding(
             padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 90.0),
             child: Column(
@@ -68,12 +58,27 @@ class _LoginWidgetState extends State<LoginWidget> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 24.0),
-                  child: Image.asset(
-                    'assets/images/logoGeekMessaging.png',
-                    width: 160.0,
-                    height: 140.0,
-                    fit: BoxFit.cover,
+                  padding: EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                  child: Text(
+                    'oomi',
+                    style: FlutterFlowTheme.of(context).bodyMedium.override(
+                          fontFamily: 'Quicksand',
+                          color: FlutterFlowTheme.of(context).primary,
+                          fontSize: 144.0,
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 64.0),
+                  child: Text(
+                    'an ocean of creation',
+                    style: FlutterFlowTheme.of(context).bodyMedium.override(
+                          fontFamily: 'Lexend Deca',
+                          color: FlutterFlowTheme.of(context).secondaryText,
+                          fontSize: 18.0,
+                          fontStyle: FontStyle.italic,
+                        ),
                   ),
                 ),
                 Padding(
@@ -94,7 +99,12 @@ class _LoginWidgetState extends State<LoginWidget> {
                         obscureText: false,
                         decoration: InputDecoration(
                           labelText: 'Email Address',
-                          labelStyle: FlutterFlowTheme.of(context).bodyMedium,
+                          labelStyle: FlutterFlowTheme.of(context)
+                              .bodyMedium
+                              .override(
+                                fontFamily: 'Lexend Deca',
+                                color: FlutterFlowTheme.of(context).primaryText,
+                              ),
                           hintText: 'Email Address',
                           enabledBorder: OutlineInputBorder(
                             borderSide: BorderSide(
@@ -235,8 +245,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                 ),
                 FFButtonWidget(
                   onPressed: () async {
-                    logFirebaseEvent('LOGIN_PAGE_LOG_IN_BTN_ON_TAP');
-                    logFirebaseEvent('Button_auth');
+                    GoRouter.of(context).prepareAuthEvent();
 
                     final user = await authManager.signInWithEmail(
                       context,
@@ -247,14 +256,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                       return;
                     }
 
-                    logFirebaseEvent('Button_navigate_to');
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            NavBarPage(initialPage: 'chatMain'),
-                      ),
-                    );
+                    context.pushNamedAuth('chatMain', context.mounted);
                   },
                   text: 'Log In',
                   options: FFButtonOptions(
@@ -292,17 +294,15 @@ class _LoginWidgetState extends State<LoginWidget> {
                       ),
                       FFButtonWidget(
                         onPressed: () async {
-                          logFirebaseEvent(
-                              'LOGIN_PAGE_CREATE_ACCOUNT_BTN_ON_TAP');
-                          logFirebaseEvent('Button_navigate_to');
-                          await Navigator.push(
-                            context,
-                            PageTransition(
-                              type: PageTransitionType.fade,
-                              duration: Duration(milliseconds: 150),
-                              reverseDuration: Duration(milliseconds: 150),
-                              child: RegisterWidget(),
-                            ),
+                          context.pushNamed(
+                            'Register',
+                            extra: <String, dynamic>{
+                              kTransitionInfoKey: TransitionInfo(
+                                hasTransition: true,
+                                transitionType: PageTransitionType.fade,
+                                duration: Duration(milliseconds: 150),
+                              ),
+                            },
                           );
                         },
                         text: 'Create Account',
@@ -334,15 +334,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                   padding: EdgeInsetsDirectional.fromSTEB(0.0, 24.0, 0.0, 6.0),
                   child: FFButtonWidget(
                     onPressed: () async {
-                      logFirebaseEvent(
-                          'LOGIN_PAGE_FORGOT_PASSWORD?_BTN_ON_TAP');
-                      logFirebaseEvent('Button_navigate_to');
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ForgotPasswordWidget(),
-                        ),
-                      );
+                      context.pushNamed('forgotPassword');
                     },
                     text: 'Forgot Password?',
                     options: FFButtonOptions(
@@ -352,7 +344,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                           EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
                       iconPadding:
                           EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                      color: FlutterFlowTheme.of(context).dark900,
+                      color: FlutterFlowTheme.of(context).primaryBackground,
                       textStyle: FlutterFlowTheme.of(context).titleSmall,
                       elevation: 0.0,
                       borderSide: BorderSide(
@@ -367,30 +359,28 @@ class _LoginWidgetState extends State<LoginWidget> {
                   padding: EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 10.0),
                   child: FFButtonWidget(
                     onPressed: () async {
-                      logFirebaseEvent(
-                          'LOGIN_PAGE_CONTINUE_AS_GUEST_BTN_ON_TAP');
-                      logFirebaseEvent('Button_auth');
+                      GoRouter.of(context).prepareAuthEvent();
                       final user = await authManager.signInAnonymously(context);
                       if (user == null) {
                         return;
                       }
-                      logFirebaseEvent('Button_backend_call');
 
                       final usersUpdateData = createUsersRecordData(
                         displayName: 'Friend',
                         isGuest: true,
-                        userRole: 'Geek Master',
                       );
                       await currentUserReference!.update(usersUpdateData);
-                      logFirebaseEvent('Button_navigate_to');
-                      await Navigator.push(
-                        context,
-                        PageTransition(
-                          type: PageTransitionType.bottomToTop,
-                          duration: Duration(milliseconds: 250),
-                          reverseDuration: Duration(milliseconds: 250),
-                          child: NavBarPage(initialPage: 'chatMain'),
-                        ),
+
+                      context.pushNamedAuth(
+                        'chatMain',
+                        context.mounted,
+                        extra: <String, dynamic>{
+                          kTransitionInfoKey: TransitionInfo(
+                            hasTransition: true,
+                            transitionType: PageTransitionType.bottomToTop,
+                            duration: Duration(milliseconds: 250),
+                          ),
+                        },
                       );
                     },
                     text: 'Continue as Guest',

@@ -4,8 +4,8 @@ import '/components/empty_list/empty_list_widget.dart';
 import '/components/generation_preview/generation_preview_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/pages/my_friends/my_friends_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'chat_main_model.dart';
@@ -28,7 +28,7 @@ class _ChatMainWidgetState extends State<ChatMainWidget> {
     super.initState();
     _model = createModel(context, () => ChatMainModel());
 
-    logFirebaseEvent('screen_view', parameters: {'screen_name': 'chatMain'});
+    WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
   }
 
   @override
@@ -49,8 +49,9 @@ class _ChatMainWidgetState extends State<ChatMainWidget> {
             child: SizedBox(
               width: 50.0,
               height: 50.0,
-              child: CircularProgressIndicator(
-                color: FlutterFlowTheme.of(context).primary,
+              child: SpinKitRipple(
+                color: Color(0xFF77DEFF),
+                size: 50.0,
               ),
             ),
           );
@@ -61,16 +62,15 @@ class _ChatMainWidgetState extends State<ChatMainWidget> {
           backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
           floatingActionButton: FloatingActionButton(
             onPressed: () async {
-              logFirebaseEvent('CHAT_MAIN_FloatingActionButton_aee4w6um_');
-              logFirebaseEvent('FloatingActionButton_navigate_to');
-              await Navigator.push(
-                context,
-                PageTransition(
-                  type: PageTransitionType.bottomToTop,
-                  duration: Duration(milliseconds: 250),
-                  reverseDuration: Duration(milliseconds: 250),
-                  child: MyFriendsWidget(),
-                ),
+              context.pushNamed(
+                'MyFriends',
+                extra: <String, dynamic>{
+                  kTransitionInfoKey: TransitionInfo(
+                    hasTransition: true,
+                    transitionType: PageTransitionType.bottomToTop,
+                    duration: Duration(milliseconds: 250),
+                  ),
+                },
               );
             },
             backgroundColor: FlutterFlowTheme.of(context).primary,
@@ -110,8 +110,9 @@ class _ChatMainWidgetState extends State<ChatMainWidget> {
                     child: SizedBox(
                       width: 50.0,
                       height: 50.0,
-                      child: CircularProgressIndicator(
-                        color: FlutterFlowTheme.of(context).primary,
+                      child: SpinKitRipple(
+                        color: Color(0xFF77DEFF),
+                        size: 50.0,
                       ),
                     ),
                   );

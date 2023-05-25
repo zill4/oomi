@@ -1,19 +1,14 @@
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/backend/firebase_storage/storage.dart';
-import '/flutter_flow/flutter_flow_animations.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/upload_data.dart';
-import '/pages/change_password/change_password_widget.dart';
-import '/pages/edit_profile/edit_profile_widget.dart';
-import '/pages/login/login_widget.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
-import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'my_profile_model.dart';
@@ -26,54 +21,17 @@ class MyProfileWidget extends StatefulWidget {
   _MyProfileWidgetState createState() => _MyProfileWidgetState();
 }
 
-class _MyProfileWidgetState extends State<MyProfileWidget>
-    with TickerProviderStateMixin {
+class _MyProfileWidgetState extends State<MyProfileWidget> {
   late MyProfileModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  var hasContainerTriggered1 = false;
-  var hasContainerTriggered2 = false;
-  final animationsMap = {
-    'containerOnActionTriggerAnimation1': AnimationInfo(
-      trigger: AnimationTrigger.onActionTrigger,
-      applyInitialState: false,
-      effects: [
-        MoveEffect(
-          curve: Curves.easeInOut,
-          delay: 0.ms,
-          duration: 350.ms,
-          begin: Offset(40.0, 0.0),
-          end: Offset(0.0, 0.0),
-        ),
-      ],
-    ),
-    'containerOnActionTriggerAnimation2': AnimationInfo(
-      trigger: AnimationTrigger.onActionTrigger,
-      applyInitialState: false,
-      effects: [
-        MoveEffect(
-          curve: Curves.easeInOut,
-          delay: 0.ms,
-          duration: 350.ms,
-          begin: Offset(-40.0, 0.0),
-          end: Offset(0.0, 0.0),
-        ),
-      ],
-    ),
-  };
 
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => MyProfileModel());
 
-    logFirebaseEvent('screen_view', parameters: {'screen_name': 'myProfile'});
-    setupAnimations(
-      animationsMap.values.where((anim) =>
-          anim.trigger == AnimationTrigger.onActionTrigger ||
-          !anim.applyInitialState),
-      this,
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
   }
 
   @override
@@ -94,8 +52,9 @@ class _MyProfileWidgetState extends State<MyProfileWidget>
             child: SizedBox(
               width: 50.0,
               height: 50.0,
-              child: CircularProgressIndicator(
-                color: FlutterFlowTheme.of(context).primary,
+              child: SpinKitRipple(
+                color: Color(0xFF77DEFF),
+                size: 50.0,
               ),
             ),
           );
@@ -127,11 +86,11 @@ class _MyProfileWidgetState extends State<MyProfileWidget>
                                 children: [
                                   Align(
                                     alignment: AlignmentDirectional(0.0, 0.0),
-                                    child: Image.asset(
-                                      'assets/images/hero@2x.png',
+                                    child: Image.network(
+                                      'https://images.unsplash.com/photo-1559825481-12a05cc00344?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=930&q=80',
                                       width: MediaQuery.of(context).size.width *
                                           1.0,
-                                      height: 200.0,
+                                      height: 225.0,
                                       fit: BoxFit.cover,
                                     ),
                                   ),
@@ -146,10 +105,6 @@ class _MyProfileWidgetState extends State<MyProfileWidget>
                                         hoverColor: Colors.transparent,
                                         highlightColor: Colors.transparent,
                                         onTap: () async {
-                                          logFirebaseEvent(
-                                              'MY_PROFILE_CircleImage_b77rrswj_ON_TAP');
-                                          logFirebaseEvent(
-                                              'CircleImage_upload_media_to_firebase');
                                           final selectedMedia =
                                               await selectMedia(
                                             maxWidth: 1000.00,
@@ -227,9 +182,6 @@ class _MyProfileWidgetState extends State<MyProfileWidget>
                                               return;
                                             }
                                           }
-
-                                          logFirebaseEvent(
-                                              'CircleImage_backend_call');
 
                                           final usersUpdateData =
                                               createUsersRecordData(
@@ -326,230 +278,6 @@ class _MyProfileWidgetState extends State<MyProfileWidget>
                   ),
                 ],
               ),
-              Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(0.0, 1.0, 0.0, 0.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    if (!(Theme.of(context).brightness == Brightness.dark))
-                      InkWell(
-                        splashColor: Colors.transparent,
-                        focusColor: Colors.transparent,
-                        hoverColor: Colors.transparent,
-                        highlightColor: Colors.transparent,
-                        onTap: () async {
-                          logFirebaseEvent(
-                              'MY_PROFILE_PAGE_isLightMode_ON_TAP');
-                          logFirebaseEvent(
-                              'isLightMode_set_dark_mode_settings');
-                          setDarkModeSetting(context, ThemeMode.dark);
-                          logFirebaseEvent('isLightMode_widget_animation');
-                          if (animationsMap[
-                                  'containerOnActionTriggerAnimation2'] !=
-                              null) {
-                            setState(() => hasContainerTriggered2 = true);
-                            SchedulerBinding.instance.addPostFrameCallback(
-                                (_) async => await animationsMap[
-                                        'containerOnActionTriggerAnimation2']!
-                                    .controller
-                                    .forward(from: 0.0));
-                          }
-                        },
-                        child: Container(
-                          width: MediaQuery.of(context).size.width * 1.0,
-                          decoration: BoxDecoration(
-                            color: FlutterFlowTheme.of(context)
-                                .secondaryBackground,
-                            boxShadow: [
-                              BoxShadow(
-                                blurRadius: 1.0,
-                                color: Color(0xFF1A1F24),
-                                offset: Offset(0.0, 0.0),
-                              )
-                            ],
-                          ),
-                          child: Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
-                                24.0, 12.0, 24.0, 12.0),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Switch to Dark Mode',
-                                  style:
-                                      FlutterFlowTheme.of(context).titleSmall,
-                                ),
-                                Container(
-                                  width: 80.0,
-                                  height: 40.0,
-                                  decoration: BoxDecoration(
-                                    color: FlutterFlowTheme.of(context)
-                                        .primaryBackground,
-                                    borderRadius: BorderRadius.circular(20.0),
-                                  ),
-                                  child: Stack(
-                                    alignment: AlignmentDirectional(0.0, 0.0),
-                                    children: [
-                                      Align(
-                                        alignment:
-                                            AlignmentDirectional(0.95, 0.0),
-                                        child: Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 0.0, 8.0, 0.0),
-                                          child: Icon(
-                                            Icons.nights_stay,
-                                            color: FlutterFlowTheme.of(context)
-                                                .secondaryText,
-                                            size: 20.0,
-                                          ),
-                                        ),
-                                      ),
-                                      Align(
-                                        alignment:
-                                            AlignmentDirectional(-0.85, 0.0),
-                                        child: Container(
-                                          width: 36.0,
-                                          height: 36.0,
-                                          decoration: BoxDecoration(
-                                            color: FlutterFlowTheme.of(context)
-                                                .secondaryBackground,
-                                            boxShadow: [
-                                              BoxShadow(
-                                                blurRadius: 4.0,
-                                                color: Color(0x430B0D0F),
-                                                offset: Offset(0.0, 2.0),
-                                              )
-                                            ],
-                                            borderRadius:
-                                                BorderRadius.circular(30.0),
-                                            shape: BoxShape.rectangle,
-                                          ),
-                                        ).animateOnActionTrigger(
-                                            animationsMap[
-                                                'containerOnActionTriggerAnimation1']!,
-                                            hasBeenTriggered:
-                                                hasContainerTriggered1),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    if (Theme.of(context).brightness == Brightness.dark)
-                      InkWell(
-                        splashColor: Colors.transparent,
-                        focusColor: Colors.transparent,
-                        hoverColor: Colors.transparent,
-                        highlightColor: Colors.transparent,
-                        onTap: () async {
-                          logFirebaseEvent('MY_PROFILE_PAGE_isDarkMode_ON_TAP');
-                          logFirebaseEvent('isDarkMode_set_dark_mode_settings');
-                          setDarkModeSetting(context, ThemeMode.light);
-                          logFirebaseEvent('isDarkMode_widget_animation');
-                          if (animationsMap[
-                                  'containerOnActionTriggerAnimation1'] !=
-                              null) {
-                            setState(() => hasContainerTriggered1 = true);
-                            SchedulerBinding.instance.addPostFrameCallback(
-                                (_) async => await animationsMap[
-                                        'containerOnActionTriggerAnimation1']!
-                                    .controller
-                                    .forward(from: 0.0));
-                          }
-                        },
-                        child: Container(
-                          width: MediaQuery.of(context).size.width * 1.0,
-                          decoration: BoxDecoration(
-                            color: FlutterFlowTheme.of(context)
-                                .secondaryBackground,
-                            boxShadow: [
-                              BoxShadow(
-                                blurRadius: 1.0,
-                                color: Color(0xFF1A1F24),
-                                offset: Offset(0.0, 0.0),
-                              )
-                            ],
-                          ),
-                          child: Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
-                                24.0, 12.0, 24.0, 12.0),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Switch to Light Mode',
-                                  style:
-                                      FlutterFlowTheme.of(context).titleSmall,
-                                ),
-                                Container(
-                                  width: 80.0,
-                                  height: 40.0,
-                                  decoration: BoxDecoration(
-                                    color: FlutterFlowTheme.of(context)
-                                        .primaryBackground,
-                                    borderRadius: BorderRadius.circular(20.0),
-                                  ),
-                                  child: Stack(
-                                    alignment: AlignmentDirectional(0.0, 0.0),
-                                    children: [
-                                      Align(
-                                        alignment:
-                                            AlignmentDirectional(-0.9, 0.0),
-                                        child: Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  8.0, 2.0, 0.0, 0.0),
-                                          child: Icon(
-                                            Icons.wb_sunny_rounded,
-                                            color: FlutterFlowTheme.of(context)
-                                                .secondaryText,
-                                            size: 24.0,
-                                          ),
-                                        ),
-                                      ),
-                                      Align(
-                                        alignment:
-                                            AlignmentDirectional(0.9, 0.0),
-                                        child: Container(
-                                          width: 36.0,
-                                          height: 36.0,
-                                          decoration: BoxDecoration(
-                                            color: FlutterFlowTheme.of(context)
-                                                .secondaryBackground,
-                                            boxShadow: [
-                                              BoxShadow(
-                                                blurRadius: 4.0,
-                                                color: Color(0x430B0D0F),
-                                                offset: Offset(0.0, 2.0),
-                                              )
-                                            ],
-                                            borderRadius:
-                                                BorderRadius.circular(30.0),
-                                            shape: BoxShape.rectangle,
-                                          ),
-                                        ).animateOnActionTrigger(
-                                            animationsMap[
-                                                'containerOnActionTriggerAnimation2']!,
-                                            hasBeenTriggered:
-                                                hasContainerTriggered2),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
               if (!myProfileUsersRecord.isGuest)
                 Column(
                   mainAxisSize: MainAxisSize.max,
@@ -610,19 +338,26 @@ class _MyProfileWidgetState extends State<MyProfileWidget>
                                   hoverColor: Colors.transparent,
                                   highlightColor: Colors.transparent,
                                   onTap: () async {
-                                    logFirebaseEvent(
-                                        'MY_PROFILE_PAGE_Row_2wd55n8n_ON_TAP');
-                                    logFirebaseEvent('Row_navigate_to');
-                                    await Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => EditProfileWidget(
-                                          userEmail: myProfileUsersRecord,
-                                          userDisplay: myProfileUsersRecord,
-                                          userPhoto:
-                                              myProfileUsersRecord.reference,
+                                    context.pushNamed(
+                                      'editProfile',
+                                      queryParams: {
+                                        'userEmail': serializeParam(
+                                          myProfileUsersRecord,
+                                          ParamType.Document,
                                         ),
-                                      ),
+                                        'userDisplay': serializeParam(
+                                          myProfileUsersRecord,
+                                          ParamType.Document,
+                                        ),
+                                        'userPhoto': serializeParam(
+                                          myProfileUsersRecord.reference,
+                                          ParamType.DocumentReference,
+                                        ),
+                                      }.withoutNulls,
+                                      extra: <String, dynamic>{
+                                        'userEmail': myProfileUsersRecord,
+                                        'userDisplay': myProfileUsersRecord,
+                                      },
                                     );
                                   },
                                   child: Row(
@@ -683,16 +418,7 @@ class _MyProfileWidgetState extends State<MyProfileWidget>
                                 hoverColor: Colors.transparent,
                                 highlightColor: Colors.transparent,
                                 onTap: () async {
-                                  logFirebaseEvent(
-                                      'MY_PROFILE_PAGE_Row_mhthbg1k_ON_TAP');
-                                  logFirebaseEvent('Row_navigate_to');
-                                  await Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          ChangePasswordWidget(),
-                                    ),
-                                  );
+                                  context.pushNamed('changePassword');
                                 },
                                 child: Row(
                                   mainAxisSize: MainAxisSize.max,
@@ -733,17 +459,11 @@ class _MyProfileWidgetState extends State<MyProfileWidget>
                           children: [
                             FFButtonWidget(
                               onPressed: () async {
-                                logFirebaseEvent(
-                                    'MY_PROFILE_PAGE_LOG_OUT_BTN_ON_TAP');
-                                logFirebaseEvent('Button_auth');
+                                GoRouter.of(context).prepareAuthEvent();
                                 await authManager.signOut();
-                                await Navigator.pushAndRemoveUntil(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => LoginWidget(),
-                                  ),
-                                  (r) => false,
-                                );
+                                GoRouter.of(context).clearRedirectLocation();
+
+                                context.goNamedAuth('Login', context.mounted);
                               },
                               text: 'Log Out',
                               options: FFButtonOptions(
@@ -753,13 +473,13 @@ class _MyProfileWidgetState extends State<MyProfileWidget>
                                     0.0, 0.0, 0.0, 0.0),
                                 iconPadding: EdgeInsetsDirectional.fromSTEB(
                                     0.0, 0.0, 0.0, 0.0),
-                                color: Colors.white,
+                                color: FlutterFlowTheme.of(context).secondary,
                                 textStyle: FlutterFlowTheme.of(context)
                                     .bodySmall
                                     .override(
                                       fontFamily: 'Lexend Deca',
-                                      color:
-                                          FlutterFlowTheme.of(context).primary,
+                                      color: FlutterFlowTheme.of(context)
+                                          .primaryText,
                                     ),
                                 elevation: 3.0,
                                 borderSide: BorderSide(

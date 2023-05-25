@@ -3,11 +3,9 @@ import '/backend/backend.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import '/main.dart';
-import '/pages/create_brand/create_brand_widget.dart';
-import '/pages/login/login_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'register_model.dart';
@@ -30,10 +28,10 @@ class _RegisterWidgetState extends State<RegisterWidget> {
     super.initState();
     _model = createModel(context, () => RegisterModel());
 
-    logFirebaseEvent('screen_view', parameters: {'screen_name': 'Register'});
     _model.emailAddressController ??= TextEditingController();
     _model.passwordController ??= TextEditingController();
     _model.confirmPasswordController ??= TextEditingController();
+    WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
   }
 
   @override
@@ -47,7 +45,7 @@ class _RegisterWidgetState extends State<RegisterWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: scaffoldKey,
-      backgroundColor: FlutterFlowTheme.of(context).dark900,
+      backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
       body: Align(
         alignment: AlignmentDirectional(-0.14, -0.08),
         child: Container(
@@ -55,12 +53,6 @@ class _RegisterWidgetState extends State<RegisterWidget> {
           height: double.infinity,
           decoration: BoxDecoration(
             color: Color(0x19444D59),
-            image: DecorationImage(
-              fit: BoxFit.cover,
-              image: Image.asset(
-                'assets/images/launchScreen@3x.png',
-              ).image,
-            ),
           ),
           child: Padding(
             padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 70.0),
@@ -69,12 +61,15 @@ class _RegisterWidgetState extends State<RegisterWidget> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 24.0),
-                  child: Image.asset(
-                    'assets/images/logoGeekMessaging.png',
-                    width: 160.0,
-                    height: 140.0,
-                    fit: BoxFit.cover,
+                  padding: EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                  child: Text(
+                    'oomi',
+                    style: FlutterFlowTheme.of(context).bodyMedium.override(
+                          fontFamily: 'Quicksand',
+                          color: FlutterFlowTheme.of(context).primary,
+                          fontSize: 144.0,
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
                 ),
                 Padding(
@@ -321,8 +316,7 @@ class _RegisterWidgetState extends State<RegisterWidget> {
                 ),
                 FFButtonWidget(
                   onPressed: () async {
-                    logFirebaseEvent('REGISTER_PAGE_CREATE_ACCOUNT_BTN_ON_TAP');
-                    logFirebaseEvent('Button_auth');
+                    GoRouter.of(context).prepareAuthEvent();
                     if (_model.passwordController.text !=
                         _model.confirmPasswordController.text) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -344,20 +338,7 @@ class _RegisterWidgetState extends State<RegisterWidget> {
                       return;
                     }
 
-                    final usersCreateData = createUsersRecordData(
-                      isGuest: false,
-                    );
-                    await UsersRecord.collection
-                        .doc(user.uid)
-                        .update(usersCreateData);
-
-                    logFirebaseEvent('Button_navigate_to');
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CreateBrandWidget(),
-                      ),
-                    );
+                    context.pushNamedAuth('CreateBrand', context.mounted);
                   },
                   text: 'Create Account',
                   options: FFButtonOptions(
@@ -395,17 +376,15 @@ class _RegisterWidgetState extends State<RegisterWidget> {
                       ),
                       FFButtonWidget(
                         onPressed: () async {
-                          logFirebaseEvent('REGISTER_PAGE_loginButton_ON_TAP');
-                          logFirebaseEvent('loginButton_navigate_to');
-                          await Navigator.pushAndRemoveUntil(
-                            context,
-                            PageTransition(
-                              type: PageTransitionType.fade,
-                              duration: Duration(milliseconds: 150),
-                              reverseDuration: Duration(milliseconds: 150),
-                              child: LoginWidget(),
-                            ),
-                            (r) => false,
+                          context.goNamed(
+                            'Login',
+                            extra: <String, dynamic>{
+                              kTransitionInfoKey: TransitionInfo(
+                                hasTransition: true,
+                                transitionType: PageTransitionType.fade,
+                                duration: Duration(milliseconds: 150),
+                              ),
+                            },
                           );
                         },
                         text: 'Login',
@@ -437,29 +416,28 @@ class _RegisterWidgetState extends State<RegisterWidget> {
                   padding: EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 10.0),
                   child: FFButtonWidget(
                     onPressed: () async {
-                      logFirebaseEvent('REGISTER_CONTINUE_AS_GUEST_BTN_ON_TAP');
-                      logFirebaseEvent('Button_auth');
+                      GoRouter.of(context).prepareAuthEvent();
                       final user = await authManager.signInAnonymously(context);
                       if (user == null) {
                         return;
                       }
-                      logFirebaseEvent('Button_backend_call');
 
                       final usersUpdateData = createUsersRecordData(
                         displayName: 'Friend',
                         isGuest: true,
-                        userRole: 'Geek Master',
                       );
                       await currentUserReference!.update(usersUpdateData);
-                      logFirebaseEvent('Button_navigate_to');
-                      await Navigator.push(
-                        context,
-                        PageTransition(
-                          type: PageTransitionType.bottomToTop,
-                          duration: Duration(milliseconds: 250),
-                          reverseDuration: Duration(milliseconds: 250),
-                          child: NavBarPage(initialPage: 'chatMain'),
-                        ),
+
+                      context.pushNamedAuth(
+                        'chatMain',
+                        context.mounted,
+                        extra: <String, dynamic>{
+                          kTransitionInfoKey: TransitionInfo(
+                            hasTransition: true,
+                            transitionType: PageTransitionType.bottomToTop,
+                            duration: Duration(milliseconds: 250),
+                          ),
+                        },
                       );
                     },
                     text: 'Continue as Guest',

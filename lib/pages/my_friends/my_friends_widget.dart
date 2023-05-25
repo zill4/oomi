@@ -4,6 +4,7 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'my_friends_model.dart';
@@ -26,7 +27,7 @@ class _MyFriendsWidgetState extends State<MyFriendsWidget> {
     super.initState();
     _model = createModel(context, () => MyFriendsModel());
 
-    logFirebaseEvent('screen_view', parameters: {'screen_name': 'MyFriends'});
+    WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
   }
 
   @override
@@ -64,9 +65,7 @@ class _MyFriendsWidgetState extends State<MyFriendsWidget> {
                 size: 30.0,
               ),
               onPressed: () async {
-                logFirebaseEvent('MY_FRIENDS_PAGE_close_rounded_ICN_ON_TAP');
-                logFirebaseEvent('IconButton_navigate_back');
-                Navigator.pop(context);
+                context.pop();
               },
             ),
           ),
@@ -91,8 +90,8 @@ class _MyFriendsWidgetState extends State<MyFriendsWidget> {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(20.0),
-                    child: Image.network(
-                      'https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/oomi-4ebvgt/assets/n9q9ozgs2l3w/UploadMediaBlock.png',
+                    child: Image.asset(
+                      'assets/images/UploadMediaBlock.png',
                       width: 300.0,
                       height: 198.0,
                       fit: BoxFit.contain,
