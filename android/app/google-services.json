@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "342813196805",
+    "project_id": "cx-terminal",
+    "storage_bucket": "cx-terminal.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:342813196805:android:fe132a34943992f87d926c",
+        "android_client_info": {
+          "package_name": "oomi.cx.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "342813196805-o4dtgl48oil91uce695tp7oef4rgca70.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "oomi.cx.app",
+            "certificate_hash": "9bbb3186b2189ef16d8f272bdab59362c395cbb4"
+          }
+        },
+        {
+          "client_id": "342813196805-3ckv0crp4mk5cf654ijqataivp6vl18g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAW4NQJZRCrJ2yaClxjfQpN9Uwe-NTBY-Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "342813196805-3ckv0crp4mk5cf654ijqataivp6vl18g.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "342813196805-pmhb7r9ldklehva80ijee9nf0hiuqie4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "oomi.cx.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
