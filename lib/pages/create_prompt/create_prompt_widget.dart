@@ -1,7 +1,11 @@
+import '/auth/firebase_auth/auth_util.dart';
+import '/backend/backend.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import '/flutter_flow/random_data_util.dart' as random_data;
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -28,6 +32,8 @@ class _CreatePromptWidgetState extends State<CreatePromptWidget> {
 
     _model.textController1 ??= TextEditingController();
     _model.textController2 ??= TextEditingController();
+    _model.textController3 ??= TextEditingController();
+    _model.textController4 ??= TextEditingController();
     WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
   }
 
@@ -40,6 +46,8 @@ class _CreatePromptWidgetState extends State<CreatePromptWidget> {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<FFAppState>();
+
     return Scaffold(
       key: scaffoldKey,
       backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
@@ -254,7 +262,7 @@ class _CreatePromptWidgetState extends State<CreatePromptWidget> {
                   mainAxisSize: MainAxisSize.max,
                   children: [
                     Text(
-                      'Prompt Text',
+                      'Prompt Parts',
                       style: FlutterFlowTheme.of(context).headlineMedium,
                     ),
                   ],
@@ -277,6 +285,7 @@ class _CreatePromptWidgetState extends State<CreatePromptWidget> {
                               controller: _model.textController2,
                               obscureText: false,
                               decoration: InputDecoration(
+                                labelText: 'Start',
                                 labelStyle:
                                     FlutterFlowTheme.of(context).labelMedium,
                                 hintText: 'Write your prompt here...',
@@ -316,8 +325,126 @@ class _CreatePromptWidgetState extends State<CreatePromptWidget> {
                                     .secondaryBackground,
                               ),
                               style: FlutterFlowTheme.of(context).bodyMedium,
-                              maxLines: 20,
+                              maxLines: 2,
                               validator: _model.textController2Validator
+                                  .asValidator(context),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Expanded(
+                          child: Padding(
+                            padding: EdgeInsetsDirectional.fromSTEB(
+                                0.0, 16.0, 0.0, 0.0),
+                            child: TextFormField(
+                              controller: _model.textController3,
+                              obscureText: false,
+                              decoration: InputDecoration(
+                                labelText: 'Middle',
+                                labelStyle:
+                                    FlutterFlowTheme.of(context).labelMedium,
+                                hintText: 'Write your prompt here...',
+                                hintStyle:
+                                    FlutterFlowTheme.of(context).labelMedium,
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color:
+                                        FlutterFlowTheme.of(context).alternate,
+                                    width: 2.0,
+                                  ),
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: FlutterFlowTheme.of(context).primary,
+                                    width: 2.0,
+                                  ),
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                                errorBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: FlutterFlowTheme.of(context).error,
+                                    width: 2.0,
+                                  ),
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                                focusedErrorBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: FlutterFlowTheme.of(context).error,
+                                    width: 2.0,
+                                  ),
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                                filled: true,
+                                fillColor: FlutterFlowTheme.of(context)
+                                    .secondaryBackground,
+                              ),
+                              style: FlutterFlowTheme.of(context).bodyMedium,
+                              maxLines: 2,
+                              validator: _model.textController3Validator
+                                  .asValidator(context),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Expanded(
+                          child: Padding(
+                            padding: EdgeInsetsDirectional.fromSTEB(
+                                0.0, 16.0, 0.0, 0.0),
+                            child: TextFormField(
+                              controller: _model.textController4,
+                              obscureText: false,
+                              decoration: InputDecoration(
+                                labelText: 'End',
+                                labelStyle:
+                                    FlutterFlowTheme.of(context).labelMedium,
+                                hintText: 'Write your prompt here...',
+                                hintStyle:
+                                    FlutterFlowTheme.of(context).labelMedium,
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color:
+                                        FlutterFlowTheme.of(context).alternate,
+                                    width: 2.0,
+                                  ),
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: FlutterFlowTheme.of(context).primary,
+                                    width: 2.0,
+                                  ),
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                                errorBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: FlutterFlowTheme.of(context).error,
+                                    width: 2.0,
+                                  ),
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                                focusedErrorBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: FlutterFlowTheme.of(context).error,
+                                    width: 2.0,
+                                  ),
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                                filled: true,
+                                fillColor: FlutterFlowTheme.of(context)
+                                    .secondaryBackground,
+                              ),
+                              style: FlutterFlowTheme.of(context).bodyMedium,
+                              maxLines: 2,
+                              validator: _model.textController4Validator
                                   .asValidator(context),
                             ),
                           ),
@@ -328,10 +455,28 @@ class _CreatePromptWidgetState extends State<CreatePromptWidget> {
                 ),
               ),
               FFButtonWidget(
-                onPressed: () {
-                  print('Button pressed ...');
+                onPressed: () async {
+                  final promptsCreateData = {
+                    ...createPromptsRecordData(
+                      promptTitle: _model.textController1.text,
+                      prompt1: _model.textController2.text,
+                      prompt2: _model.textController3.text,
+                      prompt3: _model.textController4.text,
+                      user: currentUserReference,
+                      promptId: random_data.randomString(
+                        6,
+                        6,
+                        true,
+                        false,
+                        true,
+                      ),
+                    ),
+                    'timestamp': FieldValue.serverTimestamp(),
+                  };
+                  await PromptsRecord.collection.doc().set(promptsCreateData);
+                  context.safePop();
                 },
-                text: 'Save Changes',
+                text: 'Create Prompt',
                 options: FFButtonOptions(
                   width: 270.0,
                   height: 50.0,

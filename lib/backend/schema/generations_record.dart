@@ -24,11 +24,6 @@ class GenerationsRecord extends FirestoreRecord {
   DateTime? get timestamp => _timestamp;
   bool hasTimestamp() => _timestamp != null;
 
-  // "generated_image" field.
-  String? _generatedImage;
-  String get generatedImage => _generatedImage ?? '';
-  bool hasGeneratedImage() => _generatedImage != null;
-
   // "generated_video" field.
   String? _generatedVideo;
   String get generatedVideo => _generatedVideo ?? '';
@@ -44,25 +39,18 @@ class GenerationsRecord extends FirestoreRecord {
   String get generationId => _generationId ?? '';
   bool hasGenerationId() => _generationId != null;
 
-  // "seed_images" field.
-  List<DocumentReference>? _seedImages;
-  List<DocumentReference> get seedImages => _seedImages ?? const [];
-  bool hasSeedImages() => _seedImages != null;
-
-  // "seed_video" field.
-  DocumentReference? _seedVideo;
-  DocumentReference? get seedVideo => _seedVideo;
-  bool hasSeedVideo() => _seedVideo != null;
+  // "generation_title" field.
+  String? _generationTitle;
+  String get generationTitle => _generationTitle ?? '';
+  bool hasGenerationTitle() => _generationTitle != null;
 
   void _initializeFields() {
     _user = snapshotData['user'] as DocumentReference?;
     _timestamp = snapshotData['timestamp'] as DateTime?;
-    _generatedImage = snapshotData['generated_image'] as String?;
     _generatedVideo = snapshotData['generated_video'] as String?;
     _description = snapshotData['description'] as String?;
     _generationId = snapshotData['generation_id'] as String?;
-    _seedImages = getDataList(snapshotData['seed_images']);
-    _seedVideo = snapshotData['seed_video'] as DocumentReference?;
+    _generationTitle = snapshotData['generation_title'] as String?;
   }
 
   static CollectionReference get collection =>
@@ -94,21 +82,19 @@ class GenerationsRecord extends FirestoreRecord {
 Map<String, dynamic> createGenerationsRecordData({
   DocumentReference? user,
   DateTime? timestamp,
-  String? generatedImage,
   String? generatedVideo,
   String? description,
   String? generationId,
-  DocumentReference? seedVideo,
+  String? generationTitle,
 }) {
   final firestoreData = mapToFirestore(
     <String, dynamic>{
       'user': user,
       'timestamp': timestamp,
-      'generated_image': generatedImage,
       'generated_video': generatedVideo,
       'description': description,
       'generation_id': generationId,
-      'seed_video': seedVideo,
+      'generation_title': generationTitle,
     }.withoutNulls,
   );
 

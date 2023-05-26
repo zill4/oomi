@@ -6,6 +6,18 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 class PromptCardModel extends FlutterFlowModel {
+  ///  Local state fields for this component.
+
+  String? promptTitle;
+
+  String? promptPart1;
+
+  String? promptPart2;
+
+  String? promptPart3;
+
+  bool isSelected = false;
+
   /// Initialization and disposal methods.
 
   void initState(BuildContext context) {}

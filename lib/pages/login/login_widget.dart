@@ -42,6 +42,8 @@ class _LoginWidgetState extends State<LoginWidget> {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<FFAppState>();
+
     return Scaffold(
       key: scaffoldKey,
       backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
@@ -255,6 +257,8 @@ class _LoginWidgetState extends State<LoginWidget> {
                     if (user == null) {
                       return;
                     }
+
+                    FFAppState().token = currentJwtToken!;
 
                     context.pushNamedAuth('generationsMain', context.mounted);
                   },

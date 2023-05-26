@@ -43,6 +43,8 @@ class _RegisterWidgetState extends State<RegisterWidget> {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<FFAppState>();
+
     return Scaffold(
       key: scaffoldKey,
       backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
@@ -337,6 +339,10 @@ class _RegisterWidgetState extends State<RegisterWidget> {
                     if (user == null) {
                       return;
                     }
+
+                    setState(() {
+                      FFAppState().token = currentJwtToken!;
+                    });
 
                     context.pushNamedAuth('CreateBrand', context.mounted);
                   },
