@@ -162,7 +162,7 @@ class _GenerationsMainWidgetState extends State<GenerationsMainWidget> {
                                       ParamType.String,
                                     ),
                                     'generationURL': serializeParam(
-                                      '',
+                                      allGenerationsItem.generationId,
                                       ParamType.String,
                                     ),
                                   }.withoutNulls,

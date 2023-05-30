@@ -87,8 +87,7 @@ class _VewGeneratonWidgetState extends State<VewGeneratonWidget> {
         mainAxisSize: MainAxisSize.max,
         children: [
           FlutterFlowVideoPlayer(
-            path: functions.stringURLToVideoPath(
-                functions.getGenerationMediaURL(widget.generationURL!)!)!,
+            path: functions.stringURLToVideoPath(widget.generationURL!)!,
             videoType: VideoType.network,
             autoPlay: false,
             looping: true,

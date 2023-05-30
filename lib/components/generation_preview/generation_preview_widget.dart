@@ -114,8 +114,7 @@ class _GenerationPreviewWidgetState extends State<GenerationPreviewWidget>
                 topRight: Radius.circular(0.0),
               ),
               child: Image.network(
-                functions.stringURLToImagePath(
-                    functions.getGenerationMediaURL(widget.generationPath!)!)!,
+                functions.stringURLToImagePath(widget.generationPath!)!,
                 width: 120.0,
                 height: 100.0,
                 fit: BoxFit.cover,
