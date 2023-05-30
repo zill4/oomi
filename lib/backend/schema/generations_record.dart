@@ -49,6 +49,11 @@ class GenerationsRecord extends FirestoreRecord {
   String get status => _status ?? '';
   bool hasStatus() => _status != null;
 
+  // "generated_image" field.
+  String? _generatedImage;
+  String get generatedImage => _generatedImage ?? '';
+  bool hasGeneratedImage() => _generatedImage != null;
+
   void _initializeFields() {
     _user = snapshotData['user'] as DocumentReference?;
     _timestamp = snapshotData['timestamp'] as DateTime?;
@@ -57,6 +62,7 @@ class GenerationsRecord extends FirestoreRecord {
     _generationId = snapshotData['generation_id'] as String?;
     _generationTitle = snapshotData['generation_title'] as String?;
     _status = snapshotData['status'] as String?;
+    _generatedImage = snapshotData['generated_image'] as String?;
   }
 
   static CollectionReference get collection =>
@@ -93,6 +99,7 @@ Map<String, dynamic> createGenerationsRecordData({
   String? generationId,
   String? generationTitle,
   String? status,
+  String? generatedImage,
 }) {
   final firestoreData = mapToFirestore(
     <String, dynamic>{
@@ -103,6 +110,7 @@ Map<String, dynamic> createGenerationsRecordData({
       'generation_id': generationId,
       'generation_title': generationTitle,
       'status': status,
+      'generated_image': generatedImage,
     }.withoutNulls,
   );
 

@@ -162,7 +162,7 @@ class _GenerationsMainWidgetState extends State<GenerationsMainWidget> {
                                       ParamType.String,
                                     ),
                                     'generationURL': serializeParam(
-                                      allGenerationsItem.generationId,
+                                      allGenerationsItem.generatedVideo,
                                       ParamType.String,
                                     ),
                                   }.withoutNulls,
@@ -188,7 +188,7 @@ class _GenerationsMainWidgetState extends State<GenerationsMainWidget> {
                                   ),
                                   generationStatus: allGenerationsItem.status,
                                   generationPath:
-                                      allGenerationsItem.generationId,
+                                      allGenerationsItem.generatedImage,
                                 ),
                               ),
                             );

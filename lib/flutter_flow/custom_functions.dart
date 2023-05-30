@@ -16,13 +16,9 @@ bool? hasNoGenerations(List<GenerationsRecord>? allGenerations) {
 }
 
 String? stringURLToImagePath(String urlString) {
-  return ('https://firebasestorage.googleapis.com/v0/b/cx-terminal.appspot.com/o/' +
-      urlString +
-      '/frame_00012.png ');
+  return (urlString + '/frame_00012.png');
 }
 
 String? stringURLToVideoPath(String urlString) {
-  return ('https://firebasestorage.googleapis.com/v0/b/cx-terminal.appspot.com/o/' +
-      urlString +
-      '/generation.mp4');
+  return (urlString + '/generation.mp4');
 }

@@ -1,9 +1,7 @@
-import '/components/prompt_card/prompt_card_widget.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_video_player.dart';
-import '/flutter_flow/custom_functions.dart' as functions;
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -83,55 +81,23 @@ class _VewGeneratonWidgetState extends State<VewGeneratonWidget> {
         centerTitle: false,
         elevation: 2.0,
       ),
-      body: Column(
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          FlutterFlowVideoPlayer(
-            path: functions.stringURLToVideoPath(widget.generationURL!)!,
-            videoType: VideoType.network,
-            autoPlay: false,
-            looping: true,
-            showControls: true,
-            allowFullScreen: true,
-            allowPlaybackSpeedMenu: false,
-            lazyLoad: false,
-          ),
-          Column(
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Padding(
-                    padding:
-                        EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 0.0, 0.0),
-                    child: Text(
-                      'Prompt',
-                      textAlign: TextAlign.start,
-                      style: FlutterFlowTheme.of(context).bodyMedium.override(
-                            fontFamily: 'Lexend Deca',
-                            fontSize: 24.0,
-                          ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          Row(
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              Expanded(
-                child: wrapWithModel(
-                  model: _model.promptCardModel,
-                  updateCallback: () => setState(() {}),
-                  child: PromptCardWidget(),
-                ),
-              ),
-            ],
-          ),
-        ],
+      body: Padding(
+        padding: EdgeInsetsDirectional.fromSTEB(10.0, 20.0, 10.0, 0.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            FlutterFlowVideoPlayer(
+              path: widget.generationURL!,
+              videoType: VideoType.network,
+              autoPlay: false,
+              looping: true,
+              showControls: true,
+              allowFullScreen: true,
+              allowPlaybackSpeedMenu: false,
+              lazyLoad: false,
+            ),
+          ],
+        ),
       ),
     );
   }
