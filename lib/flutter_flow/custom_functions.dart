@@ -14,3 +14,21 @@ import '/auth/firebase_auth/auth_util.dart';
 bool? hasNoGenerations(List<GenerationsRecord>? allGenerations) {
   return allGenerations?.isEmpty ?? true;
 }
+
+String? getGenerationMediaURL(String path) {
+  final storage = Storage();
+
+  // Create a signed URL with a validity period of 60 minutes
+  final url = await storage.read(bucketName, path,
+      expiration: const Duration(minutes: 60));
+
+  return url;
+}
+
+String? stringURLToImagePath(String urlString) {
+  return (urlString + '/frame_00012.png ');
+}
+
+String? stringURLToVideoPath(String urlString) {
+  return (urlString + '/generation.mp4');
+}

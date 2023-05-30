@@ -167,7 +167,11 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: 'VewGeneraton',
           path: '/vewGeneraton',
-          builder: (context, params) => VewGeneratonWidget(),
+          builder: (context, params) => VewGeneratonWidget(
+            generationTitle:
+                params.getParam('generationTitle', ParamType.String),
+            generationURL: params.getParam('generationURL', ParamType.String),
+          ),
         )
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
       urlPathStrategy: UrlPathStrategy.path,

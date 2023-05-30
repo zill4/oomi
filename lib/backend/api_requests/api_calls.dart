@@ -16,7 +16,6 @@ class GenerateVideoCall {
     String? prompt1 = '',
     String? prompt2 = '',
     String? prompt3 = '',
-    String? authToken = '',
   }) {
     final body = '''
 {
@@ -32,7 +31,8 @@ class GenerateVideoCall {
       callType: ApiCallType.POST,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization':
+            'Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjJkOWE1ZWY1YjEyNjIzYzkxNjcxYTcwOTNjYjMyMzMzM2NkMDdkMDkiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJhY2NvdW50cy5nb29nbGUuY29tIiwiYXpwIjoiNjE4MTA0NzA4MDU0LTlyOXMxYzRhbGczNmVybGl1Y2hvOXQ1Mm4zMm42ZGdxLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwiYXVkIjoiNjE4MTA0NzA4MDU0LTlyOXMxYzRhbGczNmVybGl1Y2hvOXQ1Mm4zMm42ZGdxLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwic3ViIjoiMTA3NDM0NDc3MDMyNTEwMzEzNDM2IiwiaGQiOiJjcmlzcGNvZGUuaW8iLCJlbWFpbCI6Imp1c3RpbkBjcmlzcGNvZGUuaW8iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiYXRfaGFzaCI6ImJWZzdFaTF5dWU4M0owQkNSN282UlEiLCJpYXQiOjE2ODUxMDE2NTksImV4cCI6MTY4NTEwNTI1OSwianRpIjoiZjUwNmJmNGEzMDQ2NGQ4ZDE3ZTIxMmQzNWQ4NjVkMGJiY2Q2YWI2NCJ9.yYr5oD6FdFyMFCcBFH0HC79sch97ff9jAo3PflE5VIQZsl_WXnI_RG_f-5x3MTADk7No6pWX8ibSEsuKlRHcW4DPHpugWjgAOg10ZU5-hkCmWhPw3el7LM2x9AnLXpxej8LlZPsuTFWlyIjpajn5DpEXvqR2MPNG5gN2YngZgsyG2F8bs9eJ8txzcjSwQfDyisph1q0MpGCZSsxpEpT_U-3fAwplFt03xK2F8ZLyKa3d-_kpoGzeInkgPj50i0WCRvM7Ym0xhldt42amRXyEslkngc5gcjG-WC249Wfguwqfpd3nfltF5d1wUI2nKdmUSuPcgaYeOiTanwmmpV-34A',
       },
       params: {},
       body: body,

@@ -6,8 +6,6 @@ import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import '/flutter_flow/random_data_util.dart' as random_data;
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -203,142 +201,135 @@ class _CreateGenerationWidgetState extends State<CreateGenerationWidget> {
                   ],
                 ),
               ),
-              Align(
-                alignment: AlignmentDirectional(0.0, -0.6),
-                child: Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 20.0),
-                  child: StreamBuilder<List<PromptsRecord>>(
-                    stream: queryPromptsRecord(
-                      queryBuilder: (promptsRecord) => promptsRecord
-                          .where('user', isEqualTo: currentUserReference)
-                          .orderBy('timestamp', descending: true),
-                    ),
-                    builder: (context, snapshot) {
-                      // Customize what your widget looks like when it's loading.
-                      if (!snapshot.hasData) {
-                        return Center(
-                          child: SizedBox(
-                            width: 50.0,
-                            height: 50.0,
-                            child: SpinKitRipple(
-                              color: Color(0xFF77DEFF),
-                              size: 50.0,
-                            ),
-                          ),
-                        );
-                      }
-                      List<PromptsRecord> listViewPromptsRecordList =
-                          snapshot.data!;
-                      return ListView.builder(
-                        padding: EdgeInsets.zero,
-                        shrinkWrap: true,
-                        scrollDirection: Axis.vertical,
-                        itemCount: listViewPromptsRecordList.length,
-                        itemBuilder: (context, listViewIndex) {
-                          final listViewPromptsRecord =
-                              listViewPromptsRecordList[listViewIndex];
-                          return InkWell(
-                            splashColor: Colors.transparent,
-                            focusColor: Colors.transparent,
-                            hoverColor: Colors.transparent,
-                            highlightColor: Colors.transparent,
-                            onTap: () async {
-                              setState(() {
-                                _model.promptPart1 =
-                                    listViewPromptsRecord.prompt1;
-                                _model.promptPart2 =
-                                    listViewPromptsRecord.prompt2;
-                                _model.promptPart3 =
-                                    listViewPromptsRecord.prompt3;
-                              });
-                            },
-                            child: wrapWithModel(
-                              model: _model.promptCardModels.getModel(
-                                listViewPromptsRecord.timestamp!.toString(),
-                                listViewIndex,
-                              ),
-                              updateCallback: () => setState(() {}),
-                              child: PromptCardWidget(
-                                key: Key(
-                                  'Keyt8i_${listViewPromptsRecord.timestamp!.toString()}',
-                                ),
-                                promptTitle: listViewPromptsRecord.promptTitle,
-                                promptPart1: listViewPromptsRecord.prompt1,
-                                promptPart2: listViewPromptsRecord.prompt2,
-                                promptPart3: listViewPromptsRecord.prompt3,
+              Container(
+                width: MediaQuery.of(context).size.width * 0.9,
+                height: MediaQuery.of(context).size.height * 0.6,
+                decoration: BoxDecoration(),
+                child: Align(
+                  alignment: AlignmentDirectional(0.0, -0.6),
+                  child: Padding(
+                    padding:
+                        EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 20.0),
+                    child: StreamBuilder<List<PromptsRecord>>(
+                      stream: queryPromptsRecord(
+                        queryBuilder: (promptsRecord) => promptsRecord
+                            .where('user', isEqualTo: currentUserReference)
+                            .orderBy('timestamp', descending: true),
+                      ),
+                      builder: (context, snapshot) {
+                        // Customize what your widget looks like when it's loading.
+                        if (!snapshot.hasData) {
+                          return Center(
+                            child: SizedBox(
+                              width: 50.0,
+                              height: 50.0,
+                              child: SpinKitRipple(
+                                color: Color(0xFF77DEFF),
+                                size: 50.0,
                               ),
                             ),
                           );
-                        },
-                      );
-                    },
+                        }
+                        List<PromptsRecord> listViewPromptsRecordList =
+                            snapshot.data!;
+                        return ListView.builder(
+                          padding: EdgeInsets.zero,
+                          shrinkWrap: true,
+                          scrollDirection: Axis.vertical,
+                          itemCount: listViewPromptsRecordList.length,
+                          itemBuilder: (context, listViewIndex) {
+                            final listViewPromptsRecord =
+                                listViewPromptsRecordList[listViewIndex];
+                            return InkWell(
+                              splashColor: Colors.transparent,
+                              focusColor: Colors.transparent,
+                              hoverColor: Colors.transparent,
+                              highlightColor: Colors.transparent,
+                              onTap: () async {
+                                setState(() {
+                                  _model.promptPart1 =
+                                      listViewPromptsRecord.prompt1;
+                                  _model.promptPart2 =
+                                      listViewPromptsRecord.prompt2;
+                                  _model.promptPart3 =
+                                      listViewPromptsRecord.prompt3;
+                                });
+                              },
+                              child: wrapWithModel(
+                                model: _model.promptCardModels.getModel(
+                                  listViewPromptsRecord.timestamp!.toString(),
+                                  listViewIndex,
+                                ),
+                                updateCallback: () => setState(() {}),
+                                child: PromptCardWidget(
+                                  key: Key(
+                                    'Keyt8i_${listViewPromptsRecord.timestamp!.toString()}',
+                                  ),
+                                  promptTitle:
+                                      listViewPromptsRecord.promptTitle,
+                                  promptPart1: listViewPromptsRecord.prompt1,
+                                  promptPart2: listViewPromptsRecord.prompt2,
+                                  promptPart3: listViewPromptsRecord.prompt3,
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
-              Row(
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  FFButtonWidget(
-                    onPressed: () async {
-                      _model.apiResultzpq = await GenerateVideoCall.call(
-                        userId: currentUserUid,
-                        generationTitle: _model.generationTitle,
-                        prompt1: _model.promptPart1,
-                        prompt2: _model.promptPart2,
-                        prompt3: _model.promptPart3,
-                      );
-                      if ((_model.apiResultzpq?.succeeded ?? true)) {
-                        await Future.delayed(
-                            const Duration(milliseconds: 1000));
-                      } else {
-                        await Future.delayed(
-                            const Duration(milliseconds: 1000));
-                      }
+              Padding(
+                padding: EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    FFButtonWidget(
+                      onPressed: () async {
+                        _model.apiResultzpq = await GenerateVideoCall.call(
+                          userId: currentUserUid,
+                          generationTitle: _model.generationTitle,
+                          prompt1: _model.promptPart1,
+                          prompt2: _model.promptPart2,
+                          prompt3: _model.promptPart3,
+                        );
+                        if ((_model.apiResultzpq?.succeeded ?? true)) {
+                          await Future.delayed(
+                              const Duration(milliseconds: 1000));
+                        } else {
+                          await Future.delayed(
+                              const Duration(milliseconds: 1000));
+                        }
 
-                      final generationsCreateData = {
-                        ...createGenerationsRecordData(
-                          user: currentUserReference,
-                          generatedVideo: (_model.apiResultzpq?.jsonBody ?? ''),
-                          generationId: random_data.randomString(
-                            6,
-                            6,
-                            true,
-                            false,
-                            true,
-                          ),
+                        context.pushNamed('generationsMain');
+
+                        setState(() {});
+                      },
+                      text: 'Generate Video',
+                      options: FFButtonOptions(
+                        height: 40.0,
+                        padding: EdgeInsetsDirectional.fromSTEB(
+                            24.0, 0.0, 24.0, 0.0),
+                        iconPadding:
+                            EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                        color: FlutterFlowTheme.of(context).primary,
+                        textStyle:
+                            FlutterFlowTheme.of(context).titleSmall.override(
+                                  fontFamily: 'Lexend Deca',
+                                  color: Colors.white,
+                                ),
+                        elevation: 3.0,
+                        borderSide: BorderSide(
+                          color: Colors.transparent,
+                          width: 1.0,
                         ),
-                        'timestamp': FieldValue.serverTimestamp(),
-                      };
-                      await GenerationsRecord.collection
-                          .doc()
-                          .set(generationsCreateData);
-
-                      context.pushNamed('generationsMain');
-
-                      setState(() {});
-                    },
-                    text: 'Generate Video',
-                    options: FFButtonOptions(
-                      height: 40.0,
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(24.0, 0.0, 24.0, 0.0),
-                      iconPadding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                      color: FlutterFlowTheme.of(context).primary,
-                      textStyle:
-                          FlutterFlowTheme.of(context).titleSmall.override(
-                                fontFamily: 'Lexend Deca',
-                                color: Colors.white,
-                              ),
-                      elevation: 3.0,
-                      borderSide: BorderSide(
-                        color: Colors.transparent,
-                        width: 1.0,
+                        borderRadius: BorderRadius.circular(8.0),
                       ),
-                      borderRadius: BorderRadius.circular(8.0),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),

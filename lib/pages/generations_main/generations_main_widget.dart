@@ -79,7 +79,7 @@ class _GenerationsMainWidgetState extends State<GenerationsMainWidget> {
             elevation: 8.0,
             child: Icon(
               Icons.add_circle,
-              color: FlutterFlowTheme.of(context).tertiary,
+              color: FlutterFlowTheme.of(context).secondaryBackground,
               size: 50.0,
             ),
           ),
@@ -90,7 +90,7 @@ class _GenerationsMainWidgetState extends State<GenerationsMainWidget> {
               'All Generations',
               style: FlutterFlowTheme.of(context).displaySmall.override(
                     fontFamily: 'Lexend Deca',
-                    color: FlutterFlowTheme.of(context).tertiary,
+                    color: FlutterFlowTheme.of(context).dark900,
                   ),
             ),
             actions: [],
@@ -154,11 +154,42 @@ class _GenerationsMainWidgetState extends State<GenerationsMainWidget> {
                               hoverColor: Colors.transparent,
                               highlightColor: Colors.transparent,
                               onTap: () async {
-                                context.pushNamed('VewGeneraton');
+                                context.pushNamed(
+                                  'VewGeneraton',
+                                  queryParams: {
+                                    'generationTitle': serializeParam(
+                                      allGenerationsItem.generationTitle,
+                                      ParamType.String,
+                                    ),
+                                    'generationURL': serializeParam(
+                                      '',
+                                      ParamType.String,
+                                    ),
+                                  }.withoutNulls,
+                                );
                               },
-                              child: GenerationPreviewWidget(
-                                key: Key(
-                                    'Key4fu_${allGenerationsIndex}_of_${allGenerations.length}'),
+                              child: wrapWithModel(
+                                model: _model.generationPreviewModels.getModel(
+                                  allGenerationsItem.timestamp!.toString(),
+                                  allGenerationsIndex,
+                                ),
+                                updateCallback: () => setState(() {}),
+                                child: GenerationPreviewWidget(
+                                  key: Key(
+                                    'Key4fu_${allGenerationsItem.timestamp!.toString()}',
+                                  ),
+                                  generationTitle:
+                                      allGenerationsItem.generationTitle,
+                                  generationTime: dateTimeFormat(
+                                    'M/d h:mm a',
+                                    allGenerationsItem.timestamp,
+                                    locale: FFLocalizations.of(context)
+                                        .languageCode,
+                                  ),
+                                  generationStatus: allGenerationsItem.status,
+                                  generationPath:
+                                      allGenerationsItem.generationId,
+                                ),
                               ),
                             );
                           },

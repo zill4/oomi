@@ -1,6 +1,7 @@
 import '/flutter_flow/flutter_flow_animations.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import '/flutter_flow/custom_functions.dart' as functions;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -11,7 +12,18 @@ import 'generation_preview_model.dart';
 export 'generation_preview_model.dart';
 
 class GenerationPreviewWidget extends StatefulWidget {
-  const GenerationPreviewWidget({Key? key}) : super(key: key);
+  const GenerationPreviewWidget({
+    Key? key,
+    this.generationTitle,
+    this.generationTime,
+    this.generationStatus,
+    required this.generationPath,
+  }) : super(key: key);
+
+  final String? generationTitle;
+  final String? generationTime;
+  final String? generationStatus;
+  final String? generationPath;
 
   @override
   _GenerationPreviewWidgetState createState() =>
@@ -102,33 +114,11 @@ class _GenerationPreviewWidgetState extends State<GenerationPreviewWidget>
                 topRight: Radius.circular(0.0),
               ),
               child: Image.network(
-                _model.generatedPreview,
+                functions.stringURLToImagePath(
+                    functions.getGenerationMediaURL(widget.generationPath!)!)!,
                 width: 120.0,
                 height: 100.0,
                 fit: BoxFit.cover,
-              ),
-            ),
-            Align(
-              alignment: AlignmentDirectional(-0.9, 0.85),
-              child: Container(
-                width: 32.0,
-                height: 32.0,
-                decoration: BoxDecoration(
-                  color: FlutterFlowTheme.of(context).secondaryBackground,
-                  boxShadow: [
-                    BoxShadow(
-                      blurRadius: 4.0,
-                      color: Color(0x230E151B),
-                      offset: Offset(0.0, 2.0),
-                    )
-                  ],
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.play_arrow_rounded,
-                  color: FlutterFlowTheme.of(context).primaryText,
-                  size: 20.0,
-                ),
               ),
             ),
             Padding(
@@ -139,24 +129,35 @@ class _GenerationPreviewWidgetState extends State<GenerationPreviewWidget>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    _model.title,
+                    widget.generationTitle!,
                     style: FlutterFlowTheme.of(context).bodyLarge,
                   ),
                   Padding(
-                    padding: EdgeInsetsDirectional.fromSTEB(0.0, 4.0, 0.0, 4.0),
-                    child: Text(
-                      valueOrDefault<String>(
-                        _model.length?.toString(),
-                        '69',
+                    padding: EdgeInsetsDirectional.fromSTEB(3.0, 1.0, 0.0, 0.0),
+                    child: Container(
+                      width: 100.0,
+                      height: 21.0,
+                      decoration: BoxDecoration(
+                        color: FlutterFlowTheme.of(context).secondaryBackground,
                       ),
-                      style: FlutterFlowTheme.of(context).labelSmall,
+                      child: Text(
+                        widget.generationTime!,
+                        style: FlutterFlowTheme.of(context).bodyMedium.override(
+                              fontFamily: 'Lexend Deca',
+                              color: FlutterFlowTheme.of(context).alternate,
+                              fontSize: 11.0,
+                            ),
+                      ),
                     ),
                   ),
                   Row(
                     mainAxisSize: MainAxisSize.max,
                     children: [
                       Text(
-                        _model.promptTitle,
+                        valueOrDefault<String>(
+                          widget.generationStatus,
+                          'generating',
+                        ),
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
                               fontFamily: 'Lexend Deca',
                               color: FlutterFlowTheme.of(context).primary,

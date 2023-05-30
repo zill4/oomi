@@ -10,11 +10,21 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 class GenerationsMainModel extends FlutterFlowModel {
+  ///  State fields for stateful widgets in this page.
+
+  // Models for GenerationPreview dynamic component.
+  late FlutterFlowDynamicModels<GenerationPreviewModel> generationPreviewModels;
+
   /// Initialization and disposal methods.
 
-  void initState(BuildContext context) {}
+  void initState(BuildContext context) {
+    generationPreviewModels =
+        FlutterFlowDynamicModels(() => GenerationPreviewModel());
+  }
 
-  void dispose() {}
+  void dispose() {
+    generationPreviewModels.dispose();
+  }
 
   /// Additional helper methods are added here.
 

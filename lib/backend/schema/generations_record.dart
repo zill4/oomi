@@ -44,6 +44,11 @@ class GenerationsRecord extends FirestoreRecord {
   String get generationTitle => _generationTitle ?? '';
   bool hasGenerationTitle() => _generationTitle != null;
 
+  // "status" field.
+  String? _status;
+  String get status => _status ?? '';
+  bool hasStatus() => _status != null;
+
   void _initializeFields() {
     _user = snapshotData['user'] as DocumentReference?;
     _timestamp = snapshotData['timestamp'] as DateTime?;
@@ -51,6 +56,7 @@ class GenerationsRecord extends FirestoreRecord {
     _description = snapshotData['description'] as String?;
     _generationId = snapshotData['generation_id'] as String?;
     _generationTitle = snapshotData['generation_title'] as String?;
+    _status = snapshotData['status'] as String?;
   }
 
   static CollectionReference get collection =>
@@ -86,6 +92,7 @@ Map<String, dynamic> createGenerationsRecordData({
   String? description,
   String? generationId,
   String? generationTitle,
+  String? status,
 }) {
   final firestoreData = mapToFirestore(
     <String, dynamic>{
@@ -95,6 +102,7 @@ Map<String, dynamic> createGenerationsRecordData({
       'description': description,
       'generation_id': generationId,
       'generation_title': generationTitle,
+      'status': status,
     }.withoutNulls,
   );
 
