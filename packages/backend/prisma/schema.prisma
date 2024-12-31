@@ -10,7 +10,9 @@ datasource db {
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
-  name          String?
+  password      String
+  firstName     String?
+  lastName      String?
   resumes       Resume[]
   jobApplications JobApplication[]
   createdAt     DateTime  @default(now())
@@ -18,22 +20,21 @@ model User {
 }
 
 model Resume {
-  id          String    @id @default(cuid())
-  userId      String
-  user        User      @relation(fields: [userId], references: [id])
-  content     Json
-  shortStory  String?   @db.Text
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  file      String   // URL or path to file
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model JobApplication {
-  id          String    @id @default(cuid())
-  userId      String
-  user        User      @relation(fields: [userId], references: [id])
-  jobPosting  Json
-  coverLetter String    @db.Text
-  resumeId    String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  company   String
+  title     String
+  status    String   @default("PENDING")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 } 
