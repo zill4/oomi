@@ -21,7 +21,7 @@ export default function Home() {
               Try for Free
             </Link>
             <Link
-              to="/signup"
+              to="/sign-up"
               className="rounded-md bg-gray-400 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-gray-300"
             >
               Sign Up
