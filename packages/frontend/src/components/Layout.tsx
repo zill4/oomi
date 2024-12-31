@@ -38,4 +38,4 @@ export default function Layout({ children }: LayoutProps) {
       </main>
     </div>
   );
-} 
+}
