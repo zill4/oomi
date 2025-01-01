@@ -13,6 +13,7 @@ services:
     environment:
       - NODE_ENV=development
       - VITE_API_URL=http://backend:4000
+    container_name: oomi-frontend
 
   backend:
     build:
@@ -29,6 +30,14 @@ services:
       - CLAUDE_API_KEY=${CLAUDE_API_KEY}
     depends_on:
       - db
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    container_name: oomi-backend
+    env_file:
+      - .env
 
   db:
     image: postgres:15-alpine
@@ -40,6 +49,7 @@ services:
       - POSTGRES_DB=oomi
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    container_name: oomi-db
 
 volumes:
   postgres_data: 

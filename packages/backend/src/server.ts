@@ -24,6 +24,11 @@ app.use((err: Error, req: express.Request, res: express.Response, next: express.
   res.status(500).json({ message: 'Something went wrong!' });
 });
 
+// Add health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'healthy' });
+});
+
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
