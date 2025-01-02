@@ -7,11 +7,9 @@ interface JwtPayload {
   userId: string
 }
 
-declare global {
-  namespace Express {
-    interface Request {
-      userId?: string
-    }
+declare module 'express' {
+  interface Request {
+    userId?: string
   }
 }
 
@@ -27,7 +25,8 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
     const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload
     req.userId = decoded.userId
     next()
-  } catch (error) {
+  } catch (err) {
+    console.error('Token verification failed:', err)
     return res.status(403).json({ message: 'Invalid or expired token' })
   }
 } 

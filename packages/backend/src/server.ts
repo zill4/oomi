@@ -19,7 +19,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 
 // Global error handler
-app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: Error, _req: express.Request, res: express.Response) => {
   console.error(err.stack);
   res.status(500).json({ message: 'Something went wrong!' });
 });
