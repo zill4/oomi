@@ -6,14 +6,6 @@ WORKDIR /app
 COPY package.json ./
 RUN npm install
 
-# Development target for docker-compose
-FROM base AS development
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-EXPOSE 3000
-CMD ["npm", "run", "dev"]
-
 # Builder
 FROM base AS builder
 WORKDIR /app
@@ -22,11 +14,8 @@ COPY . .
 RUN npm run build
 
 # Runner
-FROM base AS runner
-WORKDIR /app
-ENV NODE_ENV=production
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-COPY package.json ./
+FROM nginx:alpine AS runner
+COPY --from=builder /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 3000
-CMD ["npm", "start"] 
+CMD ["nginx", "-g", "daemon off;"] 
