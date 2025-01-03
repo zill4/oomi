@@ -26,34 +26,78 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v2
 
-    - name: Get AWS Account ID
-      id: get-aws-account
+    - name: Get AWS Account ID and Create Task Definition
+      id: setup
       run: |
+        # Get AWS Account ID
         AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)
         echo "AWS_ACCOUNT_ID=${AWS_ACCOUNT_ID}" >> $GITHUB_ENV
-        echo "Got AWS Account ID: ${AWS_ACCOUNT_ID}"
-
-    - name: Create ECS Cluster
-      run: |
-        echo "Creating/ensuring cluster exists..."
-        aws ecs create-cluster --cluster-name ${{ env.ECS_CLUSTER }} || true
-
-    - name: Create ECS Task Definition
-      run: |
-        echo "Creating task definition..."
-        # Replace AWS_ACCOUNT_ID in the task definition
-        sed -i "s/\${AWS_ACCOUNT_ID}/${{ env.AWS_ACCOUNT_ID }}/g" ${{ env.ECS_TASK_DEFINITION }}
         
-        TASK_DEF_ARN=$(aws ecs register-task-definition \
-          --cli-input-json file://${{ env.ECS_TASK_DEFINITION }} \
-          --query 'taskDefinition.taskDefinitionArn' \
-          --output text)
-        echo "TASK_DEF_ARN=${TASK_DEF_ARN}" >> $GITHUB_ENV
-        echo "Created task definition: ${TASK_DEF_ARN}"
+        # Create task definition directory if it doesn't exist
+        mkdir -p infra/aws
+        
+        # Create task definition file
+        cat > ${{ env.ECS_TASK_DEFINITION }} << EOL
+        {
+          "family": "oomi-app",
+          "networkMode": "awsvpc",
+          "requiresCompatibilities": ["FARGATE"],
+          "cpu": "256",
+          "memory": "512",
+          "executionRoleArn": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/ecsTaskExecutionRole",
+          "containerDefinitions": [
+            {
+              "name": "frontend",
+              "image": "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/oomi-frontend:latest",
+              "essential": true,
+              "portMappings": [
+                {
+                  "containerPort": 3000,
+                  "protocol": "tcp"
+                }
+              ],
+              "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                  "awslogs-group": "/ecs/oomi-frontend",
+                  "awslogs-region": "${AWS_REGION}",
+                  "awslogs-stream-prefix": "ecs"
+                }
+              }
+            },
+            {
+              "name": "backend",
+              "image": "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/oomi-backend:latest",
+              "essential": true,
+              "portMappings": [
+                {
+                  "containerPort": 4000,
+                  "protocol": "tcp"
+                }
+              ],
+              "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                  "awslogs-group": "/ecs/oomi-backend",
+                  "awslogs-region": "${AWS_REGION}",
+                  "awslogs-stream-prefix": "ecs"
+                }
+              }
+            }
+          ]
+        }
+        EOL
+        
+        cat ${{ env.ECS_TASK_DEFINITION }}
 
-    - name: Create IAM Role
+    - name: Create ECS Resources
       run: |
-        echo "Creating ECS Task Execution Role..."
+        # Create cluster
+        echo "Creating ECS cluster..."
+        aws ecs create-cluster --cluster-name ${{ env.ECS_CLUSTER }}
+        
+        # Create IAM role
+        echo "Creating IAM role..."
         aws iam create-role \
           --role-name ecsTaskExecutionRole \
           --assume-role-policy-document '{
@@ -72,45 +116,34 @@ jobs:
         aws iam attach-role-policy \
           --role-name ecsTaskExecutionRole \
           --policy-arn arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy || true
-
-    - name: Create Log Groups
-      run: |
-        echo "Creating CloudWatch log groups..."
+        
+        # Create log groups
+        echo "Creating log groups..."
         aws logs create-log-group --log-group-name /ecs/oomi-frontend || true
         aws logs create-log-group --log-group-name /ecs/oomi-backend || true
-
-    - name: Create ECS Services
-      run: |
-        echo "Creating frontend service..."
+        
+        # Register task definition
+        echo "Registering task definition..."
+        TASK_DEF_ARN=$(aws ecs register-task-definition \
+          --cli-input-json file://${{ env.ECS_TASK_DEFINITION }} \
+          --query 'taskDefinition.taskDefinitionArn' \
+          --output text)
+        echo "TASK_DEF_ARN=${TASK_DEF_ARN}" >> $GITHUB_ENV
+        
+        # Create services
+        echo "Creating services..."
         aws ecs create-service \
           --cluster ${{ env.ECS_CLUSTER }} \
           --service-name oomi-frontend \
-          --task-definition ${{ env.TASK_DEF_ARN }} \
+          --task-definition ${TASK_DEF_ARN} \
           --desired-count 1 \
           --launch-type FARGATE \
           --network-configuration "awsvpcConfiguration={subnets=[${{ secrets.VPC_SUBNETS }}],securityGroups=[${{ secrets.SECURITY_GROUP }}],assignPublicIp=ENABLED}" || true
         
-        echo "Creating backend service..."
         aws ecs create-service \
           --cluster ${{ env.ECS_CLUSTER }} \
           --service-name oomi-backend \
-          --task-definition ${{ env.TASK_DEF_ARN }} \
+          --task-definition ${TASK_DEF_ARN} \
           --desired-count 1 \
           --launch-type FARGATE \
-          --network-configuration "awsvpcConfiguration={subnets=[${{ secrets.VPC_SUBNETS }}],securityGroups=[${{ secrets.SECURITY_GROUP }}],assignPublicIp=ENABLED}" || true
-
-    - name: Update Services
-      if: success()
-      run: |
-        echo "Updating services..."
-        aws ecs update-service \
-          --cluster ${{ env.ECS_CLUSTER }} \
-          --service oomi-frontend \
-          --task-definition ${{ env.TASK_DEF_ARN }} \
-          --force-new-deployment || echo "Frontend service update failed"
-        
-        aws ecs update-service \
-          --cluster ${{ env.ECS_CLUSTER }} \
-          --service oomi-backend \
-          --task-definition ${{ env.TASK_DEF_ARN }} \
-          --force-new-deployment || echo "Backend service update failed" 
+          --network-configuration "awsvpcConfiguration={subnets=[${{ secrets.VPC_SUBNETS }}],securityGroups=[${{ secrets.SECURITY_GROUP }}],assignPublicIp=ENABLED}" || true 
