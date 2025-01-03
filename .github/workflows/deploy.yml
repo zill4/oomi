@@ -25,4 +25,4 @@ jobs:
         aws sts get-caller-identity
         
         echo "Creating ECS Cluster..."
-        aws ecs create-cluster --cluster-name ${{ env.ECS_CLUSTER }} 
+        aws ecs create-cluster --cluster-name ${{ env.ECS_CLUSTER }}
