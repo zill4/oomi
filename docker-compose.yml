@@ -4,21 +4,24 @@ services:
   frontend:
     build:
       context: ./packages/frontend
-      target: development
+      target: builder
     ports:
-      - "3000:3000"
+      - "3000:5173"
     volumes:
       - ./packages/frontend:/app
       - /app/node_modules
     environment:
       - NODE_ENV=development
-      - VITE_API_URL=http://backend:4000
+      - VITE_API_URL=http://localhost:4000
+    command: npm run dev -- --host
     container_name: oomi-frontend
+    networks:
+      - oomi-network
 
   backend:
     build:
       context: ./packages/backend
-      target: development
+      target: builder
     ports:
       - "4000:4000"
     volumes:
@@ -29,15 +32,12 @@ services:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/oomi
       - CLAUDE_API_KEY=${CLAUDE_API_KEY}
     depends_on:
-      - db
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      db:
+        condition: service_healthy
+    command: npm run dev
     container_name: oomi-backend
-    env_file:
-      - .env
+    networks:
+      - oomi-network
 
   db:
     image: postgres:15-alpine
@@ -50,6 +50,17 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     container_name: oomi-db
+    networks:
+      - oomi-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+networks:
+  oomi-network:
+    driver: bridge
 
 volumes:
   postgres_data: 
