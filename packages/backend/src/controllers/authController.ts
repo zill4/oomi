@@ -1,9 +1,9 @@
 import { Request, Response } from 'express'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
-import { prisma } from '../server'
-import { validateEmail, validatePassword } from '../utils/validation'
-import type { RegisterInput, LoginInput, AuthResponse } from '../types/auth'
+import { prisma } from '../server.js'
+import { validateEmail, validatePassword } from '../utils/validation.js'
+import type { RegisterInput, LoginInput, AuthResponse } from '../types/auth.js'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
 const JWT_EXPIRES_IN = '7d'

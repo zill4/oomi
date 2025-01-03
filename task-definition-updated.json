@@ -11,7 +11,7 @@
             "image": "nginx:latest",
             "portMappings": [
                 {
-                    "containerPort": 80,
+                    "containerPort": 3000,
                     "protocol": "tcp"
                 }
             ],
@@ -30,7 +30,7 @@
             "image": "nginx:latest",
             "portMappings": [
                 {
-                    "containerPort": 3000,
+                    "containerPort": 4000,
                     "protocol": "tcp"
                 }
             ],
