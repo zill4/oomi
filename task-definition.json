@@ -1,65 +1,37 @@
 {
-    "family": "oomi-task",
+    "family": "oomi",
     "networkMode": "awsvpc",
-    "requiresCompatibilities": ["FARGATE"],
-    "cpu": "256",
-    "memory": "512",
-    "executionRoleArn": "arn:aws:iam::616754338712:role/ecsTaskExecutionRole",
-    "taskRoleArn": "arn:aws:iam::616754338712:role/ecsTaskExecutionRole",
     "containerDefinitions": [
         {
-            "name": "oomi-frontend",
-            "image": "616754338712.dkr.ecr.us-west-2.amazonaws.com/oomi-frontend:latest",
+            "name": "frontend",
+            "image": "<account>.dkr.ecr.<region>.amazonaws.com/oomi-frontend:latest",
             "portMappings": [
                 {
                     "containerPort": 3000,
                     "protocol": "tcp"
                 }
             ],
-            "essential": true,
-            "environment": [
-                {
-                    "name": "NODE_ENV",
-                    "value": "production"
-                }
-            ],
-            "logConfiguration": {
-                "logDriver": "awslogs",
-                "options": {
-                    "awslogs-group": "/ecs/oomi-frontend",
-                    "awslogs-region": "us-west-2",
-                    "awslogs-stream-prefix": "ecs"
-                }
-            }
+            "essential": true
         },
         {
-            "name": "oomi-backend",
-            "image": "616754338712.dkr.ecr.us-west-2.amazonaws.com/oomi-backend:latest",
+            "name": "backend",
+            "image": "<account>.dkr.ecr.<region>.amazonaws.com/oomi-backend:latest",
             "portMappings": [
                 {
                     "containerPort": 4000,
                     "protocol": "tcp"
                 }
             ],
-            "essential": true,
             "environment": [
                 {
-                    "name": "NODE_ENV",
-                    "value": "production"
-                },
-                {
-                    "name": "PORT",
-                    "value": "4000"
+                    "name": "DATABASE_URL",
+                    "value": "postgresql://user:pass@host:5432/oomi"
                 }
             ],
-            "logConfiguration": {
-                "logDriver": "awslogs",
-                "options": {
-                    "awslogs-group": "/ecs/oomi-backend",
-                    "awslogs-region": "us-west-2",
-                    "awslogs-stream-prefix": "ecs"
-                }
-            }
+            "essential": true
         }
-    ]
+    ],
+    "requiresCompatibilities": ["FARGATE"],
+    "cpu": "256",
+    "memory": "512"
 }
