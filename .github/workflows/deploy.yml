@@ -2,10 +2,7 @@ name: Deploy to AWS
 
 env:
   AWS_REGION: us-west-2
-  ECR_REPOSITORY_FRONTEND: oomi-frontend
-  ECR_REPOSITORY_BACKEND: oomi-backend
   ECS_CLUSTER: oomi-cluster
-  ECS_TASK_DEFINITION: infra/aws/ecs-task-definition.json
 
 jobs:
   deploy:
@@ -22,99 +19,10 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
 
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v2
-
-    - name: Setup ECS Resources
+    - name: Test AWS Connection
       run: |
-        # Get AWS Account ID
-        AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)
-        echo "AWS_ACCOUNT_ID=${AWS_ACCOUNT_ID}" >> $GITHUB_ENV
-        echo "Got AWS Account ID: ${AWS_ACCOUNT_ID}"
+        echo "Testing AWS Connection..."
+        aws sts get-caller-identity
         
-        # Create ECS cluster
-        echo "Creating ECS cluster..."
-        aws ecs create-cluster --cluster-name ${{ env.ECS_CLUSTER }}
-        
-        # Create task definition directory
-        mkdir -p infra/aws
-        
-        # Create task definition file
-        echo "Creating task definition..."
-        cat > ${{ env.ECS_TASK_DEFINITION }} << EOL
-        {
-          "family": "oomi-app",
-          "networkMode": "awsvpc",
-          "requiresCompatibilities": ["FARGATE"],
-          "cpu": "256",
-          "memory": "512",
-          "executionRoleArn": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/ecsTaskExecutionRole",
-          "containerDefinitions": [
-            {
-              "name": "frontend",
-              "image": "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/oomi-frontend:latest",
-              "essential": true,
-              "portMappings": [
-                {
-                  "containerPort": 3000,
-                  "protocol": "tcp"
-                }
-              ],
-              "logConfiguration": {
-                "logDriver": "awslogs",
-                "options": {
-                  "awslogs-group": "/ecs/oomi-frontend",
-                  "awslogs-region": "${AWS_REGION}",
-                  "awslogs-stream-prefix": "ecs"
-                }
-              }
-            },
-            {
-              "name": "backend",
-              "image": "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/oomi-backend:latest",
-              "essential": true,
-              "portMappings": [
-                {
-                  "containerPort": 4000,
-                  "protocol": "tcp"
-                }
-              ],
-              "logConfiguration": {
-                "logDriver": "awslogs",
-                "options": {
-                  "awslogs-group": "/ecs/oomi-backend",
-                  "awslogs-region": "${AWS_REGION}",
-                  "awslogs-stream-prefix": "ecs"
-                }
-              }
-            }
-          ]
-        }
-        EOL
-
-        # Register task definition
-        echo "Registering task definition..."
-        TASK_DEF_ARN=$(aws ecs register-task-definition \
-          --cli-input-json file://${{ env.ECS_TASK_DEFINITION }} \
-          --query 'taskDefinition.taskDefinitionArn' \
-          --output text)
-        echo "TASK_DEF_ARN=${TASK_DEF_ARN}" >> $GITHUB_ENV
-        
-        # Create services
-        echo "Creating services..."
-        aws ecs create-service \
-          --cluster ${{ env.ECS_CLUSTER }} \
-          --service-name oomi-frontend \
-          --task-definition ${TASK_DEF_ARN} \
-          --desired-count 1 \
-          --launch-type FARGATE \
-          --network-configuration "awsvpcConfiguration={subnets=[${{ secrets.VPC_SUBNETS }}],securityGroups=[${{ secrets.SECURITY_GROUP }}],assignPublicIp=ENABLED}" || true
-        
-        aws ecs create-service \
-          --cluster ${{ env.ECS_CLUSTER }} \
-          --service-name oomi-backend \
-          --task-definition ${TASK_DEF_ARN} \
-          --desired-count 1 \
-          --launch-type FARGATE \
-          --network-configuration "awsvpcConfiguration={subnets=[${{ secrets.VPC_SUBNETS }}],securityGroups=[${{ secrets.SECURITY_GROUP }}],assignPublicIp=ENABLED}" || true 
+        echo "Creating ECS Cluster..."
+        aws ecs create-cluster --cluster-name ${{ env.ECS_CLUSTER }} 
