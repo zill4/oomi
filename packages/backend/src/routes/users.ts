@@ -1,15 +1,15 @@
 import { Router } from 'express';
-import prisma from '../lib/prisma';
+import { prisma } from '../server';
+import { authenticateToken } from '../middleware/auth';
 
 export const router = Router();
 
-router.post('/', async (req, res) => {
+router.post('/', authenticateToken, async (req, res) => {
   try {
-    const { email, name } = req.body;
     const user = await prisma.user.create({
       data: {
-        email,
-        name,
+        email: req.body.email,
+        password: req.body.password
       },
     });
     res.json(user);
