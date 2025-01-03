@@ -1,0 +1,47 @@
+{
+    "family": "oomi-task",
+    "networkMode": "awsvpc",
+    "requiresCompatibilities": ["FARGATE"],
+    "cpu": "256",
+    "memory": "512",
+    "containerDefinitions": [
+        {
+            "name": "oomi-frontend",
+            "image": "nginx:latest",
+            "portMappings": [
+                {
+                    "containerPort": 80,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true,
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/oomi-frontend",
+                    "awslogs-region": "us-west-2",
+                    "awslogs-stream-prefix": "frontend"
+                }
+            }
+        },
+        {
+            "name": "oomi-backend",
+            "image": "nginx:latest",
+            "portMappings": [
+                {
+                    "containerPort": 3000,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true,
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/oomi-backend",
+                    "awslogs-region": "us-west-2",
+                    "awslogs-stream-prefix": "backend"
+                }
+            }
+        }
+    ]
+}
