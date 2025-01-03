@@ -19,10 +19,17 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
 
-    - name: Test AWS Connection
+    - name: Test AWS Connection and Setup
       run: |
         echo "Testing AWS Connection..."
         aws sts get-caller-identity
         
-        echo "Creating ECS Cluster..."
-        aws ecs create-cluster --cluster-name ${{ env.ECS_CLUSTER }}
+        echo "Checking for existing cluster..."
+        EXISTING_CLUSTER=$(aws ecs describe-clusters --clusters ${{ env.ECS_CLUSTER }} --query 'clusters[0].clusterName' --output text || echo "")
+        
+        if [ "$EXISTING_CLUSTER" == "None" ] || [ -z "$EXISTING_CLUSTER" ]; then
+          echo "Creating new ECS cluster..."
+          aws ecs create-cluster --cluster-name ${{ env.ECS_CLUSTER }}
+        else
+          echo "Cluster already exists"
+        fi
