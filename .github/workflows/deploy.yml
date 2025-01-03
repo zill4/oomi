@@ -26,54 +26,69 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v2
           
-    - name: Create or update ECS resources
+    - name: Create ECS Cluster
       run: |
-        # Debug info
-        echo "Current directory: $(pwd)"
-        echo "Task definition file exists: $(test -f ${{ env.ECS_TASK_DEFINITION }} && echo 'Yes' || echo 'No')"
-        
-        # Create cluster if it doesn't exist
-        echo "Creating/ensuring cluster exists..."
         aws ecs create-cluster --cluster-name ${{ env.ECS_CLUSTER }} || true
+        echo "Created/verified cluster ${{ env.ECS_CLUSTER }}"
+
+    - name: Create Task Definition
+      run: |
+        if [ ! -f ${{ env.ECS_TASK_DEFINITION }} ]; then
+          echo "Task definition file not found at ${{ env.ECS_TASK_DEFINITION }}"
+          exit 1
+        fi
         
-        # Register task definition
-        echo "Registering task definition..."
         TASK_DEF_ARN=$(aws ecs register-task-definition \
           --cli-input-json file://${{ env.ECS_TASK_DEFINITION }} \
           --query 'taskDefinition.taskDefinitionArn' \
           --output text)
-        echo "Task definition ARN: $TASK_DEF_ARN"
+        echo "TASK_DEF_ARN=$TASK_DEF_ARN" >> $GITHUB_ENV
+        echo "Registered task definition: $TASK_DEF_ARN"
+
+    - name: Create ECS Services
+      run: |
+        # Check if frontend service exists
+        if ! aws ecs describe-services --cluster ${{ env.ECS_CLUSTER }} --services oomi-frontend | grep -q "ACTIVE"; then
+          echo "Creating frontend service..."
+          aws ecs create-service \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service-name oomi-frontend \
+            --task-definition ${{ env.TASK_DEF_ARN }} \
+            --desired-count 1 \
+            --launch-type FARGATE \
+            --network-configuration "awsvpcConfiguration={subnets=[${{ secrets.VPC_SUBNETS }}],securityGroups=[${{ secrets.SECURITY_GROUP }}],assignPublicIp=ENABLED}"
+        fi
         
-        # Create frontend service
-        echo "Creating frontend service..."
-        aws ecs create-service \
-          --cluster ${{ env.ECS_CLUSTER }} \
-          --service-name oomi-frontend \
-          --task-definition $TASK_DEF_ARN \
-          --desired-count 1 \
-          --launch-type FARGATE \
-          --network-configuration "awsvpcConfiguration={subnets=[${{ secrets.VPC_SUBNETS }}],securityGroups=[${{ secrets.SECURITY_GROUP }}],assignPublicIp=ENABLED}" || true
+        # Check if backend service exists
+        if ! aws ecs describe-services --cluster ${{ env.ECS_CLUSTER }} --services oomi-backend | grep -q "ACTIVE"; then
+          echo "Creating backend service..."
+          aws ecs create-service \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service-name oomi-backend \
+            --task-definition ${{ env.TASK_DEF_ARN }} \
+            --desired-count 1 \
+            --launch-type FARGATE \
+            --network-configuration "awsvpcConfiguration={subnets=[${{ secrets.VPC_SUBNETS }}],securityGroups=[${{ secrets.SECURITY_GROUP }}],assignPublicIp=ENABLED}"
+        fi
+
+    - name: Update ECS Services
+      if: success()
+      run: |
+        # Only try to update if services exist
+        if aws ecs describe-services --cluster ${{ env.ECS_CLUSTER }} --services oomi-frontend | grep -q "ACTIVE"; then
+          echo "Updating frontend service..."
+          aws ecs update-service \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service oomi-frontend \
+            --task-definition ${{ env.TASK_DEF_ARN }} \
+            --force-new-deployment
+        fi
         
-        # Create backend service
-        echo "Creating backend service..."
-        aws ecs create-service \
-          --cluster ${{ env.ECS_CLUSTER }} \
-          --service-name oomi-backend \
-          --task-definition $TASK_DEF_ARN \
-          --desired-count 1 \
-          --launch-type FARGATE \
-          --network-configuration "awsvpcConfiguration={subnets=[${{ secrets.VPC_SUBNETS }}],securityGroups=[${{ secrets.SECURITY_GROUP }}],assignPublicIp=ENABLED}" || true
-        
-        # Update services if they exist
-        echo "Updating services..."
-        aws ecs update-service \
-          --cluster ${{ env.ECS_CLUSTER }} \
-          --service oomi-frontend \
-          --task-definition $TASK_DEF_ARN \
-          --force-new-deployment || echo "Frontend service update failed"
-          
-        aws ecs update-service \
-          --cluster ${{ env.ECS_CLUSTER }} \
-          --service oomi-backend \
-          --task-definition $TASK_DEF_ARN \
-          --force-new-deployment || echo "Backend service update failed" 
+        if aws ecs describe-services --cluster ${{ env.ECS_CLUSTER }} --services oomi-backend | grep -q "ACTIVE"; then
+          echo "Updating backend service..."
+          aws ecs update-service \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service oomi-backend \
+            --task-definition ${{ env.TASK_DEF_ARN }} \
+            --force-new-deployment
+        fi 

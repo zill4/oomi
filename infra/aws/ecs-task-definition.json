@@ -1,10 +1,15 @@
 {
   "family": "oomi-app",
   "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "arn:aws:iam::616754338712:role/ecsTaskExecutionRole",
   "containerDefinitions": [
     {
       "name": "frontend",
-      "image": "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/oomi-frontend:latest",
+      "image": "616754338712.dkr.ecr.us-west-2.amazonaws.com/oomi-frontend:latest",
+      "essential": true,
       "portMappings": [
         {
           "containerPort": 3000,
@@ -16,11 +21,20 @@
           "name": "NODE_ENV",
           "value": "production"
         }
-      ]
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/oomi-frontend",
+          "awslogs-region": "us-west-2",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
     },
     {
       "name": "backend",
-      "image": "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/oomi-backend:latest",
+      "image": "616754338712.dkr.ecr.us-west-2.amazonaws.com/oomi-backend:latest",
+      "essential": true,
       "portMappings": [
         {
           "containerPort": 4000,
@@ -33,19 +47,14 @@
           "value": "production"
         }
       ],
-      "secrets": [
-        {
-          "name": "DATABASE_URL",
-          "valueFrom": "arn:aws:ssm:${AWS_REGION}:${AWS_ACCOUNT_ID}:parameter/oomi/DATABASE_URL"
-        },
-        {
-          "name": "JWT_SECRET",
-          "valueFrom": "arn:aws:ssm:${AWS_REGION}:${AWS_ACCOUNT_ID}:parameter/oomi/JWT_SECRET"
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/oomi-backend",
+          "awslogs-region": "us-west-2",
+          "awslogs-stream-prefix": "ecs"
         }
-      ]
+      }
     }
-  ],
-  "requiresCompatibilities": ["FARGATE"],
-  "cpu": "256",
-  "memory": "512"
+  ]
 } 
