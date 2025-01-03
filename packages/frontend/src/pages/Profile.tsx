@@ -2,11 +2,14 @@ import { useState } from 'react'
 
 export default function Profile() {
   const [isEditing, setIsEditing] = useState(false)
-  const [bio, setBio] = useState(`I am writing to express my interest in the Software Developer position listed on CareerCraft. With a solid background in computer science and extensive experience in developing robust applications, I am confident that my skills align well with the requirements of the role.
+  const [bio] = useState(`I am writing to express my interest in the Software Developer position listed on CareerCraft. With a solid background in computer science and extensive experience in developing robust applications, I am confident that my skills align well with the requirements of the role.
 
 Over the past five years, I have worked on numerous projects where I successfully designed and implemented software solutions that enhanced functionality and user experience. My proficiency in languages such as JavaScript, Python, and Java, combined with my problem-solving abilities, makes me a perfect fit for your team.
 
 I am particularly drawn to this position at your company because of your commitment to innovation and excellence. I am enthusiastic about the opportunity to contribute to your team and I am keen to further discuss how my background, skills, and certifications can contribute to the success of your organization.`)
+
+
+
 
   return (
     <div className="space-y-8">
@@ -25,7 +28,7 @@ I am particularly drawn to this position at your company because of your commitm
           </div>
           <button
             className="ml-auto px-4 py-2 text-sm font-medium text-white bg-seafoam-500 rounded-md hover:bg-seafoam-400"
-            onClick={() => setIsEditing(true)}
+            onClick={() => setIsEditing(!isEditing)}
           >
             Edit Profile
           </button>
@@ -58,7 +61,7 @@ I am particularly drawn to this position at your company because of your commitm
           <h2 className="text-2xl font-bold">Bio</h2>
           <button
             className="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-400"
-            onClick={() => setIsEditing(true)}
+            onClick={() => setIsEditing(!isEditing)}
           >
             Edit
           </button>
