@@ -3,6 +3,8 @@ name: Deploy to AWS
 env:
   AWS_REGION: us-west-2
   ECS_CLUSTER: oomi-cluster
+  ECS_SERVICE: oomi-service
+  TASK_DEFINITION: oomi-task
 
 jobs:
   deploy:
@@ -19,17 +21,45 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
 
-    - name: Test AWS Connection and Setup
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Build and push images
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.sha }}
       run: |
-        echo "Testing AWS Connection..."
-        aws sts get-caller-identity
+        # Build and push frontend
+        docker build -t $ECR_REGISTRY/oomi-frontend:$IMAGE_TAG -f packages/frontend/Dockerfile ./packages/frontend
+        docker push $ECR_REGISTRY/oomi-frontend:$IMAGE_TAG
         
-        echo "Checking for existing cluster..."
-        EXISTING_CLUSTER=$(aws ecs describe-clusters --clusters ${{ env.ECS_CLUSTER }} --query 'clusters[0].clusterName' --output text || echo "")
+        # Build and push backend
+        docker build -t $ECR_REGISTRY/oomi-backend:$IMAGE_TAG -f packages/backend/Dockerfile ./packages/backend
+        docker push $ECR_REGISTRY/oomi-backend:$IMAGE_TAG
+
+    - name: Download task definition
+      run: |
+        aws ecs describe-task-definition --task-definition ${{ env.TASK_DEFINITION }} \
+        --query taskDefinition > task-definition.json
+
+    - name: Update task definition
+      id: task-def
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        # Update image in task definition
+        sed -i "s|$ECR_REGISTRY/oomi-frontend:[^\"]*|$ECR_REGISTRY/oomi-frontend:$IMAGE_TAG|g" task-definition.json
+        sed -i "s|$ECR_REGISTRY/oomi-backend:[^\"]*|$ECR_REGISTRY/oomi-backend:$IMAGE_TAG|g" task-definition.json
         
-        if [ "$EXISTING_CLUSTER" == "None" ] || [ -z "$EXISTING_CLUSTER" ]; then
-          echo "Creating new ECS cluster..."
-          aws ecs create-cluster --cluster-name ${{ env.ECS_CLUSTER }}
-        else
-          echo "Cluster already exists"
-        fi
+        # Register new task definition
+        aws ecs register-task-definition --cli-input-json file://task-definition.json
+
+    - name: Update ECS service
+      run: |
+        aws ecs update-service \
+          --cluster ${{ env.ECS_CLUSTER }} \
+          --service ${{ env.ECS_SERVICE }} \
+          --task-definition ${{ env.TASK_DEFINITION }} \
+          --force-new-deployment
