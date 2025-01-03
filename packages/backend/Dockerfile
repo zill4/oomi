@@ -16,17 +16,17 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run prisma:generate
 RUN npm run build
-RUN npm prune --production
 
 # Runner
 FROM base AS runner
 WORKDIR /app
 ENV NODE_ENV=production
+ENV PORT=8080
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY package.json ./
 COPY tsconfig.json ./
 COPY prisma ./prisma
 RUN npm run prisma:generate
-EXPOSE 4000
+EXPOSE 8080
 CMD ["node", "--experimental-specifier-resolution=node", "dist/server.js"]

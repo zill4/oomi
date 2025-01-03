@@ -1,72 +1,16 @@
-name: Deploy to ECS
-
+name: Deploy to Fly.io
 on:
-  workflow_run:
-    workflows: ["CI"]
-    types:
-      - completed
-    branches:
-      - main
-
-env:
-  AWS_REGION: us-west-2
-  ECS_CLUSTER: oomi-cluster
-  TASK_DEFINITION: oomi-task
-  FRONTEND_SERVICE: oomi-frontend
-  BACKEND_SERVICE: oomi-backend
+  push:
+    branches: [main]
 
 jobs:
   deploy:
+    name: Deploy app
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-          
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Update task definition
-        id: task-def
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - name: Deploy to Fly.io
+        run: flyctl deploy --remote-only
         env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          # Update image in task definition
-          sed -i "s|nginx:latest|$ECR_REGISTRY/oomi-frontend:$IMAGE_TAG|g" task-definition-updated.json
-          sed -i "s|nginx:latest|$ECR_REGISTRY/oomi-backend:$IMAGE_TAG|g" task-definition-updated.json
-          
-          # Register new task definition
-          aws ecs register-task-definition \
-            --cli-input-json file://task-definition-updated.json \
-            --family ${{ env.TASK_DEFINITION }}
-
-      - name: Update ECS services
-        run: |
-          # Update frontend service
-          aws ecs update-service \
-            --cluster ${{ env.ECS_CLUSTER }} \
-            --service ${{ env.FRONTEND_SERVICE }} \
-            --task-definition ${{ env.TASK_DEFINITION }} \
-            --force-new-deployment
-
-          # Update backend service
-          aws ecs update-service \
-            --cluster ${{ env.ECS_CLUSTER }} \
-            --service ${{ env.BACKEND_SERVICE }} \
-            --task-definition ${{ env.TASK_DEFINITION }} \
-            --force-new-deployment
-
-      - name: Wait for services to stabilize
-        run: |
-          aws ecs wait services-stable \
-            --cluster ${{ env.ECS_CLUSTER }} \
-            --services ${{ env.FRONTEND_SERVICE }} ${{ env.BACKEND_SERVICE }}
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
