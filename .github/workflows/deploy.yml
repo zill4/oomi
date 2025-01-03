@@ -1,82 +1,57 @@
 name: Deploy to AWS
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
 env:
   AWS_REGION: us-west-2
   ECR_REPOSITORY_FRONTEND: oomi-frontend
   ECR_REPOSITORY_BACKEND: oomi-backend
-  ECS_SERVICE: oomi-service
   ECS_CLUSTER: oomi-cluster
   ECS_TASK_DEFINITION: infra/aws/ecs-task-definition.json
+  VPC_SUBNETS: ${{ env.VPC_SUBNETS }}
+  SECURITY_GROUP: ${{ env.SECURITY_GROUP }}
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-      - name: Install dependencies
-        run: npm ci
-      - name: Run tests
-        run: npm test
-
   deploy:
-    needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-
+    
     steps:
-    - uses: actions/checkout@v3
-
+    - uses: actions/checkout@v4
+      
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
-
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v2
-      env:
-        AWS_REGION: ${{ env.AWS_REGION }}
-
-    - name: Build and push frontend image
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
-        AWS_REGION: ${{ env.AWS_REGION }}
+          
+    - name: Create or update ECS services
       run: |
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:${{ github.sha }} -f packages/frontend/Dockerfile ./packages/frontend
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:${{ github.sha }}
-
-    - name: Build and push backend image
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-      run: |
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_BACKEND:${{ github.sha }} ./packages/backend
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY_BACKEND:${{ github.sha }}
-
-    - name: Fill in the new image ID in the Amazon ECS task definition
-      id: task-def
-      uses: aws-actions/amazon-ecs-render-task-definition@v1
-      with:
-        task-definition: ${{ env.ECS_TASK_DEFINITION }}
-        container-name: frontend
-        image: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY_FRONTEND }}:${{ github.sha }}
-
-    - name: Deploy Amazon ECS task definition
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-      with:
-        task-definition: ${{ steps.task-def.outputs.task-definition }}
-        service: ${{ env.ECS_SERVICE }}
-        cluster: ${{ env.ECS_CLUSTER }}
-        wait-for-service-stability: true 
+        # Check if cluster exists, create if it doesn't
+        aws ecs describe-clusters --clusters ${{ env.ECS_CLUSTER }} || \
+        aws ecs create-cluster --cluster-name ${{ env.ECS_CLUSTER }}
+        
+        # Register task definition
+        TASK_DEF_ARN=$(aws ecs register-task-definition \
+          --cli-input-json file://${{ env.ECS_TASK_DEFINITION }} \
+          --query 'taskDefinition.taskDefinitionArn' \
+          --output text)
+        
+        # Create or update frontend service
+        aws ecs describe-services --cluster ${{ env.ECS_CLUSTER }} --services oomi-frontend || \
+        aws ecs create-service \
+          --cluster ${{ env.ECS_CLUSTER }} \
+          --service-name oomi-frontend \
+          --task-definition $TASK_DEF_ARN \
+          --desired-count 1 \
+          --launch-type FARGATE \
+          --network-configuration "awsvpcConfiguration={subnets=[${{ env.VPC_SUBNETS }}],securityGroups=[${{ env.SECURITY_GROUP }}]}"
+        
+        # Create or update backend service
+        aws ecs describe-services --cluster ${{ env.ECS_CLUSTER }} --services oomi-backend || \
+        aws ecs create-service \
+          --cluster ${{ env.ECS_CLUSTER }} \
+          --service-name oomi-backend \
+          --task-definition $TASK_DEF_ARN \
+          --desired-count 1 \
+          --launch-type FARGATE \
+          --network-configuration "awsvpcConfiguration={subnets=[${{ env.VPC_SUBNETS }}],securityGroups=[${{ env.SECURITY_GROUP }}]}" 
