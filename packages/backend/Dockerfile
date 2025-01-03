@@ -25,6 +25,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run prisma:generate
 RUN npm run build
+RUN cp -r src/routes dist/routes
 
 # Runner
 FROM base AS runner
@@ -36,4 +37,4 @@ COPY package.json ./
 COPY prisma ./prisma
 RUN npm run prisma:generate
 EXPOSE 4000
-CMD ["npm", "start"] 
+CMD ["node", "dist/server.js"]

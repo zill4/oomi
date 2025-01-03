@@ -4,25 +4,18 @@
     "requiresCompatibilities": ["FARGATE"],
     "cpu": "256",
     "memory": "512",
-    "executionRoleArn": "arn:aws:iam::616754338712:role/ecsTaskExecutionRole",
-    "taskRoleArn": "arn:aws:iam::616754338712:role/ecsTaskExecutionRole",
+    "executionRoleArn": "arn:aws:iam::YOUR_ACCOUNT_ID:role/ecsTaskExecutionRole",
     "containerDefinitions": [
         {
             "name": "oomi-frontend",
-            "image": "616754338712.dkr.ecr.us-west-2.amazonaws.com/oomi-frontend:latest",
+            "image": "nginx:latest",
             "portMappings": [
                 {
-                    "containerPort": 3000,
+                    "containerPort": 80,
                     "protocol": "tcp"
                 }
             ],
             "essential": true,
-            "environment": [
-                {
-                    "name": "NODE_ENV",
-                    "value": "production"
-                }
-            ],
             "logConfiguration": {
                 "logDriver": "awslogs",
                 "options": {
@@ -34,24 +27,14 @@
         },
         {
             "name": "oomi-backend",
-            "image": "616754338712.dkr.ecr.us-west-2.amazonaws.com/oomi-backend:latest",
+            "image": "nginx:latest",
             "portMappings": [
                 {
-                    "containerPort": 4000,
+                    "containerPort": 3000,
                     "protocol": "tcp"
                 }
             ],
             "essential": true,
-            "environment": [
-                {
-                    "name": "NODE_ENV",
-                    "value": "production"
-                },
-                {
-                    "name": "PORT",
-                    "value": "4000"
-                }
-            ],
             "logConfiguration": {
                 "logDriver": "awslogs",
                 "options": {
