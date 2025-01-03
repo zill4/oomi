@@ -26,17 +26,22 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v2
 
-    - name: Get AWS Account ID and Create Task Definition
-      id: setup
+    - name: Setup ECS Resources
       run: |
         # Get AWS Account ID
         AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)
         echo "AWS_ACCOUNT_ID=${AWS_ACCOUNT_ID}" >> $GITHUB_ENV
+        echo "Got AWS Account ID: ${AWS_ACCOUNT_ID}"
         
-        # Create task definition directory if it doesn't exist
+        # Create ECS cluster
+        echo "Creating ECS cluster..."
+        aws ecs create-cluster --cluster-name ${{ env.ECS_CLUSTER }}
+        
+        # Create task definition directory
         mkdir -p infra/aws
         
         # Create task definition file
+        echo "Creating task definition..."
         cat > ${{ env.ECS_TASK_DEFINITION }} << EOL
         {
           "family": "oomi-app",
@@ -87,41 +92,7 @@ jobs:
           ]
         }
         EOL
-        
-        cat ${{ env.ECS_TASK_DEFINITION }}
 
-    - name: Create ECS Resources
-      run: |
-        # Create cluster
-        echo "Creating ECS cluster..."
-        aws ecs create-cluster --cluster-name ${{ env.ECS_CLUSTER }}
-        
-        # Create IAM role
-        echo "Creating IAM role..."
-        aws iam create-role \
-          --role-name ecsTaskExecutionRole \
-          --assume-role-policy-document '{
-            "Version": "2012-10-17",
-            "Statement": [
-              {
-                "Effect": "Allow",
-                "Principal": {
-                  "Service": "ecs-tasks.amazonaws.com"
-                },
-                "Action": "sts:AssumeRole"
-              }
-            ]
-          }' || true
-        
-        aws iam attach-role-policy \
-          --role-name ecsTaskExecutionRole \
-          --policy-arn arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy || true
-        
-        # Create log groups
-        echo "Creating log groups..."
-        aws logs create-log-group --log-group-name /ecs/oomi-frontend || true
-        aws logs create-log-group --log-group-name /ecs/oomi-backend || true
-        
         # Register task definition
         echo "Registering task definition..."
         TASK_DEF_ARN=$(aws ecs register-task-definition \
