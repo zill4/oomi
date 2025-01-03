@@ -52,8 +52,10 @@ jobs:
     - name: Build and push frontend image
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
+        AWS_REGION: ${{ env.AWS_REGION }}
       run: |
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:${{ github.sha }} ./packages/frontend
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:${{ github.sha }} -f packages/frontend/Dockerfile ./packages/frontend
         docker push $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:${{ github.sha }}
 
     - name: Build and push backend image
