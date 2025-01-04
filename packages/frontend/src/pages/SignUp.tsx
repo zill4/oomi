@@ -4,8 +4,10 @@ import { FcGoogle } from 'react-icons/fc'
 import { FaXTwitter } from 'react-icons/fa6'
 import { FaLinkedin } from 'react-icons/fa'
 import { toast } from 'react-hot-toast'
+import { useAuth } from '../context/AuthContext'
 
 export default function SignUp() {
+  const { login } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -55,8 +57,10 @@ export default function SignUp() {
         throw new Error(data.message || 'Something went wrong');
       }
 
+      login(data.token, data.user);
+      
       toast.success('Account created successfully!');
-      navigate('/login');
+      navigate('/profile');
     } catch (error) {
       console.error('Signup Error:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to create account');

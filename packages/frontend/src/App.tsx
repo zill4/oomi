@@ -9,25 +9,70 @@ import Profile from './pages/Profile'
 import Jobs from './pages/Jobs'
 import Settings from './pages/Settings'
 import { Toaster } from 'react-hot-toast'
+import { AuthProvider } from './context/AuthContext'
+import ProtectedRoute from './components/ProtectedRoute'
+import PublicRoute from './components/PublicRoute'
 
 function App() {
   return (
-    <>
+    <AuthProvider>
       <Toaster position="top-center" />
       <Router>
         <Routes>
-          <Route path="/" element={<Layout><Home /></Layout>} />
+          <Route 
+            path="/" 
+            element={
+              <PublicRoute>
+                <Layout><Home /></Layout>
+              </PublicRoute>
+            } 
+          />
           <Route path="/try" element={<Layout><Try /></Layout>} />
-          <Route path="/sign-up" element={<Layout><SignUp /></Layout>} />
-          <Route path="/login" element={<Layout><Login /></Layout>} />
-          <Route path="/profile" element={<DashboardLayout><Profile /></DashboardLayout>} />
-          <Route path="/jobs" element={<DashboardLayout><Jobs /></DashboardLayout>} />
-          <Route path="/settings" element={<DashboardLayout><Settings /></DashboardLayout>} />
-
-          {/* Add other routes as needed */}
+          <Route 
+            path="/sign-up" 
+            element={
+              <PublicRoute>
+                <Layout><SignUp /></Layout>
+              </PublicRoute>
+            } 
+          />
+          <Route 
+            path="/login" 
+            element={
+              <PublicRoute>
+                <Layout><Login /></Layout>
+              </PublicRoute>
+            } 
+          />
+          
+          {/* Protected Routes */}
+          <Route 
+            path="/profile" 
+            element={
+              <ProtectedRoute>
+                <DashboardLayout><Profile /></DashboardLayout>
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/jobs" 
+            element={
+              <ProtectedRoute>
+                <DashboardLayout><Jobs /></DashboardLayout>
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/settings" 
+            element={
+              <ProtectedRoute>
+                <DashboardLayout><Settings /></DashboardLayout>
+              </ProtectedRoute>
+            } 
+          />
         </Routes>
       </Router>
-    </>
+    </AuthProvider>
   )
 }
 

@@ -7,8 +7,13 @@ services:
       - .:/app
       - /app/node_modules
       - /app/packages/frontend/node_modules
+      - /app/packages/frontend/.turbo
+      - /app/packages/frontend/dist
     ports:
       - "5173:5173"
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
     command: sh -c "cd packages/frontend && npm run dev -- --host"
     depends_on:
       - backend
@@ -28,8 +33,20 @@ services:
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/oomi
       - JWT_SECRET=${JWT_SECRET}
+      - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
-    command: sh -c "cd packages/backend && npx prisma generate && npx prisma migrate deploy && npm run dev"
+      - NODE_ENV=development
+    command: >
+      sh -c "cd packages/backend &&
+             npx prisma generate &&
+             npx prisma migrate status &&
+             if [ $? -ne 0 ]; then
+               echo 'Running database migrations...' &&
+               npx prisma migrate deploy
+             else
+               echo 'Database is up to date'
+             fi &&
+             npm run dev"
     depends_on:
       db:
         condition: service_healthy
@@ -47,6 +64,18 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  prisma-studio:
+    build: 
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5555:5555"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/oomi
+    command: sh -c "cd packages/backend && npx prisma studio --hostname 0.0.0.0 --port 5555 --browser none"
+    depends_on:
+      - db
 
 volumes:
   postgres_data:

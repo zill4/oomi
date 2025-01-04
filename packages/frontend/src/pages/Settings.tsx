@@ -1,7 +1,14 @@
 import { useState } from 'react'
 import { Switch } from '@headlessui/react'
+import { useAuth } from '../context/AuthContext'
+import { useNavigate } from 'react-router-dom'
+import { Dialog } from '@headlessui/react'
+import { toast } from 'react-hot-toast'
 
 export default function Settings() {
+  const { logout } = useAuth()
+  const navigate = useNavigate()
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [notifications, setNotifications] = useState({
     news: false,
     jobs: false,
@@ -15,6 +22,33 @@ export default function Settings() {
       ...prev,
       [key]: !prev[key]
     }))
+  }
+
+  const handleLogout = () => {
+    logout()
+    navigate('/')
+  }
+
+  const handleDeleteAccount = async () => {
+    try {
+      const response = await fetch('/api/auth/delete-account', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete account')
+      }
+
+      logout()
+      toast.success('Account deleted successfully')
+      navigate('/')
+    } catch (error) {
+      console.error('Delete account error:', error)
+      toast.error('Failed to delete account')
+    }
   }
 
   return (
@@ -133,17 +167,54 @@ export default function Settings() {
         <h2 className="text-lg font-medium text-gray-900 mb-4">Account Actions</h2>
         <div className="flex space-x-4">
           <button
+            onClick={handleLogout}
             className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
           >
             Log Out
           </button>
           <button
-            className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+            onClick={() => setIsDeleteModalOpen(true)}
+            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
           >
             Delete Account
           </button>
         </div>
       </div>
+
+      {/* Delete Account Modal */}
+      <Dialog
+        open={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        className="relative z-50"
+      >
+        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <Dialog.Panel className="mx-auto max-w-sm rounded-lg bg-white p-6">
+            <Dialog.Title className="text-lg font-medium text-gray-900">
+              Delete Account
+            </Dialog.Title>
+            <Dialog.Description className="mt-2 text-sm text-gray-500">
+              Are you sure you want to delete your account? This action cannot be undone.
+            </Dialog.Description>
+
+            <div className="mt-4 flex space-x-4">
+              <button
+                onClick={() => setIsDeleteModalOpen(false)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteAccount}
+                className="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600 transition-colors"
+              >
+                Yes, Delete Account
+              </button>
+            </div>
+          </Dialog.Panel>
+        </div>
+      </Dialog>
 
       {/* Contact */}
       <div className="bg-white rounded-lg shadow p-6">
