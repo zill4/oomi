@@ -12,9 +12,9 @@ export const VALIDATION_RULES = {
   },
   bio: {
     min: 0,
-    max: 500,
+    max: 10000,
     message: {
-      tooLong: 'Bio cannot exceed 500 characters'
+      tooLong: 'Bio cannot exceed 10000 characters'
     }
   },
   email: {

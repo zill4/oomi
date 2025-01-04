@@ -10,7 +10,7 @@ TODO List:
     - Attributes editting FN, LN, Email, Password, etc. (Change pass with email, Do Later)
     - Delete Account (Delete Account with Email, Do Later)
 2. Document upload
-    - Upload Resume(s) PDF
+    - Upload Resume(s) PDF X
     - Upload Cover Letter(s) PDF (We generate these so this should be easier).
 3. Resume Processing
     - Parse multiple resumes as PDF -> to ATS format
@@ -50,3 +50,10 @@ For V1.5
     - Job App Analytics, improved Dashboard
     - Project Prompting? Like JD require X
 
+## Helper Commands
+To create a migration without applying it immediately (so you can preserve data), use:
+`docker-compose exec backend sh -c "cd packages/backend && npx prisma migrate dev --create-only"`
+Apply it:
+`docker-compose exec backend sh -c "cd packages/backend && npx prisma migrate deploy"`
+Restart
+`docker-compose restart backend`

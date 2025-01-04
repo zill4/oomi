@@ -56,12 +56,12 @@ export const validateName = (name: string, fieldName: string): ValidationError |
 }
 
 export const validateBio = (bio: string): ValidationError | null => {
-  const rules = VALIDATION_RULES.bio
-
-  if (bio.length > rules.max) {
-    return { field: 'bio', message: rules.message.tooLong }
+  if (bio.length > 10000) {
+    return {
+      field: 'bio',
+      message: 'Bio must be less than 10,000 characters'
+    }
   }
-
   return null
 }
 
