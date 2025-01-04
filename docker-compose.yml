@@ -1,31 +1,29 @@
-version: '3.8'
-
 services:
   frontend:
     build:
-      context: ./packages/frontend
-      target: builder
+      context: .
+      target: frontend-builder
     ports:
       - "3000:5173"
     volumes:
-      - ./packages/frontend:/app
+      - ./packages/frontend:/app/packages/frontend
       - /app/node_modules
     environment:
       - NODE_ENV=development
       - VITE_API_URL=http://localhost:4000
-    command: npm run dev -- --host
+    command: npm run dev -w packages/frontend -- --host
     container_name: oomi-frontend
     networks:
       - oomi-network
 
   backend:
     build:
-      context: ./packages/backend
-      target: builder
+      context: .
+      target: backend-builder
     ports:
       - "4000:4000"
     volumes:
-      - ./packages/backend:/app
+      - ./packages/backend:/app/packages/backend
       - /app/node_modules
     environment:
       - NODE_ENV=development
@@ -34,7 +32,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    command: npm run dev
+    command: npm run dev -w packages/backend
     container_name: oomi-backend
     networks:
       - oomi-network
