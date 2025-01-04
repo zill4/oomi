@@ -1,0 +1,18 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Head -->
+  <circle cx="24" cy="20" r="12" fill="#14B8A6"/>
+  
+  <!-- Eyes -->
+  <circle cx="20" cy="18" r="2" fill="white"/>
+  <circle cx="28" cy="18" r="2" fill="white"/>
+  
+  <!-- Happy mouth -->
+  <path d="M20 22C20 22 22 24 24 24C26 24 28 22 28 22" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  
+  <!-- Tentacles -->
+  <path d="M16 28C16 28 14 32 12 34C10 36 8 36 8 34C8 32 10 30 12 28" stroke="#14B8A6" stroke-width="2" stroke-linecap="round"/>
+  <path d="M20 28C20 28 18 34 16 36C14 38 12 38 12 36C12 34 14 32 16 30" stroke="#14B8A6" stroke-width="2" stroke-linecap="round"/>
+  <path d="M24 28C24 28 24 34 24 36C24 38 22 38 22 36C22 34 22 32 24 30" stroke="#14B8A6" stroke-width="2" stroke-linecap="round"/>
+  <path d="M28 28C28 28 30 34 32 36C34 38 36 38 36 36C36 34 34 32 32 30" stroke="#14B8A6" stroke-width="2" stroke-linecap="round"/>
+  <path d="M32 28C32 28 34 32 36 34C38 36 40 36 40 34C40 32 38 30 36 28" stroke="#14B8A6" stroke-width="2" stroke-linecap="round"/>
+</svg> 

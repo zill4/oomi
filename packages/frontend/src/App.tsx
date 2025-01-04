@@ -12,6 +12,7 @@ import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import PublicRoute from './components/PublicRoute'
+import Onboarding from './pages/Onboarding'
 
 function App() {
   return (
@@ -67,6 +68,16 @@ function App() {
             element={
               <ProtectedRoute>
                 <DashboardLayout><Settings /></DashboardLayout>
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* Add Onboarding route */}
+          <Route 
+            path="/onboarding" 
+            element={
+              <ProtectedRoute>
+                <Onboarding />
               </ProtectedRoute>
             } 
           />

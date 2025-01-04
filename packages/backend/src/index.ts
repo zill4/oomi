@@ -4,6 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import { env } from './config/env.js';
 import { authenticateToken } from './middleware/auth.js';
 import authRoutes from './routes/authRoutes.js';
+import userRoutes from './routes/users.js';
 
 const prisma = new PrismaClient();
 const app = express();
@@ -14,6 +15,7 @@ app.use(express.json());
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
 
 // Health check endpoint
 app.get('/health', (_req, res) => {

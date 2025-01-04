@@ -1,0 +1,22 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Body -->
+  <path d="M8 24C8 24 16 14 24 14C32 14 40 24 40 24C40 24 32 34 24 34C16 34 8 24 8 24Z" fill="#14B8A6"/>
+  
+  <!-- Fin -->
+  <path d="M24 14L32 6L36 14" fill="#14B8A6"/>
+  
+  <!-- Tail -->
+  <path d="M40 24L46 18L44 24L46 30L40 24Z" fill="#14B8A6"/>
+  
+  <!-- Eyes -->
+  <circle cx="20" cy="24" r="2" fill="white"/>
+  <circle cx="28" cy="24" r="2" fill="white"/>
+  
+  <!-- Gills -->
+  <path d="M32 22L34 22" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  <path d="M32 24L34 24" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  <path d="M32 26L34 26" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  
+  <!-- Friendly smile -->
+  <path d="M22 27C22 27 24 28 26 27" stroke="white" stroke-width="2" stroke-linecap="round"/>
+</svg> 

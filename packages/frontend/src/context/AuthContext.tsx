@@ -3,6 +3,11 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 interface User {
   id: string;
   email: string;
+  firstName?: string;
+  lastName?: string;
+  bio?: string;
+  resumeUrl?: string;
+  token: string;
 }
 
 interface AuthContextType {
@@ -39,13 +44,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsInitialized(true);
   }, []);
 
-  const login = (token: string, user: User) => {
-    console.log('Login called with:', { token, user });
-    localStorage.setItem('authToken', token);
-    localStorage.setItem('user', JSON.stringify(user));
-    setToken(token);
-    setUser(user);
-  };
+  const login = (newToken: string, userData: Omit<User, 'token'>) => {
+    return new Promise<void>((resolve) => {
+      const fullUser = { ...userData, token: newToken }
+      setToken(newToken)
+      setUser(fullUser)
+      localStorage.setItem('authToken', newToken)
+      localStorage.setItem('user', JSON.stringify(userData))
+      
+      // Ensure state updates are processed
+      setTimeout(resolve, 0)
+    })
+  }
 
   const logout = () => {
     localStorage.removeItem('authToken');

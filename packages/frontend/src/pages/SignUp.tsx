@@ -60,7 +60,11 @@ export default function SignUp() {
       login(data.token, data.user);
       
       toast.success('Account created successfully!');
-      navigate('/profile');
+      if (!data.user.firstName || !data.user.lastName) {
+        navigate('/onboarding')
+      } else {
+        navigate('/profile')
+      }
     } catch (error) {
       console.error('Signup Error:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to create account');

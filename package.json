@@ -26,5 +26,8 @@
     "prettier": "^3.2.5",
     "turbo": "^1.13.4",
     "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@heroicons/react": "^2.2.0"
   }
 }
