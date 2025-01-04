@@ -18,8 +18,12 @@ export function useApi() {
 
     // Build base headers
     const requestHeaders: HeadersInit = {
-      'Content-Type': 'application/json',
       ...headers,
+    }
+
+    // Only add Content-Type: application/json if we're not sending FormData
+    if (!(options.body instanceof FormData)) {
+      requestHeaders['Content-Type'] = 'application/json'
     }
 
     // Get token directly from localStorage

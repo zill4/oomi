@@ -18,7 +18,7 @@ export const VALIDATION_RULES = {
     }
   },
   email: {
-    pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+    pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
     max: 255,
     message: {
       required: 'Email is required',

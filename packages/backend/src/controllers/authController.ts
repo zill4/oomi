@@ -19,8 +19,9 @@ export const signup = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Email and password are required' })
     }
 
-    if (!validateEmail(email)) {
-      return res.status(400).json({ message: 'Invalid email format' })
+    const emailError = validateEmail(email)
+    if (emailError) {
+      return res.status(400).json({ message: emailError.message })
     }
 
     if (!validatePassword(password)) {

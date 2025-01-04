@@ -19,6 +19,7 @@ model User {
   jobApplications JobApplication[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+  avatarUrl     String?
 }
 
 model Resume {

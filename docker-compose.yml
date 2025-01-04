@@ -39,13 +39,8 @@ services:
     command: >
       sh -c "cd packages/backend &&
              npx prisma generate &&
-             npx prisma migrate status &&
-             if [ $? -ne 0 ]; then
-               echo 'Running database migrations...' &&
-               npx prisma migrate deploy
-             else
-               echo 'Database is up to date'
-             fi &&
+             echo 'Checking database status...' &&
+             npx prisma migrate deploy &&
              npm run dev"
     depends_on:
       db:

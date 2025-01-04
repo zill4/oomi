@@ -1,12 +1,13 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useApi } from '../lib/api'
 import { toast } from 'react-hot-toast'
 import { PencilIcon, CameraIcon } from '@heroicons/react/24/outline'
 import { validateName, validateBio, ValidationError } from '../utils/validation'
+import { useFileUpload } from '../hooks/useFileUpload'
 
 export default function Profile() {
-  const { user, login } = useAuth()
+  const { user, login, getSignedUrl } = useAuth()
   const { fetchWithAuth } = useApi()
   const [isEditingBio, setIsEditingBio] = useState(false)
   const [isEditingName, setIsEditingName] = useState(false)
@@ -16,6 +17,32 @@ export default function Profile() {
     lastName: user?.lastName || ''
   })
   const [errors, setErrors] = useState<ValidationError[]>([])
+  const { uploadFile, isUploading } = useFileUpload({
+    maxSize: 5 * 1024 * 1024,
+    allowedTypes: ['image/*'],
+    fieldName: 'avatar'
+  })
+  const [avatarUrl, setAvatarUrl] = useState<string>('')
+
+  useEffect(() => {
+    const loadAvatarUrl = async () => {
+      if (user?.avatarUrl) {
+        try {
+          // Only get signed URL if it's a storage URL
+          if (user.avatarUrl.includes('fly.storage')) {
+            const signedUrl = await getSignedUrl(user.avatarUrl)
+            setAvatarUrl(signedUrl)
+          } else {
+            setAvatarUrl(user.avatarUrl)
+          }
+        } catch (error) {
+          console.error('Failed to load avatar URL:', error)
+        }
+      }
+    }
+
+    loadAvatarUrl()
+  }, [user?.avatarUrl, getSignedUrl])
 
   const validateForm = (data: typeof formData): ValidationError[] => {
     const errors: ValidationError[] = []
@@ -79,6 +106,28 @@ export default function Profile() {
     }
   }
 
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    try {
+      const signedUrl = await uploadFile(file, `/users/${user!.id}/avatar`)
+      setAvatarUrl(signedUrl)
+
+      // Update user context with new avatar URL
+      if (user) {
+        await login(user.token, { 
+          ...user, 
+          avatarUrl: signedUrl 
+        })
+      }
+      
+      toast.success('Profile picture updated successfully!')
+    } catch (error) {
+      toast.error('Failed to update profile picture')
+    }
+  }
+
   return (
     <div className="space-y-8">
       {/* Profile Section */}
@@ -87,16 +136,36 @@ export default function Profile() {
         <div className="flex items-center space-x-4">
           <div className="relative group">
             <div className="w-16 h-16 rounded-full bg-seafoam-100 flex items-center justify-center overflow-hidden">
-              <img
-                src="/shark-avatar.svg"
-                alt="Oomi Avatar"
-                className="w-12 h-12"
-              />
-              {/* Image upload overlay */}
-              <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                  onError={() => setAvatarUrl('')}
+                />
+              ) : (
+                <img
+                  src="/shark-avatar.svg"
+                  alt="Default Avatar"
+                  className="w-12 h-12"
+                />
+              )}
+              <label className="absolute inset-0 bg-black bg-opacity-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
                 <CameraIcon className="w-6 h-6 text-white" />
-              </div>
+                <input
+                  type="file"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleAvatarUpload}
+                  disabled={isUploading}
+                />
+              </label>
             </div>
+            {isUploading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 rounded-full">
+                <div className="w-5 h-5 border-2 border-seafoam-500 border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            )}
             <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-seafoam-500 rounded-full border-2 border-white flex items-center justify-center">
               <span className="text-white text-xs">🌊</span>
             </div>
