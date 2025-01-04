@@ -7,6 +7,10 @@
   ],
   "scripts": {
     "dev": "turbo run dev",
+    "dev:docker": "docker-compose up --build",
+    "dev:clean": "docker-compose down -v && npm run clean",
+    "prisma:studio": "npm run -w packages/backend prisma studio",
+    "db:migrate": "npm run -w packages/backend prisma migrate deploy",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "test": "turbo run test",

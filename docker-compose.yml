@@ -1,64 +1,52 @@
 services:
   frontend:
-    build:
+    build: 
       context: .
-      target: frontend-builder
-    ports:
-      - "3000:5173"
+      dockerfile: Dockerfile.dev
     volumes:
-      - ./packages/frontend:/app/packages/frontend
+      - .:/app
       - /app/node_modules
-    environment:
-      - NODE_ENV=development
-      - VITE_API_URL=http://localhost:4000
-    command: npm run dev -w packages/frontend -- --host
-    container_name: oomi-frontend
-    networks:
-      - oomi-network
+      - /app/packages/frontend/node_modules
+    ports:
+      - "5173:5173"
+    command: sh -c "cd packages/frontend && npm run dev -- --host"
+    depends_on:
+      - backend
 
   backend:
     build:
       context: .
-      target: backend-builder
-    ports:
-      - "4000:4000"
+      dockerfile: Dockerfile.dev
     volumes:
-      - ./packages/backend:/app/packages/backend
+      - .:/app
       - /app/node_modules
+      - /app/packages/backend/node_modules
+      - /app/packages/backend/.turbo
+      - /app/packages/backend/dist
+    ports:
+      - "8080:8080"
     environment:
-      - NODE_ENV=development
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/oomi
-      - CLAUDE_API_KEY=${CLAUDE_API_KEY}
+      - JWT_SECRET=${JWT_SECRET}
+      - WATCHPACK_POLLING=true
+    command: sh -c "cd packages/backend && npx prisma generate && npx prisma migrate deploy && npm run dev"
     depends_on:
       db:
         condition: service_healthy
-    command: npm run dev -w packages/backend
-    container_name: oomi-backend
-    networks:
-      - oomi-network
 
   db:
     image: postgres:15-alpine
-    ports:
-      - "5432:5432"
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=oomi
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    container_name: oomi-db
-    networks:
-      - oomi-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
 
-networks:
-  oomi-network:
-    driver: bridge
-
 volumes:
-  postgres_data: 
+  postgres_data:

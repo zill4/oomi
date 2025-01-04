@@ -1,0 +1,27 @@
+FROM node:20-alpine
+WORKDIR /app
+
+# Install required dependencies including OpenSSL
+RUN apk add --no-cache \
+    libc6-compat \
+    openssl \
+    openssl-dev
+
+# Install tsx globally
+RUN npm install -g tsx
+
+# Copy root package files
+COPY package*.json ./
+
+# Copy package files for each workspace
+COPY packages/backend/package*.json ./packages/backend/
+COPY packages/frontend/package*.json ./packages/frontend/
+
+# Install all dependencies (including devDependencies)
+RUN npm install
+
+# Copy the rest of the application
+COPY . .
+
+# Generate Prisma client
+RUN cd packages/backend && npx prisma generate

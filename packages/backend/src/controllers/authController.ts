@@ -1,18 +1,24 @@
 import { Request, Response } from 'express'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
-import { prisma } from '../server.js'
+import { prisma } from '../lib/prisma.js'
 import { validateEmail, validatePassword } from '../utils/validation.js'
 import type { RegisterInput, LoginInput, AuthResponse } from '../types/auth.js'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
 const JWT_EXPIRES_IN = '7d'
 
-export const register = async (req: Request, res: Response) => {
+export const signup = async (req: Request, res: Response) => {
   try {
+    console.log('Received signup request:', req.body); // Debug log
+
     const { email, password }: RegisterInput = req.body
 
     // Validate input
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' })
+    }
+
     if (!validateEmail(email)) {
       return res.status(400).json({ message: 'Invalid email format' })
     }
@@ -29,7 +35,7 @@ export const register = async (req: Request, res: Response) => {
     })
 
     if (existingUser) {
-      return res.status(400).json({ message: 'Email already registered' })
+      return res.status(409).json({ message: 'Email is already registered' })
     }
 
     // Hash password
@@ -46,11 +52,11 @@ export const register = async (req: Request, res: Response) => {
 
     // Generate JWT token
     const token = jwt.sign({ userId: user.id }, JWT_SECRET, {
-      expiresIn: JWT_EXPIRES_IN
+      expiresIn: '24h'
     })
 
     const response: AuthResponse = {
-      message: 'User registered successfully',
+      message: 'Account created successfully',
       token,
       user: {
         id: user.id,
@@ -58,10 +64,15 @@ export const register = async (req: Request, res: Response) => {
       }
     }
 
-    res.status(201).json(response)
+    console.log('Sending response:', response); // Debug log
+    return res.status(201).json(response);
+
   } catch (error) {
-    console.error('Registration error:', error)
-    res.status(500).json({ message: 'Error registering user' })
+    console.error('Signup error:', error);
+    return res.status(500).json({ 
+      message: 'An unexpected error occurred during signup',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
   }
 }
 

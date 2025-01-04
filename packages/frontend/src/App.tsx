@@ -8,22 +8,26 @@ import Login from './pages/Login'
 import Profile from './pages/Profile'
 import Jobs from './pages/Jobs'
 import Settings from './pages/Settings'
+import { Toaster } from 'react-hot-toast'
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Layout><Home /></Layout>} />
-        <Route path="/try" element={<Layout><Try /></Layout>} />
-        <Route path="/sign-up" element={<Layout><SignUp /></Layout>} />
-        <Route path="/login" element={<Layout><Login /></Layout>} />
-        <Route path="/profile" element={<DashboardLayout><Profile /></DashboardLayout>} />
-        <Route path="/jobs" element={<DashboardLayout><Jobs /></DashboardLayout>} />
-        <Route path="/settings" element={<DashboardLayout><Settings /></DashboardLayout>} />
+    <>
+      <Toaster position="top-center" />
+      <Router>
+        <Routes>
+          <Route path="/" element={<Layout><Home /></Layout>} />
+          <Route path="/try" element={<Layout><Try /></Layout>} />
+          <Route path="/sign-up" element={<Layout><SignUp /></Layout>} />
+          <Route path="/login" element={<Layout><Login /></Layout>} />
+          <Route path="/profile" element={<DashboardLayout><Profile /></DashboardLayout>} />
+          <Route path="/jobs" element={<DashboardLayout><Jobs /></DashboardLayout>} />
+          <Route path="/settings" element={<DashboardLayout><Settings /></DashboardLayout>} />
 
-        {/* Add other routes as needed */}
-      </Routes>
-    </Router>
+          {/* Add other routes as needed */}
+        </Routes>
+      </Router>
+    </>
   )
 }
 

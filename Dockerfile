@@ -1,47 +1,35 @@
-# Build frontend
-FROM node:20-alpine AS frontend-builder
+FROM node:20-alpine AS base
 WORKDIR /app
-COPY package.json turbo.json ./
-COPY packages/frontend/package.json ./packages/frontend/
+RUN apk add --no-cache libc6-compat
+RUN npm install -g turbo
+
+# Prune the monorepo for backend
+FROM base AS builder
+COPY . .
+RUN turbo prune backend --docker
+
+# Install dependencies
+FROM base AS installer
+COPY --from=builder /app/out/json/ .
+COPY --from=builder /app/out/package-lock.json ./package-lock.json
 RUN npm install
-COPY packages/frontend ./packages/frontend
-RUN npm run build -w packages/frontend
 
-# Build backend
-FROM node:20-alpine AS backend-builder
+# Build the project
+COPY --from=builder /app/out/full/ .
+RUN npm run build
+
+# Runner
+FROM base AS runner
 WORKDIR /app
 
-# Install OpenSSL and other required dependencies
-RUN apk add --no-cache openssl openssl-dev libc6-compat
+# Copy built application
+COPY --from=installer /app/packages/backend/dist ./dist
+COPY --from=installer /app/packages/backend/package.json .
+COPY --from=installer /app/packages/backend/prisma ./prisma
 
-COPY package.json turbo.json ./
-COPY packages/backend/package.json ./packages/backend/
-RUN npm install
-COPY packages/backend ./packages/backend
-
-# Build backend
-RUN npm run build -w packages/backend
-
-# Production image
-FROM node:20-alpine
-WORKDIR /app
-
-# Install OpenSSL and other required dependencies
-RUN apk add --no-cache openssl openssl-dev libc6-compat
-
-# Copy backend package.json and install production dependencies
-COPY packages/backend/package.json ./
+# Install production dependencies
 RUN npm install --production
-
-# Copy backend build artifacts
-COPY --from=backend-builder /app/packages/backend/dist ./dist
-COPY --from=backend-builder /app/packages/backend/prisma ./prisma
-
-# Generate Prisma Client in production environment
 RUN npx prisma generate
 
-# Copy frontend build artifacts to serve statically
-COPY --from=frontend-builder /app/packages/frontend/dist ./public
-
 EXPOSE 8080
-CMD ["node", "dist/server.js"]
+CMD ["node", "dist/index.js"]

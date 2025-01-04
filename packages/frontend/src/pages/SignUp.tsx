@@ -3,17 +3,66 @@ import { Link, useNavigate } from 'react-router-dom'
 import { FcGoogle } from 'react-icons/fc'
 import { FaXTwitter } from 'react-icons/fa6'
 import { FaLinkedin } from 'react-icons/fa'
+import { toast } from 'react-hot-toast'
 
 export default function SignUp() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Implement signup logic
-    console.log('Sign up:', { email, password })
+    
+    // Client-side validation
+    if (password !== confirmPassword) {
+      toast.error('Passwords do not match')
+      return
+    }
+
+    if (password.length < 8) {
+      toast.error('Password must be at least 8 characters long')
+      return
+    }
+
+    setIsLoading(true)
+    try {
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      })
+
+      // Check if the response has content
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Received non-JSON response from server");
+      }
+
+      let data;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        console.error('JSON Parse Error:', parseError);
+        console.log('Raw Response:', await response.text());
+        throw new Error('Failed to parse server response');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Something went wrong');
+      }
+
+      toast.success('Account created successfully!');
+      navigate('/login');
+    } catch (error) {
+      console.error('Signup Error:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to create account');
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -70,9 +119,10 @@ export default function SignUp() {
             <div>
               <button
                 type="submit"
-                className="w-full rounded-md bg-seafoam-500 py-3 px-4 font-medium text-white hover:bg-seafoam-400 focus:outline-none focus:ring-2 focus:ring-seafoam-500 focus:ring-offset-2"
+                disabled={isLoading}
+                className="w-full rounded-md bg-seafoam-500 py-3 px-4 font-medium text-white hover:bg-seafoam-400 focus:outline-none focus:ring-2 focus:ring-seafoam-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Sign Up
+                {isLoading ? 'Creating Account...' : 'Sign Up'}
               </button>
             </div>
           </form>
