@@ -5,6 +5,7 @@ import { toast } from 'react-hot-toast'
 import { PencilIcon, CameraIcon } from '@heroicons/react/24/outline'
 import { validateName, validateBio, ValidationError } from '../utils/validation'
 import { useFileUpload } from '../hooks/useFileUpload'
+import ResumeList from '../components/ResumeList'
 
 export default function Profile() {
   const { user, login, getSignedUrl } = useAuth()
@@ -129,7 +130,7 @@ export default function Profile() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Profile Section */}
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-2xl font-bold mb-6">Profile</h2>
@@ -290,17 +291,9 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Resume Section */}
+      {/* Resume Section - using only the ResumeList component */}
       <div className="bg-white rounded-lg shadow p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold">Resume</h2>
-          <button className="inline-flex items-center space-x-1 text-sm font-medium text-seafoam-500 hover:text-seafoam-400">
-            <span>Upload New Resume</span>
-          </button>
-        </div>
-        <div className="bg-gray-50 rounded-lg p-4 text-center text-gray-500">
-          <p>No resume uploaded yet</p>
-        </div>
+        <ResumeList />
       </div>
     </div>
   )

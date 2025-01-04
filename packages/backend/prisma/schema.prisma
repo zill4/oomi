@@ -25,10 +25,14 @@ model User {
 model Resume {
   id        String   @id @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  file      String   // URL or path to file
+  fileName  String
+  fileUrl   String
+  version   Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }
 
 model JobApplication {

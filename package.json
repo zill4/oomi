@@ -28,6 +28,7 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "@heroicons/react": "^2.2.0"
+    "@heroicons/react": "^2.2.0",
+    "date-fns": "^4.1.0"
   }
 }
