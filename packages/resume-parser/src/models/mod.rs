@@ -93,6 +93,22 @@ impl ResumeData {
     }
 }
 
+#[derive(Debug, sqlx::FromRow)]
+pub struct StoredResume {
+    pub id: i32,
+    pub user_id: uuid::Uuid,
+    pub pdf_key: String,
+    pub data: serde_json::Value,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub updated_at: chrono::DateTime<chrono::Utc>,
+}
+
+impl StoredResume {
+    pub fn get_resume_data(&self) -> Result<ResumeData, serde_json::Error> {
+        serde_json::from_value(self.data.clone())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

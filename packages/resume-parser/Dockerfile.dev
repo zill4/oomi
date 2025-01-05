@@ -45,5 +45,14 @@ COPY --from=builder /app .
 COPY --from=builder /usr/local/cargo/bin/sqlx /usr/local/cargo/bin/
 COPY --from=builder /usr/local/cargo/bin/cargo-watch /usr/local/cargo/bin/
 
-# Run with cargo-watch for development
-CMD ["cargo", "watch", "-x", "run"] 
+# Copy source code
+COPY packages/resume-parser/src ./src
+COPY packages/resume-parser/migrations ./migrations
+COPY packages/resume-parser/config ./config
+COPY packages/resume-parser/start.sh /usr/local/bin/start.sh
+
+# Make start script executable
+RUN chmod +x /usr/local/bin/start.sh
+
+# Run the start script
+CMD ["/usr/local/bin/start.sh"] 

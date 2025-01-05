@@ -1,8 +1,9 @@
-use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
+use uuid::Uuid;
+use sqlx::{postgres::PgPoolOptions, Pool, Postgres, PgPool};
 use tracing::{info, error};
 
 use crate::error::{ParserError, Result};
-use crate::models::ResumeData;
+use crate::models::{ResumeData, StoredResume};
 
 pub struct Database {
     pool: Pool<Postgres>,
@@ -42,13 +43,16 @@ impl Database {
             }
         })?;
 
+        let user_uuid = Uuid::parse_str(user_id)
+            .map_err(|e| ParserError::Database(sqlx::Error::Protocol(e.to_string())))?;
+
         let record_id = sqlx::query!(
             r#"
             INSERT INTO resumes (user_id, pdf_key, data, created_at, updated_at)
             VALUES ($1, $2, $3, NOW(), NOW())
             RETURNING id
             "#,
-            user_id,
+            user_uuid,
             pdf_key,
             resume_json
         )
@@ -63,30 +67,31 @@ impl Database {
         Ok(record_id)
     }
 
-    pub async fn get_resume(&self, id: i32) -> Result<Option<ResumeData>> {
+    pub async fn get_resume(
+        pool: &PgPool,
+        id: i32,
+        user_id: &str,
+    ) -> Result<Option<ResumeData>> {
+        let user_uuid = Uuid::parse_str(user_id)
+            .map_err(|e| ParserError::Database(sqlx::Error::Protocol(e.to_string())))?;
+
         let record = sqlx::query!(
             r#"
             SELECT data
             FROM resumes
-            WHERE id = $1
+            WHERE id = $1 AND user_id = $2
             "#,
-            id
+            id,
+            user_uuid
         )
-        .fetch_optional(&self.pool)
-        .await
-        .map_err(|e| {
-            error!("Failed to fetch resume: {}", e);
-            ParserError::Database(e)
-        })?;
+        .fetch_optional(pool)
+        .await?;
 
         match record {
             Some(row) => {
                 let resume: ResumeData = serde_json::from_value(row.data).map_err(|e| {
                     error!("Failed to deserialize resume data: {}", e);
-                    ParserError::InvalidData { 
-                        message: e.to_string(),
-                        field: Some("resume_data".to_string())
-                    }
+                    ParserError::Database(sqlx::Error::Protocol(e.to_string()))
                 })?;
                 Ok(Some(resume))
             }
@@ -95,6 +100,9 @@ impl Database {
     }
 
     pub async fn list_user_resumes(&self, user_id: &str) -> Result<Vec<(i32, String)>> {
+        let user_uuid = Uuid::parse_str(user_id)
+            .map_err(|e| ParserError::Database(sqlx::Error::Protocol(e.to_string())))?;
+
         let records = sqlx::query!(
             r#"
             SELECT id, pdf_key
@@ -102,7 +110,7 @@ impl Database {
             WHERE user_id = $1
             ORDER BY created_at DESC
             "#,
-            user_id
+            user_uuid
         )
         .fetch_all(&self.pool)
         .await
@@ -148,7 +156,7 @@ mod tests {
         let record_id = db.store_resume(user_id, &resume, pdf_key).await.unwrap();
 
         // Test retrieving resume
-        let retrieved = db.get_resume(record_id).await.unwrap().unwrap();
+        let retrieved = db.get_resume(record_id, user_id).await.unwrap().unwrap();
         assert_eq!(retrieved.personal_info.name, resume.personal_info.name);
         assert_eq!(retrieved.education[0].institution, resume.education[0].institution);
 
