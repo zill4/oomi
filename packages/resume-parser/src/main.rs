@@ -4,6 +4,7 @@ mod logging;
 mod server;
 mod pdf;
 mod text;
+mod resume;
 
 use config::Config;
 use error::{ParserError, Result};

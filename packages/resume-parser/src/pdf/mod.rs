@@ -35,7 +35,6 @@ pub async fn extract_text_from_pdf<P: AsRef<Path>>(path: P) -> Result<PdfDocumen
 mod tests {
     use super::*;
     use std::fs;
-    use tempfile::NamedTempFile;
 
     #[tokio::test]
     async fn test_extract_text_from_pdf() {
