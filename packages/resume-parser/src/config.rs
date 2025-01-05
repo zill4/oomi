@@ -1,6 +1,11 @@
 use serde::Deserialize;
 use std::env;
-use config::{Config as ConfigFile, ConfigError, Environment, File};
+use config::ConfigError;
+
+#[derive(Debug, Deserialize)]
+pub struct ServerConfig {
+    pub port: u16,
+}
 
 #[derive(Debug, Deserialize)]
 pub struct DatabaseConfig {
@@ -26,6 +31,7 @@ pub struct QueueConfig {
 #[derive(Debug, Deserialize)]
 pub struct Config {
     pub environment: String,
+    pub server: ServerConfig,
     pub database: DatabaseConfig,
     pub s3: S3Config,
     pub queue: QueueConfig,
@@ -37,6 +43,10 @@ impl Config {
         dotenv::dotenv().ok();
 
         let environment = env::var("APP_ENVIRONMENT").unwrap_or_else(|_| "development".into());
+        let port = env::var("PORT")
+            .unwrap_or_else(|_| "3001".into())
+            .parse()
+            .unwrap_or(3001);
 
         // First, get environment variables directly
         let s3_bucket = env::var("BUCKET_NAME").unwrap_or_else(|_| "resumes".into());
@@ -49,9 +59,9 @@ impl Config {
         let rabbitmq_url = env::var("RABBITMQ_URL")
             .unwrap_or_else(|_| "amqp://guest:guest@rabbitmq:5672".into());
 
-        // Create the config structure
         let config = Config {
             environment,
+            server: ServerConfig { port },
             database: DatabaseConfig {
                 url: db_url,
                 max_connections: 5,
@@ -69,7 +79,6 @@ impl Config {
             },
         };
 
-        // Log the configuration (with sensitive data redacted)
         tracing::debug!("Loaded configuration: {:?}", Self::redact_sensitive(&config));
 
         Ok(config)
@@ -78,6 +87,9 @@ impl Config {
     fn redact_sensitive(config: &Config) -> Config {
         Config {
             environment: config.environment.clone(),
+            server: ServerConfig {
+                port: config.server.port,
+            },
             database: DatabaseConfig {
                 url: "[REDACTED]".to_string(),
                 max_connections: config.database.max_connections,

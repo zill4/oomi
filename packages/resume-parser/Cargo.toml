@@ -40,3 +40,8 @@ lapin = "2.3"  # RabbitMQ client
 # Utilities
 chrono = { version = "0.4", features = ["serde"] }
 uuid = { version = "1.7", features = ["v4", "serde"] }
+
+# HTTP server
+axum = "0.7"
+tower = "0.4"
+tower-http = { version = "0.5", features = ["trace"] }

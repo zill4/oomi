@@ -1,6 +1,7 @@
 mod config;
 mod error;
 mod logging;
+mod server;
 
 use config::Config;
 use error::{ParserError, Result};
@@ -29,7 +30,7 @@ async fn main() -> Result<()> {
         "Resume Parser Service starting up..."
     );
 
-    // Run the service until interrupted
+    // Run both the service and HTTP server
     run_service(config).await?;
 
     info!("Resume Parser Service shutting down...");
@@ -40,12 +41,14 @@ async fn main() -> Result<()> {
 async fn run_service(config: Config) -> Result<()> {
     info!(
         "Service configured and running...\n\
+        Server port: {}\n\
         Database URL: {}\n\
         S3 Configuration:\n\
           - Bucket: {}\n\
           - Region: {}\n\
           - Endpoint: {:?}\n\
         Queue URL: {}",
+        config.server.port,
         config.database.url,
         config.s3.bucket,
         config.s3.region,
@@ -53,8 +56,14 @@ async fn run_service(config: Config) -> Result<()> {
         config.queue.url
     );
 
-    // Create a future that never resolves
-    let running = tokio::spawn(async {
+    // Spawn the health check server
+    let server_handle = tokio::spawn(server::start_server(
+        config.server.port,
+        config.environment.clone(),
+    ));
+
+    // Create the heartbeat task
+    let heartbeat = tokio::spawn(async {
         loop {
             tokio::time::sleep(tokio::time::Duration::from_secs(60)).await;
             info!("Service heartbeat...");
@@ -65,11 +74,13 @@ async fn run_service(config: Config) -> Result<()> {
     match signal::ctrl_c().await {
         Ok(()) => {
             info!("Interrupt received, starting graceful shutdown");
-            running.abort();
+            heartbeat.abort();
+            server_handle.abort();
         }
         Err(err) => {
             eprintln!("Unable to listen for shutdown signal: {}", err);
-            running.abort();
+            heartbeat.abort();
+            server_handle.abort();
         }
     }
 

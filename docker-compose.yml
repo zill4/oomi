@@ -87,10 +87,13 @@ services:
       AWS_REGION: ${AWS_REGION:-auto}
       BUCKET_NAME: ${BUCKET_NAME}
       RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+      PORT: "3001"
     restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
+    ports:
+      - "3001:3001"
 
 volumes:
   postgres_data:
