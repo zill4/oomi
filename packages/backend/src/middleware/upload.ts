@@ -1,6 +1,6 @@
 import multer from 'multer'
 
-export type AllowedFileType = 'image' | 'pdf' | 'document'
+export type AllowedFileType = 'image' | 'pdf' | 'document' 
 
 interface UploadOptions {
   maxSize?: number

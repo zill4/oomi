@@ -41,7 +41,8 @@ export const uploadResume = async (req: Request, res: Response) => {
         userId,
         fileName: req.file.originalname,
         fileUrl,
-        version: nextVersion
+        version: nextVersion,
+        status: 'UPLOADED'
       }
     })
 
@@ -55,12 +56,10 @@ export const uploadResume = async (req: Request, res: Response) => {
 export const getResumes = async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id
-
     const resumes = await prisma.resume.findMany({
       where: { userId },
-      orderBy: { version: 'desc' }
+      orderBy: { createdAt: 'desc' }
     })
-
     res.json(resumes)
   } catch (error) {
     console.error('Error fetching resumes:', error)
@@ -73,25 +72,16 @@ export const deleteResume = async (req: Request, res: Response) => {
     const { id } = req.params
     const userId = req.user!.id
 
-    const resume = await prisma.resume.findUnique({
-      where: { id }
+    const resume = await prisma.resume.findFirst({
+      where: { id, userId }
     })
 
     if (!resume) {
       return res.status(404).json({ error: 'Resume not found' })
     }
 
-    if (resume.userId !== userId) {
-      return res.status(403).json({ error: 'Not authorized to delete this resume' })
-    }
-
-    // Delete file from storage
     await storageService.deleteFile(new URL(resume.fileUrl).pathname)
-
-    // Delete from database
-    await prisma.resume.delete({
-      where: { id }
-    })
+    await prisma.resume.delete({ where: { id } })
 
     res.json({ message: 'Resume deleted successfully' })
   } catch (error) {
