@@ -2,6 +2,7 @@
 FROM node:20-alpine AS node-base
 WORKDIR /app
 RUN apk add --no-cache libc6-compat
+RUN npm install -g turbo
 
 # Copy root workspace files first
 COPY package.json package-lock.json turbo.json ./
@@ -30,20 +31,23 @@ RUN apt-get update && apt-get install -y \
 COPY packages/resume-parser .
 RUN cargo build --release
 
-# Final stage
-FROM node:20-alpine AS runner
+# Final stage - using Debian instead of Alpine for better compatibility
+FROM debian:bookworm-slim AS runner
 WORKDIR /app
+
+# Install Node.js and required dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    libssl3 \
+    ca-certificates \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy Node.js build artifacts
 COPY --from=node-builder /app/packages/backend/dist ./dist
 COPY --from=node-builder /app/packages/backend/package.json .
 COPY --from=node-builder /app/packages/backend/prisma ./prisma
-
-# Install runtime dependencies for Rust binary
-RUN apk add --no-cache \
-    libgcc \
-    libssl3 \
-    ca-certificates
 
 # Copy Rust binary
 COPY --from=rust-builder /app/resume-parser/target/release/resume-parser /usr/local/bin/
