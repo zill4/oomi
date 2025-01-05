@@ -16,6 +16,11 @@
 - [ ] 2.5. Create ResumeData structure mapping
 - [ ] 2.6. Add confidence scoring for parsed fields
 
+TODO: will likely want to create seperate bucket directories
+users/profile-pictures/userid
+users/resumes/uploaded/userid
+users/resumes/parsed/userid
+
 ## Phase 3: Storage Integration
 - [ ] 3.1. Implement S3 client for PDF retrieval
 - [ ] 3.2. Set up PostgreSQL connection

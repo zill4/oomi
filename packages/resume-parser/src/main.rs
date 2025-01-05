@@ -3,6 +3,7 @@ mod error;
 mod logging;
 mod server;
 mod pdf;
+mod text;
 
 use config::Config;
 use error::{ParserError, Result};
