@@ -10,6 +10,7 @@ mod models;
 mod parser;
 mod scoring;
 mod storage;
+mod database;
 
 use config::Config;
 use error::{ParserError, Result};

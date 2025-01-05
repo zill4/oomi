@@ -16,7 +16,7 @@
 - [x] 2.5. Create ResumeData structure mapping
 - [x] 2.6. Implement parser integration
 - [x] 2.7. Add confidence scoring for parsed fields
-- [ ] 2.8. Add API endpoints for parsing
+- [x] 2.8. Add API endpoints for parsing
 
 TODO: will likely want to create seperate bucket directories
 users/profile-pictures/userid
@@ -24,7 +24,7 @@ users/resumes/uploaded/userid
 users/resumes/parsed/userid
 
 ## Phase 3: Storage Integration
-- [ ] 3.1. Implement S3 client for PDF retrieval
+- [x] 3.1. Implement S3 client for PDF retrieval
 - [ ] 3.2. Set up PostgreSQL connection
 - [ ] 3.3. Create database operations module
 - [ ] 3.4. Implement parsed data storage
