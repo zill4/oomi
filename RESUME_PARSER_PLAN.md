@@ -15,7 +15,7 @@
 - [x] 2.4. Add entity extraction (dates, job titles, etc.)
 - [x] 2.5. Create ResumeData structure mapping
 - [x] 2.6. Implement parser integration
-- [ ] 2.7. Add confidence scoring for parsed fields
+- [x] 2.7. Add confidence scoring for parsed fields
 - [ ] 2.8. Add API endpoints for parsing
 
 TODO: will likely want to create seperate bucket directories

@@ -1,6 +1,7 @@
 use serde::Deserialize;
 use std::env;
 use config::ConfigError;
+use dotenvy::dotenv;
 
 #[derive(Debug, Deserialize)]
 pub struct ServerConfig {
@@ -40,7 +41,7 @@ pub struct Config {
 impl Config {
     pub fn new() -> Result<Self, ConfigError> {
         // Load .env file if it exists
-        dotenv::dotenv().ok();
+        dotenv().ok();
 
         let environment = env::var("APP_ENVIRONMENT").unwrap_or_else(|_| "development".into());
         let port = env::var("PORT")

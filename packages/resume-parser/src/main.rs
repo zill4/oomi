@@ -8,6 +8,7 @@ mod resume;
 mod entities;
 mod models;
 mod parser;
+mod scoring;
 
 use config::Config;
 use error::{ParserError, Result};
@@ -63,10 +64,7 @@ async fn run_service(config: Config) -> Result<()> {
     );
 
     // Spawn the health check server
-    let server_handle = tokio::spawn(server::start_server(
-        config.server.port,
-        config.environment.clone(),
-    ));
+    let server_handle = tokio::spawn(server::start_server(config.server.port));
 
     // Create the heartbeat task
     let heartbeat = tokio::spawn(async {
