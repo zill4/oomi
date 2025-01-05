@@ -1,6 +1,42 @@
-target/
-Dockerfile
-.dockerignore
+# Version control
 .git
 .gitignore
+.gitattributes
+
+# Build artifacts
+/target
+**/*.rs.bk
+
+# Development files
+Dockerfile
+Dockerfile.dev
+docker-compose.yml
+README.md
 *.md
+
+# Environment files
+.env*
+
+# IDE files
+.idea
+.vscode
+*.swp
+*.swo
+
+# Debug files
+*.pdb
+*.dSYM/
+
+# Test files
+tests/
+benches/
+examples/
+
+# Temporary files
+*.tmp
+*.bak
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
