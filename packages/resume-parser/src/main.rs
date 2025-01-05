@@ -6,6 +6,8 @@ mod pdf;
 mod text;
 mod resume;
 mod entities;
+mod models;
+mod parser;
 
 use config::Config;
 use error::{ParserError, Result};
