@@ -9,6 +9,7 @@ mod entities;
 mod models;
 mod parser;
 mod scoring;
+mod storage;
 
 use config::Config;
 use error::{ParserError, Result};
