@@ -1,0 +1,41 @@
+# Rust build directory
+/target/
+
+# Rust generated files
+**/*.rs.bk
+*.pdb
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Debug files
+*.dSYM/
+
+# Environment files
+.env
+.env.local
+.env.*
+
+# Cargo lock file (uncomment if this is a library)
+# Cargo.lock
+
+# Generated documentation
+/doc/
+
+# Test coverage
+/coverage/
+/tarpaulin-report.html
+
+# Flamegraph performance profiling
+/flamegraph.svg
+/perf.data
+/perf.data.old
+
+# Custom backup files
+*.bak
+*.backup
+*~ 
