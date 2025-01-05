@@ -72,5 +72,26 @@ services:
     depends_on:
       - db
 
+  resume-parser:
+    build:
+      context: .
+      dockerfile: packages/resume-parser/Dockerfile.dev
+    volumes:
+      - ./packages/resume-parser:/app
+      - resume_parser_target:/app/target
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/oomi
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_ENDPOINT_URL_S3: ${AWS_ENDPOINT_URL_S3}
+      AWS_REGION: ${AWS_REGION:-auto}
+      BUCKET_NAME: ${BUCKET_NAME}
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   postgres_data:
+  resume_parser_target:

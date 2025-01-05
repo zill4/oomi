@@ -49,6 +49,11 @@ For V1.5
     - Email
     - Job App Analytics, improved Dashboard
     - Project Prompting? Like JD require X
+For V2
+    - Focus on building skills as a whole, similar to 42's holy graph
+    - Connect directly with job posters, have AI sort, vet, and do long running interview processes,
+    imagine working with an assistant that helps you along your whole career journey; applying, studying, interviewing,
+    and staying professionally up to date.
 
 ## Helper Commands
 To create a migration without applying it immediately (so you can preserve data), use:
@@ -57,3 +62,8 @@ Apply it:
 `docker-compose exec backend sh -c "cd packages/backend && npx prisma migrate deploy"`
 Restart
 `docker-compose restart backend`
+
+TODO: will likely want to create seperate bucket folders
+users/profile-pictures/userid
+users/resumes/uploaded/userid
+users/resumes/parsed/userid

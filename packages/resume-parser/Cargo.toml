@@ -20,16 +20,16 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 # Configuration
-config = "0.14"
+config = { version = "0.14", features = ["yaml"] }
 dotenv = "0.15"
 
 # PDF processing
 lopdf = "0.31"
 pdf-extract = "0.7"
 
-# AWS S3
-aws-config = "1.1"
-aws-sdk-s3 = "1.16"
+# AWS S3 - Updated to latest stable versions
+aws-config = "1.1.1"
+aws-sdk-s3 = "1.12.0"
 
 # Database
 sqlx = { version = "0.7", features = ["runtime-tokio-native-tls", "postgres", "json"] }

@@ -1,0 +1,35 @@
+FROM rust:latest
+
+WORKDIR /app
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y \
+    pkg-config \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy the Cargo files
+COPY packages/resume-parser/Cargo.toml ./Cargo.toml
+
+# Create src directory and dummy main.rs for dependency caching
+RUN mkdir -p src && \
+    echo 'fn main() { println!("Initializing resume-parser..."); }' > src/main.rs
+
+# Build dependencies
+RUN cargo build
+
+# Remove the dummy source and built files
+RUN rm src/main.rs target/debug/deps/resume_parser*
+
+# Copy the actual source code
+COPY packages/resume-parser/src ./src
+COPY packages/resume-parser/config ./config
+
+# Build the application
+RUN cargo build
+
+# Use cargo watch for development (hot reloading)
+RUN cargo install cargo-watch
+
+# Run with cargo-watch for development
+CMD ["cargo", "watch", "-x", "run"] 

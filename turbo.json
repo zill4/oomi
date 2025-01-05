@@ -21,6 +21,14 @@
     },
     "clean": {
       "cache": false
+    },
+    "resume-parser#build": {
+      "dependsOn": ["^build"],
+      "outputs": ["target/**"]
+    },
+    "resume-parser#dev": {
+      "cache": false,
+      "persistent": true
     }
   }
 } 

@@ -1,0 +1,16 @@
+environment: development
+
+database:
+  url: "${DATABASE_URL}"
+  max_connections: 5
+
+s3:
+  bucket: "${BUCKET_NAME}"
+  region: "${AWS_REGION}"
+  endpoint: "${AWS_ENDPOINT_URL_S3}"
+  access_key_id: "${AWS_ACCESS_KEY_ID}"
+  secret_access_key: "${AWS_SECRET_ACCESS_KEY}"
+
+queue:
+  url: "${RABBITMQ_URL}"
+  queue_name: resume_parsing 
