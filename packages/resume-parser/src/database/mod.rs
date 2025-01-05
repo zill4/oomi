@@ -36,8 +36,9 @@ impl Database {
     pub async fn store_resume(&self, user_id: &str, resume: &ResumeData, pdf_key: &str) -> Result<i32> {
         let resume_json = serde_json::to_value(resume).map_err(|e| {
             error!("Failed to serialize resume data: {}", e);
-            ParserError::InvalidData {
-                message: e.to_string()
+            ParserError::InvalidData { 
+                message: e.to_string(),
+                field: Some("resume_data".to_string())
             }
         })?;
 
@@ -82,8 +83,9 @@ impl Database {
             Some(row) => {
                 let resume: ResumeData = serde_json::from_value(row.data).map_err(|e| {
                     error!("Failed to deserialize resume data: {}", e);
-                    ParserError::InvalidData {
-                        message: e.to_string()
+                    ParserError::InvalidData { 
+                        message: e.to_string(),
+                        field: Some("resume_data".to_string())
                     }
                 })?;
                 Ok(Some(resume))

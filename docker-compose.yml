@@ -1,3 +1,4 @@
+version: '3.8'
 services:
   frontend:
     build: 
@@ -113,6 +114,17 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: resume_parser
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
 volumes:
   postgres_data:

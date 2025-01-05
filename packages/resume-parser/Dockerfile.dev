@@ -1,35 +1,49 @@
-FROM rust:latest
-
+# Build stage
+FROM rust:1.83-slim-bullseye AS builder
 WORKDIR /app
 
-# Install build dependencies
+# Install build dependencies and cargo-sqlx
 RUN apt-get update && apt-get install -y \
     pkg-config \
     libssl-dev \
-    && rm -rf /var/lib/apt/lists/*
+    curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && cargo install sqlx-cli --no-default-features --features native-tls,postgres \
+    && cargo install cargo-watch
 
-# Copy the Cargo files
+# Copy manifests
 COPY packages/resume-parser/Cargo.toml ./Cargo.toml
 
-# Create src directory and dummy main.rs for dependency caching
+# Create dummy source and build dependencies
 RUN mkdir -p src && \
     echo 'fn main() { println!("Initializing resume-parser..."); }' > src/main.rs
 
-# Build dependencies
-RUN cargo build
+# Copy migrations and prepare offline mode
+COPY packages/resume-parser/migrations ./migrations
+ENV DATABASE_URL=postgresql://postgres:postgres@db:5432/oomi
+RUN mkdir .sqlx
 
-# Remove the dummy source and built files
-RUN rm src/main.rs target/debug/deps/resume_parser*
-
-# Copy the actual source code
+# Copy source and build
 COPY packages/resume-parser/src ./src
 COPY packages/resume-parser/config ./config
 
-# Build the application
-RUN cargo build
+# For development, we'll use the same image for runtime
+# This keeps cargo and all development tools available
+FROM rust:1.83-slim-bullseye
+WORKDIR /app
 
-# Use cargo watch for development (hot reloading)
-RUN cargo install cargo-watch
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y \
+    pkg-config \
+    libssl-dev \
+    curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && cargo install cargo-watch
+
+# Copy everything from builder
+COPY --from=builder /app .
+COPY --from=builder /usr/local/cargo/bin/sqlx /usr/local/cargo/bin/
+COPY --from=builder /usr/local/cargo/bin/cargo-watch /usr/local/cargo/bin/
 
 # Run with cargo-watch for development
 CMD ["cargo", "watch", "-x", "run"] 
