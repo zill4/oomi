@@ -6,6 +6,15 @@ pub enum ParserError {
     #[error("Configuration error: {0}")]
     Config(String),
 
+    #[error("Server error: {0}")]
+    Server(String),
+
+    #[error("PDF extraction error: {0}")]
+    PdfExtraction(String),
+
+    #[error("IO error: {0}")]
+    Io(#[from] std::io::Error),
+
     #[error("PDF processing error: {0}")]
     PdfProcessing(String),
 
@@ -29,6 +38,9 @@ pub enum ParserError {
         message: String,
         field: Option<String>,
     },
+
+    #[error(transparent)]
+    Other(#[from] anyhow::Error),
 }
 
 impl ParserError {

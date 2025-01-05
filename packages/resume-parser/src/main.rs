@@ -2,6 +2,7 @@ mod config;
 mod error;
 mod logging;
 mod server;
+mod pdf;
 
 use config::Config;
 use error::{ParserError, Result};
