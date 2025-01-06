@@ -27,7 +27,8 @@ model Resume {
   userId      String
   fileName    String
   fileUrl     String
-  status      String    // Just 'UPLOADED' for now
+  status      String    // Add 'PARSING', 'PARSED', 'PARSE_ERROR' states
+  parsedData  Json?     // Store parsed resume data
   version     Int       @default(1)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt

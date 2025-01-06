@@ -2,7 +2,7 @@ use crate::error::{ParserError, Result};
 use crate::parser::ResumeParser;
 use crate::scoring::ResumeScorer;
 use axum::{
-    extract::Multipart,
+    extract::{Multipart, State},
     routing::{get, post},
     Json, Router,
     response::{IntoResponse, Response},
@@ -16,6 +16,8 @@ use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
 use tower_http::cors::CorsLayer;
 use tracing::{debug, error, info};
+use serde::Deserialize;
+use crate::database;
 
 // Add error handling for axum
 impl IntoResponse for ParserError {
@@ -42,15 +44,36 @@ impl IntoResponse for ParserError {
     }
 }
 
-pub async fn create_router() -> Router {
+// Add the request structure
+#[derive(Debug, Deserialize)]
+pub struct ParseRequest {
+    pub resume_id: String,
+    pub user_id: String,
+    pub pdf_key: String,
+}
+
+// Add AppState struct
+#[derive(Clone)]
+pub struct AppState {
+    pub s3_client: crate::storage::S3Client,
+    pub db_pool: sqlx::PgPool,
+}
+
+pub async fn create_router(state: AppState) -> Router {
     Router::new()
         .route("/health", get(health_check))
         .route("/parse", post(parse_resume))
+        .route("/process", post(process_resume))
         .layer(CorsLayer::permissive())
+        .with_state(state)
 }
 
 pub async fn start_server(port: u16) -> Result<()> {
-    let app = create_router().await;
+    let state = AppState {
+        db_pool: pool,
+        s3_client: s3_client,
+    };
+    let app = create_router(state).await;
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
     let listener = tokio::net::TcpListener::bind(addr).await.map_err(|e| {
         error!("Failed to bind server: {}", e);
@@ -70,11 +93,47 @@ async fn health_check() -> impl IntoResponse {
     Json(json!({ "status": "healthy" }))
 }
 
-async fn parse_resume(multipart: Multipart) -> Response {
-    match process_resume(multipart).await {
-        Ok(json) => json.into_response(),
-        Err(err) => err.into_response(),
-    }
+#[axum::debug_handler]
+async fn parse_resume(
+    State(app_state): State<AppState>,
+    Json(payload): Json<ParseRequest>,
+) -> Result<impl IntoResponse> {
+    info!("Starting resume parse for user: {}, resume: {}", 
+          payload.user_id, payload.resume_id);
+
+    // Get PDF from S3
+    let pdf_data = app_state.s3_client
+        .get_object()
+        .bucket(&crate::config::Config::new()?.s3.bucket)
+        .key(&payload.pdf_key)
+        .send()
+        .await?
+        .body
+        .collect()
+        .await?
+        .to_vec();
+
+    // Parse the resume
+    let resume_data = ResumeParser::parse_file_from_bytes(&pdf_data).await?;
+    
+    // Calculate confidence scores
+    let confidence_scores = ResumeScorer::score_resume(&resume_data);
+
+    // Store in database
+    database::store_resume(
+        &app_state.db_pool,
+        &payload.user_id,
+        &payload.pdf_key,
+        serde_json::to_value(&resume_data)?
+    ).await?;
+
+    Ok(Json(json!({
+        "message": "Resume parsed successfully",
+        "resume_id": payload.resume_id,
+        "data": resume_data,
+        "confidence_scores": confidence_scores,
+        "status": "success"
+    })))
 }
 
 async fn process_resume(mut multipart: Multipart) -> Result<Json<serde_json::Value>> {

@@ -88,4 +88,46 @@ export const deleteResume = async (req: Request, res: Response) => {
     console.error('Error deleting resume:', error)
     res.status(500).json({ error: 'Failed to delete resume' })
   }
+}
+
+export const parseResume = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params
+    const userId = req.user!.id
+
+    // Get resume from database
+    const resume = await prisma.resume.findFirst({
+      where: { id, userId }
+    })
+
+    if (!resume) {
+      return res.status(404).json({ error: 'Resume not found' })
+    }
+
+    // Send parse request to resume-parser service
+    const response = await fetch('http://resume-parser:3001/parse', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        resumeId: id,
+        userId,
+        pdfKey: resume.fileUrl
+      })
+    })
+
+    if (!response.ok) {
+      throw new Error('Failed to submit parse request')
+    }
+
+    // Update resume status
+    await prisma.resume.update({
+      where: { id },
+      data: { status: 'PARSING' }
+    })
+
+    res.json({ message: 'Parse request submitted' })
+  } catch (error) {
+    console.error('Parse request error:', error)
+    res.status(500).json({ error: 'Failed to submit parse request' })
+  }
 } 

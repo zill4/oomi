@@ -1,5 +1,8 @@
 use thiserror::Error;
 use tracing::error;
+use aws_sdk_s3::operation::get_object::GetObjectError;
+use aws_sdk_s3::primitives::ByteStreamError;
+use aws_smithy_runtime_api::client::result::SdkError;
 
 #[derive(Error, Debug)]
 pub enum ParserError {
@@ -60,6 +63,39 @@ impl ParserError {
             message: message.into(),
             source,
         }
+    }
+}
+
+impl From<serde_json::Error> for ParserError {
+    fn from(err: serde_json::Error) -> Self {
+        ParserError::InvalidData {
+            message: err.to_string(),
+            field: None,
+        }
+    }
+}
+
+impl<R> From<SdkError<GetObjectError, R>> for ParserError {
+    fn from(err: SdkError<GetObjectError, R>) -> Self {
+        ParserError::Storage {
+            message: err.to_string(),
+            source: None,
+        }
+    }
+}
+
+impl From<ByteStreamError> for ParserError {
+    fn from(err: ByteStreamError) -> Self {
+        ParserError::Storage {
+            message: err.to_string(),
+            source: None,
+        }
+    }
+}
+
+impl From<config::ConfigError> for ParserError {
+    fn from(err: config::ConfigError) -> Self {
+        ParserError::Config(err.to_string())
     }
 }
 

@@ -2,7 +2,8 @@ import { Router } from 'express'
 import { 
   uploadResume, 
   getResumes, 
-  deleteResume 
+  deleteResume,
+  parseResume
 } from '../controllers/resumeController.js'
 import { authenticateToken } from '../middleware/auth.js'
 import { createUploadMiddleware } from '../middleware/upload.js'
@@ -18,5 +19,6 @@ const uploadFile = createUploadMiddleware({
 router.post('/', authenticateToken, uploadFile.single('resume'), uploadResume)
 router.get('/', authenticateToken, getResumes)
 router.delete('/:id', authenticateToken, deleteResume)
+router.post('/:id/parse', authenticateToken, parseResume)
 
 export default router 

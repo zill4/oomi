@@ -8,6 +8,8 @@ use uuid::Uuid;
 
 use crate::error::{ParserError, Result};
 
+pub use aws_sdk_s3::Client as S3Client;
+
 pub struct S3Storage {
     client: Client,
     bucket: String,

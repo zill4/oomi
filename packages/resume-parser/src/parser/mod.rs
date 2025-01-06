@@ -1,11 +1,12 @@
 use crate::entities::EntityExtractor;
-use crate::error::Result;
+use crate::error::{ParserError, Result};
 use crate::models::ResumeData;
 use crate::pdf::extract_text_from_pdf;
 use crate::text::TextProcessor;
 use chrono::Utc;
 use std::path::Path;
 use tracing::{debug, info};
+use tempfile::NamedTempFile;
 
 pub struct ResumeParser;
 
@@ -31,6 +32,15 @@ impl ResumeParser {
 
         info!("Resume parsing completed successfully");
         Ok(resume_data)
+    }
+
+    pub async fn parse_file_from_bytes(data: &[u8]) -> Result<ResumeData> {
+        let temp_file = NamedTempFile::new().map_err(|e| ParserError::Io(e))?;
+        let path = temp_file.path().to_owned();
+        
+        tokio::fs::write(&path, data).await.map_err(|e| ParserError::Io(e))?;
+        
+        Self::parse_file(&path).await
     }
 
     fn parse_sections(sections: &std::collections::HashMap<String, String>, resume_data: &mut ResumeData) {
