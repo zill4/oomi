@@ -1,9 +1,5 @@
 environment: development
 
-database:
-  url: "${DATABASE_URL}"
-  max_connections: 5
-
 s3:
   bucket: "${BUCKET_NAME}"
   region: "${AWS_REGION}"

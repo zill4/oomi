@@ -4,23 +4,6 @@ use config::ConfigError;
 use dotenvy::dotenv;
 
 #[derive(Debug, Deserialize)]
-pub struct ServerConfig {
-    pub port: u16,
-}
-
-impl Default for ServerConfig {
-    fn default() -> Self {
-        Self { port: 3001 }
-    }
-}
-
-#[derive(Debug, Deserialize)]
-pub struct DatabaseConfig {
-    pub url: String,
-    pub max_connections: u32,
-}
-
-#[derive(Debug, Deserialize)]
 pub struct S3Config {
     pub bucket: String,
     pub region: String,
@@ -38,8 +21,6 @@ pub struct QueueConfig {
 #[derive(Debug, Deserialize)]
 pub struct Config {
     pub environment: String,
-    pub server: ServerConfig,
-    pub database: DatabaseConfig,
     pub s3: S3Config,
     pub queue: QueueConfig,
 }
@@ -68,11 +49,6 @@ impl Config {
 
         let config = Config {
             environment,
-            server: ServerConfig { port },
-            database: DatabaseConfig {
-                url: db_url,
-                max_connections: 5,
-            },
             s3: S3Config {
                 bucket: s3_bucket,
                 region: s3_region,
@@ -94,13 +70,6 @@ impl Config {
     fn redact_sensitive(config: &Config) -> Config {
         Config {
             environment: config.environment.clone(),
-            server: ServerConfig {
-                port: config.server.port,
-            },
-            database: DatabaseConfig {
-                url: "[REDACTED]".to_string(),
-                max_connections: config.database.max_connections,
-            },
             s3: S3Config {
                 bucket: config.s3.bucket.clone(),
                 region: config.s3.region.clone(),
@@ -116,14 +85,6 @@ impl Config {
     }
 
     pub fn validate(&self) -> Result<(), String> {
-        // Validate database configuration
-        if self.database.url.is_empty() {
-            return Err("Database URL is required".into());
-        }
-        if self.database.max_connections == 0 {
-            return Err("Database max_connections must be greater than 0".into());
-        }
-
         // Validate S3 configuration
         if self.s3.bucket.is_empty() {
             return Err("S3 bucket name is required".into());

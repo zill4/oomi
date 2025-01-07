@@ -18,6 +18,10 @@ use tower_http::cors::CorsLayer;
 use tracing::{debug, error, info};
 use serde::Deserialize;
 use crate::database;
+use sqlx::postgres::PgPoolOptions;
+use serde_json::Value;
+use crate::database::Database;
+use uuid::Uuid;
 
 // Add error handling for axum
 impl IntoResponse for ParserError {
@@ -69,11 +73,25 @@ pub async fn create_router(state: AppState) -> Router {
 }
 
 pub async fn start_server(port: u16) -> Result<()> {
+    let database_url = std::env::var("DATABASE_URL")
+        .unwrap_or_else(|_| "postgres://postgres:postgres@127.0.0.1:5433/oomi".to_string());
+    
+    // Initialize database pool
+    let pool = PgPoolOptions::new()
+        .max_connections(5)
+        .connect(&database_url)
+        .await
+        .map_err(|e| ParserError::Database(e))?;
+
+    // Initialize AppState
     let state = AppState {
         db_pool: pool,
-        s3_client: s3_client,
+        s3_client: storage::create_s3_client().await?,
     };
+
+    // Create router with state
     let app = create_router(state).await;
+
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
     let listener = tokio::net::TcpListener::bind(addr).await.map_err(|e| {
         error!("Failed to bind server: {}", e);
@@ -181,6 +199,20 @@ async fn process_resume(mut multipart: Multipart) -> Result<Json<serde_json::Val
         "confidence_scores": confidence_scores,
         "status": "success"
     })))
+}
+
+async fn handle_resume_upload(
+    State(state): State<AppState>,
+    mut multipart: Multipart,
+) -> Result<impl IntoResponse> {
+    let user_id = Uuid::new_v4();
+    let resume_data = serde_json::json!({});
+    let pdf_key = "test.pdf".to_string();
+
+    let db = Database::new(&state.db_pool);
+    let record_id = db.store_resume(user_id, resume_data, &pdf_key).await?;
+
+    Ok(Json(json!({ "id": record_id })))
 }
 
 #[cfg(test)]
