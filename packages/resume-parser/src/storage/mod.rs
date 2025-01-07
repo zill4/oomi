@@ -10,10 +10,9 @@ pub struct S3Client {
 
 impl S3Client {
     pub async fn new() -> Result<Self, ParserError> {
-        let region = Region::new(std::env::var("AWS_REGION").unwrap_or_else(|_| "auto".to_string()));
-        
-        let config = aws_sdk_s3::config::Builder::new()
-            .region(Some(region))
+        let config = aws_sdk_s3::Config::builder()
+            .behavior_version_latest()
+            .region(Region::new(std::env::var("AWS_REGION").unwrap_or_else(|_| "auto".to_string())))
             .endpoint_url(
                 std::env::var("AWS_ENDPOINT_URL_S3")
                     .ok()

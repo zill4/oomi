@@ -32,11 +32,16 @@ pub struct QueueConfig {
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
+    #[serde(default = "default_environment")]
     pub environment: String,
     pub s3: S3Config,
     pub queue: QueueConfig,
     #[serde(default)]
     pub processing: ProcessingConfig,
+}
+
+fn default_environment() -> String {
+    "development".to_string()
 }
 
 impl Config {

@@ -13,7 +13,6 @@ use crate::parser::ResumeParser;
 use crate::storage::S3Client;
 
 const PROCESSING_TIMEOUT: Duration = Duration::from_secs(300); // 5 minutes
-const MAX_RETRIES: u32 = 3;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ParseJob {
@@ -128,6 +127,8 @@ impl QueueClient {
     }
 
     async fn process_job(&self, job: ParseJob, retry_count: u32) -> Result<()> {
+        const MAX_RETRIES: u32 = 3;
+        
         info!("Processing resume for user: {}, pdf: {}, attempt: {}", 
             job.user_id, job.pdf_key, retry_count + 1);
 
