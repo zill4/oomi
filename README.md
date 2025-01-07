@@ -1,69 +1,108 @@
-# oomi
+# Oomi - AI-Powered Career Development Platform
 
+## Project Status
+Currently implementing core features for MVP (Minimum Viable Product).
 
-TODO List:
-1. Auth Logic 1/2 Done
-    - Sign up X
-    - Login X
-    - Profile creation X
-    - Email Confirmation (Do Later)
-    - Attributes editting FN, LN, Email, Password, etc. (Change pass with email, Do Later)
-    - Delete Account (Delete Account with Email, Do Later)
-2. Document upload
-    - Upload Resume(s) PDF X
-    - Upload Cover Letter(s) PDF (We generate these so this should be easier).
-3. Resume Processing
-    - Parse multiple resumes as PDF -> to ATS format
-    - Produce LaTeX version of Resume
-    - Fill matching fields in Resume DB
-    - Version control Resume versions
-4. Personal Story upload
-    - Have user upload text for their personal story and save to DB
-    - version control for stories (this honestly applies to all updated fields)
-5. Job Description Upload
-    - Handle pasted job description text, save JD
-    - Handle web-scraping a URL provided, if not scrapable return error and require pasted text
-    - Consider adding Web Extension to make the whole process a lot easier.
-6. Return Generated Cover Letter
-    - Generate a Cover letter for the job description based on the Story, Resume, and JD
-    using Claude API
-7. Return Generated Resume
-    - After user signs-up offer generated Resumes (free tier is maybe 1 or 2)
-8. Spruce up frontend now connected with backend logic
-    - Add more analytics everywhere
-    - Add testing for everything
-9. DevOps
-    - Make sure oomi dot ai url is attached
-    - Make sure devops is all configured properlly
-10. Set up Payment Processing
-    - Use Stripe set up payment processing
-    - Test everything again
+## MVP Roadmap
 
-That should be it for MVP
+### 1. Authentication & User Management ✅
+- [x] Sign up functionality
+- [x] Login system
+- [x] Basic profile management
+- [ ] Email confirmation
+- [ ] Password reset
+- [ ] Account deletion
 
-For V1.
-    - 3rd Party integrations (LinkedIn, X, GitHub, LeetCode?)
-    - Chrome Extension
-    - Interview Prep? JD requires X skills, build a project and grind these LeetCode Questions
-For V1.5
-    - Email
-    - Job App Analytics, improved Dashboard
-    - Project Prompting? Like JD require X
-For V2
-    - Focus on building skills as a whole, similar to 42's holy graph
-    - Connect directly with job posters, have AI sort, vet, and do long running interview processes,
-    imagine working with an assistant that helps you along your whole career journey; applying, studying, interviewing,
-    and staying professionally up to date.
+### 2. Document Management 🚀
+- [x] Resume PDF upload
+- [x] Resume parsing service
+- [ ] Cover letter generation
+- [ ] Document version control
 
-## Helper Commands
-To create a migration without applying it immediately (so you can preserve data), use:
+### 3. Resume Processing (In Progress)
+- [x] PDF parsing infrastructure
+- [x] Queue-based processing
+- [x] S3 storage integration
+- [ ] ATS format conversion
+- [ ] LaTeX generation
+- [ ] Version control
+
+### 4. Profile Enhancement
+- [ ] Personal story management
+- [ ] Skills assessment
+- [ ] Experience categorization
+- [ ] Version control for all content
+
+### 5. Job Application Features
+- [ ] Job description parsing
+- [ ] URL scraping for job posts
+- [ ] Matching algorithm
+- [ ] Application tracking
+
+### 6. AI Integration
+- [ ] Cover letter generation
+- [ ] Resume optimization
+- [ ] Skills gap analysis
+- [ ] Interview preparation
+
+### 7. Frontend Enhancement
+- [ ] Dashboard analytics
+- [ ] Progress tracking
+- [ ] Interactive resume builder
+- [ ] Real-time status updates
+
+### 8. DevOps & Infrastructure
+- [x] Docker configuration
+- [x] Basic CI/CD
+- [ ] Monitoring and logging
+- [ ] Performance optimization
+- [ ] Domain configuration
+
+### 9. Payment Processing
+- [ ] Stripe integration
+- [ ] Subscription management
+- [ ] Usage tracking
+
+## Future Versions
+
+### V1.0
+- Third-party integrations (LinkedIn, GitHub)
+- Chrome extension
+- Advanced interview prep
+
+### V1.5
+- Email notification system
+- Enhanced job analytics
+- Project recommendation system
+
+### V2.0
+- Career progression tracking
+- AI-powered mentorship
+- Automated skill development paths
+
+## Development Commands
+
+### Database Management
+
+Create migration (preserve data)
 `docker-compose exec backend sh -c "cd packages/backend && npx prisma migrate dev --create-only"`
-Apply it:
+Apply migration
 `docker-compose exec backend sh -c "cd packages/backend && npx prisma migrate deploy"`
-Restart
+Restart backend
 `docker-compose restart backend`
-
-TODO: will likely want to create seperate bucket folders
-users/profile-pictures/userid
-users/resumes/uploaded/userid
-users/resumes/parsed/userid
+users/
+├── profile-pictures/
+│ └── {userid}/
+├── resumes/
+│ ├── uploaded/
+│ │ └── {userid}/
+│ └── parsed/
+│ └── {userid}/
+└── cover-letters/
+└── {userid}/
+## Testing
+To test the resume parser:
+1. Upload a resume through the frontend interface
+2. Monitor the parsing status in the UI
+3. Verify parsed data in the database
+4. Check S3 for stored files

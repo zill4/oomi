@@ -31,6 +31,16 @@ COPY --from=builder /usr/src/app/target/release/resume-parser /app/resume-parser
 # Copy configuration
 COPY config /app/config/
 
+# Create config directory if it doesn't exist
+RUN mkdir -p /app/config
+
 ENV RUST_LOG=info
 
 CMD ["./resume-parser"] 
+
+# Copy configuration files
+COPY config /app/config/
+RUN ls -la /app/config/
+
+# Set permissions
+RUN chmod -R 755 /app/config/ 

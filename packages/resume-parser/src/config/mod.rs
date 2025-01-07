@@ -1,4 +1,5 @@
 use serde::Deserialize;
+use tracing::{info, error};
 
 #[derive(Debug, Deserialize, Default)]
 pub struct ProcessingConfig {
@@ -46,12 +47,21 @@ fn default_environment() -> String {
 
 impl Config {
     pub fn new() -> Result<Self, crate::error::ParserError> {
+        info!("Loading configuration...");
         let config = config::Config::builder()
+            .add_source(config::File::with_name("config/default"))
             .add_source(config::Environment::default())
             .build()
-            .map_err(|e| crate::error::ParserError::Config(e.to_string()))?;
+            .map_err(|e| {
+                error!("Failed to build config: {}", e);
+                crate::error::ParserError::Config(e.to_string())
+            })?;
 
+        info!("Configuration loaded, attempting to deserialize...");
         config.try_deserialize()
-            .map_err(|e| crate::error::ParserError::Config(e.to_string()))
+            .map_err(|e| {
+                error!("Failed to deserialize config: {}", e);
+                crate::error::ParserError::Config(e.to_string())
+            })
     }
 } 

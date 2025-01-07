@@ -12,3 +12,10 @@ Dockerfile
 npm-debug.log
 .turbo
 coverage
+**/node_modules
+**/.turbo
+**/.next
+**/dist
+**/build
+**/.git
+**/target

@@ -30,14 +30,18 @@ pub struct QueueClient {
 
 impl QueueClient {
     pub async fn new(url: &str) -> Result<Self> {
+        info!("Connecting to RabbitMQ at: {}", url);
+        
         let conn = Connection::connect(
             url,
-            ConnectionProperties::default(),
+            ConnectionProperties::default()
+                .with_connection_name("resume-parser".into()),
         ).await.map_err(|e| ParserError::Queue {
             message: format!("Failed to connect: {}", e),
             source: Some(e),
         })?;
 
+        info!("Connected to RabbitMQ, creating channel");
         let channel = conn.create_channel().await?;
         
         // Declare main queue

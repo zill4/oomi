@@ -21,27 +21,23 @@ services:
   backend:
     build:
       context: .
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     volumes:
       - .:/app
       - /app/node_modules
-      - /app/packages/backend/node_modules
-      - /app/packages/backend/.turbo
-      - /app/packages/backend/dist
     ports:
       - "8080:8080"
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/oomi
       - JWT_SECRET=${JWT_SECRET}
-      - CHOKIDAR_USEPOLLING=true
-      - WATCHPACK_POLLING=true
-      - NODE_ENV=development
     command: >
-      sh -c "cd packages/backend &&
-             npx prisma generate &&
-             echo 'Checking database status...' &&
-             npx prisma migrate deploy &&
-             npm run dev"
+      sh -c "
+      cd packages/backend &&
+      npm install -g tsx &&
+      npx prisma migrate reset --force &&
+      npx prisma generate &&
+      npm run dev
+      "
     depends_on:
       db:
         condition: service_healthy
@@ -85,9 +81,18 @@ services:
       - AWS_REGION=${AWS_REGION}
       - AWS_ENDPOINT_URL_S3=${AWS_ENDPOINT_URL_S3}
       - BUCKET_NAME=${BUCKET_NAME}
-      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "test", "-f", "/app/config/default.yaml"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -98,10 +103,11 @@ services:
       - RABBITMQ_DEFAULT_USER=guest
       - RABBITMQ_DEFAULT_PASS=guest
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity", "rabbitmqctl", "status"]
+      test: ["CMD", "rabbitmqctl", "status"]
       interval: 30s
       timeout: 10s
       retries: 5
+      start_period: 40s  # Give RabbitMQ time to start up
 
 volumes:
   postgres_data:

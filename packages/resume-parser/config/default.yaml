@@ -8,5 +8,5 @@ s3:
   secret_access_key: "${AWS_SECRET_ACCESS_KEY}"
 
 queue:
-  url: "${RABBITMQ_URL}"
-  queue_name: resume_parsing 
+  url: "amqp://guest:guest@rabbitmq:5672/%2f"
+  queue_name: "resume_parsing" 
