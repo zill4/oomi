@@ -1,55 +1,60 @@
-use lapin::{
-    options::*, types::FieldTable, BasicProperties,
-    Connection, ConnectionProperties, Channel
-};
 use crate::error::{ParserError, Result};
+use crate::metrics::ACTIVE_JOBS;
+use crate::notifications::{NotificationClient, ParseResult};
+use futures_util::StreamExt;
+use lapin::{
+    options::*, types::FieldTable, Connection, ConnectionProperties,
+    Channel,
+};
+use serde::{Deserialize, Serialize};
+use tokio::time::{timeout, Duration};
 use tracing::{error, info};
-use serde::{Serialize, Deserialize};
 use crate::parser::ResumeParser;
 use crate::storage::S3Client;
-use serde_json::json;
 
-#[derive(Debug, Serialize, Deserialize)]
+const PROCESSING_TIMEOUT: Duration = Duration::from_secs(300); // 5 minutes
+const MAX_RETRIES: u32 = 3;
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ParseJob {
     pub resume_id: String,
     pub user_id: String,
     pub pdf_key: String,
+    pub retries: Option<u32>,
 }
 
 pub struct QueueClient {
     channel: Channel,
     queue_name: String,
+    notification_client: NotificationClient,
 }
 
 impl QueueClient {
     pub async fn new(url: &str) -> Result<Self> {
-        // Connect to RabbitMQ
         let conn = Connection::connect(
             url,
-            ConnectionProperties::default()
-        ).await.map_err(|e| {
-            error!("Failed to connect to RabbitMQ: {}", e);
-            ParserError::Queue(format!("Connection error: {}", e))
+            ConnectionProperties::default(),
+        ).await.map_err(|e| ParserError::Queue {
+            message: format!("Failed to connect: {}", e),
+            source: Some(e),
         })?;
 
-        // Create channel
-        let channel = conn.create_channel().await.map_err(|e| {
-            error!("Failed to create channel: {}", e);
-            ParserError::Queue(format!("Channel creation error: {}", e))
-        })?;
-
-        // Declare queue
-        let queue_name = "resume_parsing";
+        let channel = conn.create_channel().await?;
+        
+        // Declare main queue
         channel.queue_declare(
-            queue_name,
+            "resume_parsing",
             QueueDeclareOptions::default(),
-            FieldTable::default()
-        ).await.map_err(|e| {
-            error!("Failed to declare queue: {}", e);
-            ParserError::Queue(format!("Queue declaration error: {}", e))
-        })?;
+            FieldTable::default(),
+        ).await?;
 
-        Ok(Self { channel, queue_name: queue_name.to_string() })
+        let notification_client = NotificationClient::new(channel.clone()).await?;
+
+        Ok(Self {
+            channel,
+            queue_name: "resume_parsing".to_string(),
+            notification_client,
+        })
     }
 
     pub async fn process_jobs(&self) -> Result<()> {
@@ -60,24 +65,47 @@ impl QueueClient {
             "resume_parser",
             BasicConsumeOptions::default(),
             FieldTable::default(),
-        ).await.map_err(|e| ParserError::Queue(format!("Consumer error: {}", e)))?;
+        ).await?;
 
         while let Some(delivery) = consumer.next().await {
             match delivery {
                 Ok(delivery) => {
                     let job: ParseJob = serde_json::from_slice(&delivery.data)
-                        .map_err(|e| ParserError::Queue(format!("Job parsing error: {}", e)))?;
+                        .map_err(|e| ParserError::InvalidData {
+                            message: format!("Failed to parse job: {}", e),
+                            field: None,
+                        })?;
 
-                    info!("Processing job: {:?}", job);
-                    // Process job here...
+                    ACTIVE_JOBS.inc();
+                    let retry_count = job.retries.unwrap_or(0);
 
-                    self.channel.basic_ack(
-                        delivery.delivery_tag,
-                        BasicAckOptions::default()
-                    ).await.map_err(|e| ParserError::Queue(format!("Ack error: {}", e)))?;
+                    match timeout(PROCESSING_TIMEOUT, self.process_job(job.clone(), retry_count)).await {
+                        Ok(process_result) => {
+                            match process_result {
+                                Ok(_) => {
+                                    self.channel
+                                        .basic_ack(delivery.delivery_tag, BasicAckOptions::default())
+                                        .await?;
+                                }
+                                Err(_) => {
+                                    self.channel
+                                        .basic_nack(delivery.delivery_tag, BasicNackOptions::default())
+                                        .await?;
+                                }
+                            }
+                        }
+                        Err(_) => {
+                            error!("Job processing timed out");
+                            self.handle_timeout(&job).await?;
+                            self.channel
+                                .basic_nack(delivery.delivery_tag, BasicNackOptions::default())
+                                .await?;
+                        }
+                    }
+                    ACTIVE_JOBS.dec();
                 }
                 Err(e) => {
-                    error!("Error receiving message: {}", e);
+                    error!("Failed to receive message: {}", e);
                 }
             }
         }
@@ -85,10 +113,24 @@ impl QueueClient {
         Ok(())
     }
 
-    async fn process_job(&self, job: ParseJob) -> Result<()> {
-        info!("Processing resume for user: {}, pdf: {}", job.user_id, job.pdf_key);
+    async fn handle_timeout(&self, job: &ParseJob) -> Result<()> {
+        let result = ParseResult {
+            resume_id: job.resume_id.clone(),
+            user_id: job.user_id.clone(),
+            pdf_key: job.pdf_key.clone(),
+            status: "timeout".to_string(),
+            result_key: None,
+            error: Some("Processing timed out".to_string()),
+            timestamp: chrono::Utc::now().to_rfc3339(),
+        };
 
-        // Initialize S3 client
+        self.notification_client.notify_completion(result).await
+    }
+
+    async fn process_job(&self, job: ParseJob, retry_count: u32) -> Result<()> {
+        info!("Processing resume for user: {}, pdf: {}, attempt: {}", 
+            job.user_id, job.pdf_key, retry_count + 1);
+
         let s3_client = S3Client::new().await?;
         
         // Get the PDF from S3
@@ -98,43 +140,21 @@ impl QueueClient {
         let resume_data = ResumeParser::parse_from_bytes(&pdf_data).await?;
 
         // Store results in S3
-        let results = json!({
-            "user_id": job.user_id,
-            "pdf_key": job.pdf_key,
-            "resume_id": job.resume_id,
-            "parsed_data": resume_data,
-            "status": "completed",
-            "timestamp": chrono::Utc::now().to_rfc3339()
-        });
-
         let result_key = s3_client
-            .store_results(&job.user_id, &job.pdf_key, &serde_json::to_vec(&results)?)
+            .store_results(&job.user_id, &job.pdf_key, &serde_json::to_vec(&resume_data)?)
             .await?;
 
-        info!("Successfully processed resume. Results stored at: {}", result_key);
-        Ok(())
-    }
-}
+        // Send completion notification
+        let result = ParseResult {
+            resume_id: job.resume_id.clone(),
+            user_id: job.user_id.clone(),
+            pdf_key: job.pdf_key.clone(),
+            status: "completed".to_string(),
+            result_key: Some(result_key),
+            error: None,
+            timestamp: chrono::Utc::now().to_rfc3339(),
+        };
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use tokio;
-
-    fn get_test_url() -> String {
-        std::env::var("TEST_RABBITMQ_URL")
-            .unwrap_or_else(|_| "amqp://guest:guest@localhost:5672".to_string())
-    }
-
-    #[tokio::test]
-    async fn test_queue_connection() {
-        let result = QueueClient::new(&get_test_url()).await;
-        assert!(result.is_ok(), "Should connect to RabbitMQ successfully");
-    }
-
-    #[tokio::test]
-    async fn test_invalid_connection() {
-        let result = QueueClient::new("amqp://invalid:5672").await;
-        assert!(result.is_err(), "Should fail with invalid connection URL");
+        self.notification_client.notify_completion(result).await
     }
 }

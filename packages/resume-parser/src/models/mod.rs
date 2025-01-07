@@ -93,7 +93,7 @@ impl ResumeData {
     }
 }
 
-#[derive(Debug, sqlx::FromRow)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct StoredResume {
     pub id: i32,
     pub user_id: uuid::Uuid,

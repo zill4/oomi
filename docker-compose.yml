@@ -77,32 +77,17 @@ services:
 
   resume-parser:
     build:
-      context: .
-      dockerfile: packages/resume-parser/Dockerfile.dev
+      context: ./packages/resume-parser
+      dockerfile: Dockerfile
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/oomi
-      - APP_ENVIRONMENT=development
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - AWS_REGION=${AWS_REGION}
-      - S3_BUCKET=${BUCKET_NAME}
+      - AWS_ENDPOINT_URL_S3=${AWS_ENDPOINT_URL_S3}
+      - BUCKET_NAME=${BUCKET_NAME}
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
-    volumes:
-      - ./packages/resume-parser:/app
-    ports:
-      - "3001:3001"
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
     depends_on:
-      db:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
+      - rabbitmq
 
   rabbitmq:
     image: rabbitmq:3-management

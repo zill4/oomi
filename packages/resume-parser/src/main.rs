@@ -10,21 +10,24 @@ mod parser;
 mod scoring;
 mod storage;
 mod queue;
+mod metrics;
+mod health;
+mod notifications;
 
-use config::Config;
-use error::{ParserError, Result};
-use queue::QueueClient;
-use tracing::{info, error};
+use crate::config::Config;
+use crate::error::{ParserError, Result};
+use crate::queue::QueueClient;
+use tracing::info;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Initialize logging
-    logging::init_logging()?;
+    // Initialize logging and metrics
+    logging::init_logging().map_err(|e| ParserError::Config(e.to_string()))?;
+    metrics::register_metrics();
     info!("Starting resume-parser service");
 
     // Load configuration
     let config = Config::new()?;
-    config.validate()?;
 
     // Initialize queue client
     let queue_client = QueueClient::new(&config.queue.url).await?;

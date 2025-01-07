@@ -1,80 +1,68 @@
 use thiserror::Error;
-use tracing::error;
+use aws_sdk_s3::error::SdkError;
 use aws_sdk_s3::operation::get_object::GetObjectError;
+use aws_sdk_s3::operation::put_object::PutObjectError;
 use aws_sdk_s3::primitives::ByteStreamError;
-use aws_smithy_runtime_api::client::result::SdkError;
+use aws_smithy_runtime_api::http::Response;
 
 #[derive(Error, Debug)]
 pub enum ParserError {
-    #[error("PDF extraction error: {0}")]
-    PdfExtraction(String),
+    #[error("IO error: {0}")]
+    Io(#[from] std::io::Error),
 
-    #[error("PDF processing error: {0}")]
-    PdfProcessing(String),
-
-    #[error("S3 storage error: {message}")]
-    Storage {
+    #[error("Queue error: {message}")]
+    Queue {
         message: String,
-        source: Option<aws_sdk_s3::Error>,
+        #[source]
+        source: Option<lapin::Error>,
     },
 
-    #[error("Invalid data: {message}")]
+    #[error("Config error: {0}")]
+    Config(String),
+
+    #[error("S3 error: {0}")]
+    S3(String),
+
+    #[error("Invalid data: {message} {}", .field.as_deref().unwrap_or(""))]
     InvalidData {
         message: String,
         field: Option<String>,
     },
+
+    #[error("Parser error: {0}")]
+    Parser(String),
+
+    #[error("PDF extraction error: {0}")]
+    PdfExtraction(String),
+
+    #[error("Serialization error: {0}")]
+    Serialization(#[from] serde_json::Error),
 }
 
-impl ParserError {
-    pub fn log_error(&self) {
-        error!(error = %self, "An error occurred");
-    }
-
-    pub fn invalid_data<S: Into<String>>(message: S, field: Option<String>) -> Self {
-        Self::InvalidData {
-            message: message.into(),
-            field,
-        }
-    }
-
-    pub fn queue<S: Into<String>>(message: S, source: Option<lapin::Error>) -> Self {
+impl From<lapin::Error> for ParserError {
+    fn from(err: lapin::Error) -> Self {
         Self::Queue {
-            message: message.into(),
-            source,
+            message: err.to_string(),
+            source: Some(err),
         }
     }
 }
 
-impl From<serde_json::Error> for ParserError {
-    fn from(err: serde_json::Error) -> Self {
-        ParserError::InvalidData {
-            message: err.to_string(),
-            field: None,
-        }
-    }
-}
-
-impl<R> From<SdkError<GetObjectError, R>> for ParserError {
-    fn from(err: SdkError<GetObjectError, R>) -> Self {
-        ParserError::Storage {
-            message: err.to_string(),
-            source: None,
-        }
+impl From<SdkError<GetObjectError, Response>> for ParserError {
+    fn from(err: SdkError<GetObjectError, Response>) -> Self {
+        Self::S3(err.to_string())
     }
 }
 
 impl From<ByteStreamError> for ParserError {
     fn from(err: ByteStreamError) -> Self {
-        ParserError::Storage {
-            message: err.to_string(),
-            source: None,
-        }
+        Self::S3(err.to_string())
     }
 }
 
-impl From<config::ConfigError> for ParserError {
-    fn from(err: config::ConfigError) -> Self {
-        ParserError::Config(err.to_string())
+impl From<SdkError<PutObjectError, Response>> for ParserError {
+    fn from(err: SdkError<PutObjectError, Response>) -> Self {
+        Self::S3(err.to_string())
     }
 }
 

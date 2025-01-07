@@ -1,6 +1,6 @@
-use crate::entities::EntityExtractor;
 use crate::error::{ParserError, Result};
 use crate::models::ResumeData;
+use crate::entities::EntityExtractor;
 use crate::pdf::extract_text_from_pdf;
 use crate::text::TextProcessor;
 use chrono::Utc;
@@ -28,17 +28,20 @@ impl ResumeParser {
             .with_metadata("parsed_date", &Utc::now().to_rfc3339());
 
         // Parse each section
-        Self::parse_sections(sections, &mut resume_data);
+        Self::parse_sections(&sections, &mut resume_data);
 
         info!("Resume parsing completed successfully");
         Ok(resume_data)
     }
 
     pub async fn parse_from_bytes(data: &[u8]) -> Result<ResumeData> {
-        let temp_file = NamedTempFile::new().map_err(|e| ParserError::Io(e))?;
+        let temp_file = NamedTempFile::new()
+            .map_err(|e| ParserError::Io(e))?;
         let path = temp_file.path().to_owned();
         
-        tokio::fs::write(&path, data).await.map_err(|e| ParserError::Io(e))?;
+        tokio::fs::write(&path, data)
+            .await
+            .map_err(|e| ParserError::Io(e))?;
         
         Self::parse_file(&path).await
     }

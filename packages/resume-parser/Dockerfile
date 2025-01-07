@@ -1,48 +1,26 @@
-# Build stage
-FROM rust:1.83-slim-bullseye AS builder
+FROM rust:1.75 as builder
 
-WORKDIR /app
+WORKDIR /usr/src/app
+COPY . .
 
-# Install build dependencies
-RUN apt-get update && apt-get install -y \
-    pkg-config \
-    libssl-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy manifests
-COPY packages/resume-parser/Cargo.toml ./Cargo.toml
-
-# Create dummy source and build dependencies
-RUN mkdir -p src && \
-    echo 'fn main() { println!("Initializing resume-parser..."); }' > src/main.rs
-
+# Build with release optimizations
 RUN cargo build --release
 
-# Remove the dummy source and built files
-RUN rm -rf src target/release/deps/resume_parser*
+FROM debian:bookworm-slim
 
-# Copy actual source code
-COPY packages/resume-parser/src ./src
-
-# Build the actual binary
-RUN cargo build --release
-
-# Runtime stage
-FROM debian:bullseye-slim
-
-WORKDIR /app
-
-# Install runtime dependencies
+# Install necessary runtime dependencies
 RUN apt-get update && apt-get install -y \
     ca-certificates \
-    libssl1.1 \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy the binary from builder
-COPY --from=builder /app/target/release/resume-parser .
+WORKDIR /app
 
-# Expose the port the server listens on
-EXPOSE 3001
+# Copy the built binary
+COPY --from=builder /usr/src/app/target/release/resume-parser /app/resume-parser
 
-# Run the binary
+# Copy configuration
+COPY config /app/config/
+
+ENV RUST_LOG=info
+
 CMD ["./resume-parser"] 
