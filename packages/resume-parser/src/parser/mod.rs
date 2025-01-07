@@ -34,7 +34,7 @@ impl ResumeParser {
         Ok(resume_data)
     }
 
-    pub async fn parse_file_from_bytes(data: &[u8]) -> Result<ResumeData> {
+    pub async fn parse_from_bytes(data: &[u8]) -> Result<ResumeData> {
         let temp_file = NamedTempFile::new().map_err(|e| ParserError::Io(e))?;
         let path = temp_file.path().to_owned();
         
