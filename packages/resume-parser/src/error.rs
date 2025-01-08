@@ -4,6 +4,8 @@ use aws_sdk_s3::operation::get_object::GetObjectError;
 use aws_sdk_s3::operation::put_object::PutObjectError;
 use aws_sdk_s3::primitives::ByteStreamError;
 use aws_smithy_runtime_api::http::Response;
+use std::env::VarError;
+use tracing_subscriber::filter::ParseError;
 
 #[derive(Error, Debug)]
 pub enum ParserError {
@@ -14,7 +16,7 @@ pub enum ParserError {
     Queue {
         message: String,
         #[source]
-        source: Option<lapin::Error>,
+        source: Option<Box<dyn std::error::Error + Send + Sync>>,
     },
 
     #[error("Config error: {0}")]
@@ -43,7 +45,7 @@ impl From<lapin::Error> for ParserError {
     fn from(err: lapin::Error) -> Self {
         Self::Queue {
             message: err.to_string(),
-            source: Some(err),
+            source: Some(Box::new(err)),
         }
     }
 }
@@ -63,6 +65,18 @@ impl From<ByteStreamError> for ParserError {
 impl From<SdkError<PutObjectError, Response>> for ParserError {
     fn from(err: SdkError<PutObjectError, Response>) -> Self {
         Self::S3(err.to_string())
+    }
+}
+
+impl From<VarError> for ParserError {
+    fn from(err: VarError) -> Self {
+        Self::Config(format!("Environment variable error: {}", err))
+    }
+}
+
+impl From<ParseError> for ParserError {
+    fn from(err: ParseError) -> Self {
+        Self::Config(format!("Failed to parse logging filter: {}", err))
     }
 }
 

@@ -4,13 +4,20 @@ import { useFileUpload } from '../hooks/useFileUpload'
 import { useApi } from '../lib/api'
 import { toast } from 'react-hot-toast'
 import { format } from 'date-fns'
-import { DocumentIcon, TrashIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline'
+import { 
+  DocumentIcon, 
+  TrashIcon, 
+  ArrowDownTrayIcon,
+  DocumentMagnifyingGlassIcon,
+  ArrowPathIcon
+} from '@heroicons/react/24/outline'
 
 interface Resume {
   id: string
   fileName: string
   fileUrl: string
   version: number
+  status: string
   createdAt: string
 }
 
@@ -19,10 +26,30 @@ export default function ResumeList() {
   const { fetchWithAuth } = useApi()
   const { getSignedUrl } = useAuth()
   const { uploadFile, isUploading } = useFileUpload({
-    maxSize: 10 * 1024 * 1024, // 10MB
+    maxSize: 10 * 1024 * 1024,
     allowedTypes: ['application/pdf'],
     fieldName: 'resume'
   })
+
+  // Add a ref to track if we need to poll
+  const hasParsingResumes = resumes.some(resume => resume.status === 'PARSING')
+
+  useEffect(() => {
+    // Only set up polling if we have resumes being parsed
+    if (!hasParsingResumes) return
+
+    const pollParseStatus = setInterval(async () => {
+      const updatedResumes = await fetchWithAuth('/resumes')
+      setResumes(updatedResumes)
+      
+      // If no more parsing resumes, clear the interval
+      if (!updatedResumes.some(resume => resume.status === 'PARSING')) {
+        clearInterval(pollParseStatus)
+      }
+    }, 5000)  // Increased to 5 seconds to reduce server load
+
+    return () => clearInterval(pollParseStatus)
+  }, [hasParsingResumes])
 
   const loadResumes = async () => {
     try {
@@ -83,6 +110,34 @@ export default function ResumeList() {
     }
   }
 
+  const handleParse = async (resumeId: string) => {
+    try {
+      await fetchWithAuth(`/resumes/${resumeId}/parse`, {
+        method: 'POST'
+      })
+      toast.success('Resume parsing started')
+      await loadResumes() // Refresh the list
+    } catch (error) {
+      toast.error('Failed to start parsing')
+    }
+  }
+
+  const handleRetry = async (resumeId: string) => {
+    try {
+      await fetchWithAuth(`/resumes/${resumeId}/parse`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ retry: true })  // Add flag to indicate retry
+      })
+      toast.success('Resume parsing retry started')
+      await loadResumes() // Refresh the list
+    } catch (error) {
+      toast.error('Failed to retry parsing')
+    }
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -129,9 +184,35 @@ export default function ResumeList() {
                   <p className="text-sm text-gray-500">
                     Version {resume.version} • {format(new Date(resume.createdAt), 'MMM d, yyyy')}
                   </p>
+                  {resume.status && (
+                    <span className={`text-xs ${
+                      resume.status === 'PARSING' ? 'text-yellow-500' :
+                      resume.status === 'PARSED' ? 'text-green-500' :
+                      resume.status === 'PARSE_ERROR' ? 'text-red-500' :
+                      'text-gray-500'
+                    }`}>
+                      {resume.status}
+                    </span>
+                  )}
                 </div>
               </div>
               <div className="flex space-x-3">
+                <button
+                  onClick={() => handleParse(resume.id)}
+                  disabled={resume.status === 'PARSING'}
+                  className="text-blue-500 hover:text-blue-600 p-2 disabled:opacity-50"
+                  title="Parse Resume"
+                >
+                  <DocumentMagnifyingGlassIcon className="h-5 w-5" />
+                </button>
+                <button
+                  onClick={() => handleRetry(resume.id)}
+                  disabled={resume.status === 'PARSING'}
+                  className="text-orange-500 hover:text-orange-600 p-2 disabled:opacity-50"
+                  title="Retry Parse"
+                >
+                  <ArrowPathIcon className="h-5 w-5" />
+                </button>
                 <button
                   onClick={() => downloadResume(resume)}
                   className="text-seafoam-500 hover:text-seafoam-600 p-2"

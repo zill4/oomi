@@ -1,24 +1,22 @@
-import { Router } from 'express'
-import { 
-  uploadResume, 
-  getResumes, 
-  deleteResume,
-  parseResume
-} from '../controllers/resumeController.js'
+import express from 'express'
 import { authenticateToken } from '../middleware/auth.js'
-import { createUploadMiddleware } from '../middleware/upload.js'
+import { uploadResume } from '../middleware/upload.js'
+import { 
+  getResumes, 
+  deleteResume, 
+  parseResume,
+  getParseStatus,
+  uploadResume as uploadResumeController
+} from '../controllers/resumeController.js'
 
-const router = Router()
+const router = express.Router()
 
-const uploadFile = createUploadMiddleware({
-// TODO: add doc, docx support
-  fileTypes: ['pdf'],
-  maxSize: 10 * 1024 * 1024 // 10MB
-})
+router.use(authenticateToken)
 
-router.post('/', authenticateToken, uploadFile.single('resume'), uploadResume)
-router.get('/', authenticateToken, getResumes)
-router.delete('/:id', authenticateToken, deleteResume)
-router.post('/:id/parse', authenticateToken, parseResume)
+router.get('/', getResumes)
+router.post('/', uploadResume.single('resume'), uploadResumeController)
+router.delete('/:id', deleteResume)
+router.post('/:id/parse', parseResume)
+router.get('/:id/parse-status', getParseStatus)
 
 export default router 

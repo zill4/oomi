@@ -9,13 +9,13 @@ export function ResumeParser() {
   // Fetch user's resumes
   const { data: resumes, isLoading } = useQuery({
     queryKey: ['resumes'],
-    queryFn: () => api.get('/api/resumes').then(res => res.data)
+    queryFn: () => api.get('/resumes').then(res => res.data)
   })
 
   // Mutation for parsing resume
   const { mutate: parseResume } = useMutation({
     mutationFn: (resumeId: string) => 
-      api.post(`/api/resumes/${resumeId}/parse`),
+      api.post(`/resumes/${resumeId}/parse`),
     onSuccess: () => {
       toast.success('Resume parsing started')
     },

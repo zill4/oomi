@@ -1,6 +1,8 @@
 import { Request, Response } from 'express'
 import { prisma } from '../lib/prisma.js'
 import { storageService } from '../services/storageService.js'
+import * as amqp from 'amqplib'
+import { ParseJob } from '../types/queue.js'
 
 const MAX_RESUMES = 5
 
@@ -91,11 +93,13 @@ export const deleteResume = async (req: Request, res: Response) => {
 }
 
 export const parseResume = async (req: Request, res: Response) => {
+  let connection: amqp.Connection | undefined;
+  let channel: amqp.Channel | undefined;
+  
   try {
     const { id } = req.params
     const userId = req.user!.id
 
-    // Get resume from database
     const resume = await prisma.resume.findFirst({
       where: { id, userId }
     })
@@ -104,30 +108,108 @@ export const parseResume = async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Resume not found' })
     }
 
-    // Send parse request to resume-parser service
-    const response = await fetch('http://resume-parser:3001/parse', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        resumeId: id,
-        userId,
-        pdfKey: resume.fileUrl
-      })
-    })
-
-    if (!response.ok) {
-      throw new Error('Failed to submit parse request')
-    }
-
-    // Update resume status
+    // Update resume status to PARSING
     await prisma.resume.update({
       where: { id },
       data: { status: 'PARSING' }
     })
 
-    res.json({ message: 'Parse request submitted' })
+    // Connect to RabbitMQ
+    connection = await amqp.connect('amqp://guest:guest@rabbitmq:5672')
+    channel = await connection.createChannel()
+    
+    // Add error handlers with proper types
+    channel.on('error', (err: Error) => {
+      console.error('Channel error:', err)
+    })
+
+    connection.on('error', (err: Error) => {
+      console.error('Connection error:', err)
+    })
+
+    // Create queue with proper settings
+    await channel.assertQueue('resume_parsing', {
+      durable: true,
+      autoDelete: false
+    })
+
+    // Get the pdf_key without leading slash
+    const pdf_key = new URL(resume.fileUrl).pathname.replace(/^\//, '')
+
+    // Send message to queue with correct structure
+    const message = {
+      resume_id: id,
+      user_id: userId,
+      pdf_key,
+      retries: null
+    }
+
+    console.log('Sending message to queue:', JSON.stringify(message, null, 2))
+
+    const success = channel.sendToQueue(
+      'resume_parsing',
+      Buffer.from(JSON.stringify(message)),
+      { persistent: false }
+    )
+
+    if (!success) {
+      throw new Error('Failed to send message to queue')
+    }
+
+    res.json({ 
+      message: 'Parse request submitted',
+      status: 'PARSING',
+      resumeId: id 
+    })
+
   } catch (error) {
     console.error('Parse request error:', error)
+    if (req.params.id) {
+      await prisma.resume.update({
+        where: { id: req.params.id },
+        data: { status: 'PARSE_ERROR' }
+      })
+    }
     res.status(500).json({ error: 'Failed to submit parse request' })
+  } finally {
+    try {
+      // Clean up connections
+      if (channel) await channel.close()
+      if (connection) await connection.close()
+    } catch (err) {
+      console.error('Error closing connections:', err)
+    }
+  }
+}
+
+// Add a new endpoint to get parsing status
+export const getParseStatus = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params
+    const userId = req.user!.id
+
+    const resume = await prisma.resume.findFirst({
+      where: { id, userId },
+      include: {
+        parsedResumes: {
+          orderBy: { createdAt: 'desc' },
+          take: 1
+        }
+      }
+    })
+
+    if (!resume) {
+      return res.status(404).json({ error: 'Resume not found' })
+    }
+
+    res.json({
+      status: resume.status,
+      parsedData: resume.parsedResumes[0]?.parsedData || null,
+      error: resume.parsedResumes[0]?.errorMessage || null
+    })
+
+  } catch (error) {
+    console.error('Error fetching parse status:', error)
+    res.status(500).json({ error: 'Failed to fetch parse status' })
   }
 } 

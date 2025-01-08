@@ -23,6 +23,8 @@ pub struct S3Config {
     pub bucket: String,
     pub region: String,
     pub endpoint: Option<String>,
+    pub access_key_id: String,
+    pub secret_access_key: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -50,7 +52,9 @@ impl Config {
         info!("Loading configuration...");
         let config = config::Config::builder()
             .add_source(config::File::with_name("config/default"))
-            .add_source(config::Environment::default())
+            .add_source(config::Environment::with_prefix("APP")
+                .separator("_")
+                .try_parsing(true))
             .build()
             .map_err(|e| {
                 error!("Failed to build config: {}", e);
@@ -58,6 +62,17 @@ impl Config {
             })?;
 
         info!("Configuration loaded, attempting to deserialize...");
+        
+        // Get the raw config values for logging
+        if let Ok(s3_config) = config.get_table("s3") {
+            info!("S3 Configuration:");
+            info!("  bucket: {:?}", s3_config.get("bucket"));
+            info!("  region: {:?}", s3_config.get("region"));
+            info!("  endpoint: {:?}", s3_config.get("endpoint"));
+            info!("  access_key_id: {}", if s3_config.contains_key("access_key_id") { "SET" } else { "NOT SET" });
+            info!("  secret_access_key: {}", if s3_config.contains_key("secret_access_key") { "SET" } else { "NOT SET" });
+        }
+
         config.try_deserialize()
             .map_err(|e| {
                 error!("Failed to deserialize config: {}", e);

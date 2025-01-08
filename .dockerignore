@@ -6,7 +6,6 @@ dist
 build
 node_modules
 README.md
-.env*
 .dockerignore
 Dockerfile
 npm-debug.log

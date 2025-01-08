@@ -2,7 +2,8 @@
 FROM node:20-alpine AS node-base
 WORKDIR /app
 RUN apk add --no-cache libc6-compat
-RUN npm install -g turbo
+RUN npm install -g turbo tsx
+
 
 # Copy root workspace files first
 COPY package.json package-lock.json turbo.json ./

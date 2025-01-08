@@ -32,27 +32,28 @@ services:
       - JWT_SECRET=${JWT_SECRET}
     command: >
       sh -c "
-      cd packages/backend &&
-      npm install -g tsx &&
-      npx prisma migrate reset --force &&
-      npx prisma generate &&
-      npm run dev
+        cd packages/backend &&
+        npm install -g tsx &&
+        npx prisma generate &&
+        npx prisma db push --accept-data-loss &&
+        npm run dev
       "
     depends_on:
       db:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
 
   db:
     image: postgres:15
-    ports:
-      - "5433:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: oomi
+    ports:
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    user: postgres
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -67,14 +68,23 @@ services:
       - "5555:5555"
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/oomi
-    command: sh -c "cd packages/backend && npx prisma studio --hostname 0.0.0.0 --port 5555 --browser none"
+    command: >
+      sh -c "
+      cd packages/backend &&
+      npx prisma migrate deploy &&
+      npx prisma generate &&
+      npx prisma studio --hostname 0.0.0.0 --port 5555 --browser none
+      "
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   resume-parser:
     build:
       context: ./packages/resume-parser
       dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
     environment:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
@@ -82,6 +92,7 @@ services:
       - AWS_ENDPOINT_URL_S3=${AWS_ENDPOINT_URL_S3}
       - BUCKET_NAME=${BUCKET_NAME}
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+      - RUST_LOG=resume_parser=debug,info
     depends_on:
       rabbitmq:
         condition: service_healthy
