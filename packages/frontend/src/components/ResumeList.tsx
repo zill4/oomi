@@ -11,6 +11,7 @@ import {
   DocumentMagnifyingGlassIcon,
   ArrowPathIcon
 } from '@heroicons/react/24/outline'
+import { io } from 'socket.io-client'
 
 interface Resume {
   id: string
@@ -19,10 +20,23 @@ interface Resume {
   version: number
   status: string
   createdAt: string
+  parsedDataUrl?: string
+}
+
+interface ParsedData {
+  personalInfo: {
+    firstName: string
+    lastName: string
+    email: string
+    phone?: string
+  }
+  // Add other parsed data fields as needed
 }
 
 export default function ResumeList() {
   const [resumes, setResumes] = useState<Resume[]>([])
+  const [selectedResume, setSelectedResume] = useState<Resume | null>(null)
+  const [parsedData, setParsedData] = useState<ParsedData | null>(null)
   const { fetchWithAuth } = useApi()
   const { getSignedUrl } = useAuth()
   const { uploadFile, isUploading } = useFileUpload({
@@ -35,21 +49,51 @@ export default function ResumeList() {
   const hasParsingResumes = resumes.some(resume => resume.status === 'PARSING')
 
   useEffect(() => {
-    // Only set up polling if we have resumes being parsed
+    loadResumes()
+
+    // Set up socket connection
+    const socket = io(process.env.NEXT_PUBLIC_API_URL || '')
+
+    socket.on('resumeParseComplete', async ({ resumeId, status, error }) => {
+      if (error) {
+        toast.error(`Parse error: ${error}`)
+      } else {
+        toast.success('Resume parsing completed')
+      }
+      
+      await loadResumes()
+      
+      // If the parsed resume is currently selected, fetch its parsed data
+      if (selectedResume?.id === resumeId) {
+        await fetchParsedData(resumeId)
+      }
+    })
+
+    return () => {
+      socket.disconnect()
+    }
+  }, [selectedResume])
+
+  // Polling effect for parsing status
+  useEffect(() => {
     if (!hasParsingResumes) return
 
     const pollParseStatus = setInterval(async () => {
-      const updatedResumes = await fetchWithAuth('/resumes')
-      setResumes(updatedResumes)
-      
-      // If no more parsing resumes, clear the interval
-      if (!updatedResumes.some(resume => resume.status === 'PARSING')) {
-        clearInterval(pollParseStatus)
-      }
-    }, 5000)  // Increased to 5 seconds to reduce server load
+      await loadResumes()
+    }, 5000)
 
     return () => clearInterval(pollParseStatus)
   }, [hasParsingResumes])
+
+  const fetchParsedData = async (resumeId: string) => {
+    try {
+      const response = await fetchWithAuth(`/resumes/${resumeId}/parsed-data`)
+      setParsedData(response.data)
+    } catch (error) {
+      console.error('Error fetching parsed data:', error)
+      toast.error('Failed to fetch parsed data')
+    }
+  }
 
   const loadResumes = async () => {
     try {
@@ -231,6 +275,24 @@ export default function ResumeList() {
             </li>
           ))}
         </ul>
+      )}
+      
+      {/* Add parsed data display */}
+      {selectedResume && parsedData && (
+        <div className="mt-6 p-4 bg-white rounded-lg shadow">
+          <h3 className="text-lg font-medium mb-4">Parsed Resume Data</h3>
+          <div className="space-y-4">
+            <div>
+              <h4 className="font-medium">Personal Information</h4>
+              <p>Name: {parsedData.personalInfo.firstName} {parsedData.personalInfo.lastName}</p>
+              <p>Email: {parsedData.personalInfo.email}</p>
+              {parsedData.personalInfo.phone && (
+                <p>Phone: {parsedData.personalInfo.phone}</p>
+              )}
+            </div>
+            {/* Add more parsed data sections as needed */}
+          </div>
+        </div>
       )}
     </div>
   )

@@ -1,20 +1,22 @@
 import express from 'express'
 import { authenticateToken } from '../middleware/auth.js'
-import { uploadResume } from '../middleware/upload.js'
 import { 
   getResumes, 
+  uploadResume,
   deleteResume, 
   parseResume,
-  getParseStatus,
-  uploadResume as uploadResumeController
+  getParseStatus
 } from '../controllers/resumeController.js'
+import multer from 'multer'
 
 const router = express.Router()
+const upload = multer()
 
+// Apply authentication to all resume routes
 router.use(authenticateToken)
 
 router.get('/', getResumes)
-router.post('/', uploadResume.single('resume'), uploadResumeController)
+router.post('/', upload.single('resume'), uploadResume)
 router.delete('/:id', deleteResume)
 router.post('/:id/parse', parseResume)
 router.get('/:id/parse-status', getParseStatus)
