@@ -106,3 +106,9 @@ To test the resume parser:
 2. Monitor the parsing status in the UI
 3. Verify parsed data in the database
 4. Check S3 for stored files
+
+### TODO
+1. Make sure to update fly deployment.
+2. Compose storyboard for release video
+3. Branding update - There are a lot of similarties to dating and finding a job. Interviewing is kind of like dating, and getting a job is like soft-marriage.
+Lot of risk/reward, wasted time and money, and hard feelings on both sides.

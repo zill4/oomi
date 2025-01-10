@@ -1,31 +1,31 @@
-import dotenv from 'dotenv';
 import { z } from 'zod'
-dotenv.config();
+import dotenv from 'dotenv'
 
-export const env = {
-  NODE_ENV: process.env.NODE_ENV || 'development',
-  DATABASE_URL: process.env.DATABASE_URL || 'postgresql://postgres:postgres@db:5432/oomi',
-  JWT_SECRET: process.env.JWT_SECRET || 'dev-secret-key',
-  PORT: parseInt(process.env.PORT || '8080', 10),
-  BUCKET_NAME: process.env.BUCKET_NAME || '',
-  AWS_ENDPOINT_URL_S3: process.env.AWS_ENDPOINT_URL_S3 || '',
-  AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID || '',
-  AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY || ''
-} as const;
+dotenv.config()
 
-// Basic validation
-if (!env.DATABASE_URL) {
-  console.error('❌ DATABASE_URL is required');
-  process.exit(1);
-} 
+// Define the environment schema
+const envSchema = z.object({
+  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+  DATABASE_URL: z.string().min(1),
+  JWT_SECRET: z.string().min(1),
+  PORT: z.coerce.number().default(8080),
+  
+  // S3 Configuration
+  BUCKET_NAME: z.string().min(1),
+  AWS_ENDPOINT_URL_S3: z.string().url(),
+  AWS_ACCESS_KEY_ID: z.string().min(1),
+  AWS_SECRET_ACCESS_KEY: z.string().min(1),
+  AWS_REGION: z.string().min(1),
+  
+  // MongoDB Configuration
+  MONGODB_URI: z.string().url().default('mongodb://root:example@mongodb:27017/oomi?authSource=admin'),
+  
+  // RabbitMQ Configuration
+  RABBITMQ_URL: z.string().url().default('amqp://guest:guest@rabbitmq:5672'),
+})
 
-export const envSchema = z.object({
-  NODE_ENV: z.string(),
-  DATABASE_URL: z.string(),
-  JWT_SECRET: z.string(),
-  PORT: z.number(),
-  BUCKET_NAME: z.string(),
-  AWS_ENDPOINT_URL_S3: z.string(),
-  AWS_ACCESS_KEY_ID: z.string(),
-  AWS_SECRET_ACCESS_KEY: z.string()
-}) 
+// Parse and validate environment variables
+export const env = envSchema.parse(process.env)
+
+// Export the schema type for use in other parts of the application
+export type Env = z.infer<typeof envSchema> 

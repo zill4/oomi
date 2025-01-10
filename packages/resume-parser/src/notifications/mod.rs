@@ -6,18 +6,37 @@ use lapin::{
 };
 use serde::Serialize;
 use tracing::info;
+use crate::models::ResumeData;
 
 const RESULT_QUEUE: &str = "resume_parsing_results";
 
-#[derive(Debug, Serialize, Clone)]
+#[derive(Debug, Serialize)]
 pub struct ParseResult {
-    pub resume_id: String,
-    pub user_id: String,
+    pub resumeId: String,
+    pub userId: String,
     pub pdf_key: String,
     pub status: String,
     pub result_key: Option<String>,
+    pub parsed_data: ResumeData,
+    pub confidence: Option<f64>,
     pub error: Option<String>,
     pub timestamp: String,
+}
+
+impl Clone for ParseResult {
+    fn clone(&self) -> Self {
+        ParseResult {
+            resumeId: self.resumeId.clone(),
+            userId: self.userId.clone(),
+            pdf_key: self.pdf_key.clone(),
+            status: self.status.clone(),
+            result_key: self.result_key.clone(),
+            parsed_data: self.parsed_data.clone(),
+            confidence: self.confidence,
+            error: self.error.clone(),
+            timestamp: self.timestamp.clone(),
+        }
+    }
 }
 
 #[derive(Clone)]
@@ -37,7 +56,7 @@ impl NotificationClient {
     }
 
     pub async fn notify_completion(&self, result: ParseResult) -> Result<()> {
-        info!("Sending completion notification for resume: {}", result.resume_id);
+        info!("Sending completion notification for resume: {}", result.resumeId);
         QUEUE_OPERATIONS.with_label_values(&["notify", "success"]).inc();
 
         self.channel

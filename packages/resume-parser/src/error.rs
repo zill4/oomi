@@ -39,6 +39,9 @@ pub enum ParserError {
 
     #[error("Serialization error: {0}")]
     Serialization(#[from] serde_json::Error),
+
+    #[error("HTTP error: {0}")]
+    Http(String),
 }
 
 impl From<lapin::Error> for ParserError {
@@ -77,6 +80,12 @@ impl From<VarError> for ParserError {
 impl From<ParseError> for ParserError {
     fn from(err: ParseError) -> Self {
         Self::Config(format!("Failed to parse logging filter: {}", err))
+    }
+}
+
+impl From<reqwest::Error> for ParserError {
+    fn from(err: reqwest::Error) -> Self {
+        Self::Http(err.to_string())
     }
 }
 

@@ -118,8 +118,8 @@ impl S3Client {
         Ok(buffer)
     }
 
-    pub async fn store_results(&self, user_id: &str, pdf_key: &str, results: &[u8]) -> Result<String> {
-        let result_key = format!("results/{}/{}.json", user_id, pdf_key);
+    pub async fn store_results(&self, userId: &str, pdf_key: &str, results: &[u8]) -> Result<String> {
+        let result_key = format!("results/{}/{}.json", userId, pdf_key);
         
         info!("Storing parsing results in S3: {}", result_key);
         self.client

@@ -3,6 +3,6 @@ import { handleParseCompletion } from '../controllers/notificationController.js'
 
 const router = express.Router()
 
-router.post('/parse-completion', handleParseCompletion)
+router.post('/parse-complete', handleParseCompletion)
 
 export default router 

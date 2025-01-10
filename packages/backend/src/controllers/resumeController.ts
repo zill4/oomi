@@ -3,6 +3,7 @@ import { prisma } from '../lib/prisma.js'
 import { storageService } from '../services/storageService.js'
 import * as amqp from 'amqplib'
 import { ParseJob } from '../types/queue.js'
+import { collections } from '../lib/mongodb.js'
 
 const MAX_RESUMES = 5
 
@@ -137,11 +138,12 @@ export const parseResume = async (req: Request, res: Response) => {
     const pdf_key = new URL(resume.fileUrl).pathname.replace(/^\//, '')
 
     // Send message to queue with correct structure
-    const message = {
-      resume_id: id,
-      user_id: userId,
+    const message: ParseJob = {
+      resumeId: id,
+      userId: userId,
       pdf_key,
-      retries: null
+      callback_url: `${process.env.API_URL}/notifications/parse-complete`,
+      retries: 3
     }
 
     console.log('Sending message to queue:', JSON.stringify(message, null, 2))
@@ -211,5 +213,43 @@ export const getParseStatus = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error fetching parse status:', error)
     res.status(500).json({ error: 'Failed to fetch parse status' })
+  }
+}
+
+export const getParsedResumeData = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params
+    
+    if (!req.user?.id) {
+      return res.status(401).json({ error: 'Unauthorized' })
+    }
+    
+    const userId = req.user.id
+
+    // Verify resume ownership
+    const resume = await prisma.resume.findFirst({
+      where: {
+        id,
+        userId
+      }
+    })
+
+    if (!resume) {
+      return res.status(404).json({ error: 'Resume not found' })
+    }
+
+    // Get parsed data from MongoDB
+    const parsedResume = await collections.parsedResumes.findOne({
+      resumeId: id
+    })
+
+    if (!parsedResume) {
+      return res.status(404).json({ error: 'Parsed data not found' })
+    }
+
+    res.json(parsedResume)
+  } catch (error) {
+    console.error('Error fetching parsed resume data:', error)
+    res.status(500).json({ error: 'Failed to fetch parsed resume data' })
   }
 } 

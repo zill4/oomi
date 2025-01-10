@@ -2,26 +2,40 @@ import { Request, Response } from 'express'
 import { prisma } from '../lib/prisma.js'
 import { io } from '../lib/socket.js'
 import { ParseResult } from '../types/queue.js'
+import { collections } from '../lib/mongodb.js'
 
 export const handleParseCompletion = async (req: Request, res: Response) => {
   try {
     const result: ParseResult = req.body
     console.log('Received parse completion:', result)
 
-    // Update resume status in database
+    // Store directly in MongoDB (parsed data comes in the notification)
+    await collections.parsedResumes.updateOne(
+      { resumeId: result.resumeId },
+      { 
+        $set: {
+          userId: result.userId,
+          parsedData: result.parsed_data, // Direct from parser
+          confidence: result.confidence ?? 0,
+          version: 1,
+          updatedAt: new Date()
+        }
+      },
+      { upsert: true }
+    )
+
+    // Update resume status in PostgreSQL
     await prisma.resume.update({
-      where: { id: result.resume_id },
+      where: { id: result.resumeId },
       data: {
         status: result.status === 'completed' ? 'PARSED' : 'PARSE_ERROR',
-        parsedDataUrl: result.result_key,
         updatedAt: new Date(result.timestamp)
       }
     })
 
-    // Emit websocket event to connected clients
-    console.log('Emitting resumeParseComplete event')
+    // Emit websocket event
     io.emit('resumeParseComplete', {
-      resumeId: result.resume_id,
+      resumeId: result.resumeId,
       status: result.status,
       error: result.error
     })

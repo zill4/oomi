@@ -2,16 +2,29 @@ import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } fro
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { env } from '../config/env.js'
 
-const s3Client = new S3Client({
-  endpoint: env.AWS_ENDPOINT_URL_S3,
-  region: 'auto',
-  credentials: {
-    accessKeyId: env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
-  },
-})
+class StorageService {
+  private s3Client: S3Client
 
-export const storageService = {
+  constructor() {
+    this.s3Client = new S3Client({
+      endpoint: env.AWS_ENDPOINT_URL_S3,
+      region: env.AWS_REGION,
+      credentials: {
+        accessKeyId: env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: env.AWS_SECRET_ACCESS_KEY
+      }
+    })
+  }
+
+  async getObject(key: string): Promise<Buffer> {
+    const command = new GetObjectCommand({
+      Bucket: env.BUCKET_NAME,
+      Key: key
+    })
+    const response = await this.s3Client.send(command)
+    return Buffer.concat([await response.Body!.transformToByteArray()])
+  }
+
   async uploadFile(file: Express.Multer.File, path: string) {
     const uploadCommand = new PutObjectCommand({
       Bucket: env.BUCKET_NAME,
@@ -20,7 +33,7 @@ export const storageService = {
       ContentType: file.mimetype,
     })
 
-    await s3Client.send(uploadCommand)
+    await this.s3Client.send(uploadCommand)
 
     // Generate a signed URL that's valid for 1 hour
     const getCommand = new GetObjectCommand({
@@ -28,9 +41,9 @@ export const storageService = {
       Key: path,
     })
     
-    const url = await getSignedUrl(s3Client, getCommand, { expiresIn: 3600 })
+    const url = await getSignedUrl(this.s3Client, getCommand, { expiresIn: 3600 })
     return url
-  },
+  }
 
   async deleteFile(path: string) {
     const command = new DeleteObjectCommand({
@@ -38,6 +51,8 @@ export const storageService = {
       Key: path,
     })
 
-    await s3Client.send(command)
+    await this.s3Client.send(command)
   }
-} 
+}
+
+export const storageService = new StorageService() 

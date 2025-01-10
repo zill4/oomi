@@ -78,50 +78,31 @@ impl ResumeScorer {
     }
 
     fn score_education(entry: &EducationEntry) -> ConfidenceScore {
-        let mut score = ConfidenceScore::new(0.5, "Base education score");
+        let mut score = ConfidenceScore::new(0.4, "Base education entry score");
 
-        // Check for required fields
         if !entry.institution.is_empty() {
             score.add_reason(0.2, "Institution name present");
         }
-        if !entry.degree.is_empty() {
-            score.add_reason(0.2, "Degree information present");
+        if let Some(ref degree) = entry.degree {
+            if !degree.is_empty() {
+                score.add_reason(0.2, "Degree present");
+            }
         }
-
-        // Check for optional fields that increase confidence
-        if entry.start_date.is_some() {
-            score.add_reason(0.05, "Start date present");
-        }
-        if entry.end_date.is_some() {
-            score.add_reason(0.05, "End date present");
-        }
-        if entry.field.is_some() {
-            score.add_reason(0.1, "Field of study present");
-        }
-        if entry.gpa.is_some() {
-            score.add_reason(0.1, "GPA information present");
+        if entry.graduation_date.is_some() {
+            score.add_reason(0.1, "Graduation date present");
         }
 
         score
     }
 
     fn score_experience(entry: &ExperienceEntry) -> ConfidenceScore {
-        let mut score = ConfidenceScore::new(0.5, "Base experience score");
+        let mut score = ConfidenceScore::new(0.4, "Base experience entry score");
 
-        // Check for required fields
         if !entry.company.is_empty() {
             score.add_reason(0.2, "Company name present");
         }
         if !entry.title.is_empty() {
             score.add_reason(0.2, "Job title present");
-        }
-
-        // Check for optional fields that increase confidence
-        if entry.start_date.is_some() {
-            score.add_reason(0.05, "Start date present");
-        }
-        if entry.end_date.is_some() {
-            score.add_reason(0.05, "End date present");
         }
         if !entry.achievements.is_empty() {
             score.add_reason(0.1, "Achievements present");
@@ -133,24 +114,9 @@ impl ResumeScorer {
         score
     }
 
-    fn score_skills(skills: &[crate::models::SkillCategory]) -> ConfidenceScore {
-        let mut score = ConfidenceScore::new(0.5, "Base skills score");
-
-        if !skills.is_empty() {
-            score.add_reason(0.2, "Skills present");
-            
-            let total_skills: usize = skills.iter()
-                .map(|category| category.skills.len())
-                .sum();
-
-            if total_skills > 5 {
-                score.add_reason(0.2, "Comprehensive skills list");
-            } else if total_skills > 2 {
-                score.add_reason(0.1, "Multiple skills present");
-            }
-        }
-
-        score
+    fn score_skills(skills: &[String]) -> ConfidenceScore {
+        let score = if !skills.is_empty() { 1.0 } else { 0.0 };
+        ConfidenceScore::new(score, "Skills section evaluation")
     }
 }
 

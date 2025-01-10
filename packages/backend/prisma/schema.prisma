@@ -20,6 +20,7 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   avatarUrl     String?
+  parsedResumes  ResumeParse[]
 }
 
 model Resume {
@@ -50,15 +51,18 @@ model JobApplication {
 }
 
 model ResumeParse {
-  id          Int      @id @default(autoincrement())
-  resumeId    String
+  id          String      @id @default(cuid())
+  resumeId    String      @unique
   userId      String
-  parsedData  Json?
-  errorMessage String?
+  parsedData  Json
   status      String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now())
-  resume      Resume   @relation(fields: [resumeId], references: [id])
+  errorMessage String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  resume      Resume      @relation(fields: [resumeId], references: [id])
+  user        User        @relation(fields: [userId], references: [id])
 
   @@index([resumeId])
+  @@index([userId])
 } 

@@ -10,15 +10,18 @@ use tokio::time::Duration;
 use tracing::{error, info};
 use crate::parser::ResumeParser;
 use crate::storage::S3Client;
+use chrono::Utc;
+use crate::models::ResumeData;
 
 const PROCESSING_TIMEOUT: Duration = Duration::from_secs(300); // 5 minutes
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ParseJob {
-    pub resume_id: String,
-    pub user_id: String,
+    pub resumeId: String,
+    pub userId: String,
     pub pdf_key: String,
     pub retries: Option<u32>,
+    pub callback_url: String,
 }
 
 pub struct QueueClient {
@@ -187,7 +190,7 @@ impl QueueClient {
         };
 
         let attempt = job.retries.unwrap_or(0) + 1;
-        info!("Processing attempt {} for resume_id: {}", attempt, job.resume_id);
+        info!("Processing attempt {} for resumeId: {}", attempt, job.resumeId);
 
         if attempt > MAX_RETRIES {
             error!("Job exceeded maximum retry attempts: {}", serde_json::to_string(&job)?);
@@ -197,15 +200,15 @@ impl QueueClient {
             });
         }
 
-        info!("Processing job for resume_id: {}", job.resume_id);
+        info!("Processing job for resumeId: {}", job.resumeId);
 
         // Process the job
         match self.process_job(job.clone(), attempt).await {
             Ok(_) => {
-                info!("Successfully processed job for resume_id: {}", job.resume_id);
+                info!("Successfully processed job for resumeId: {}", job.resumeId);
             }
             Err(e) => {
-                error!("Failed to process job for resume_id {}: {:?}", job.resume_id, e);
+                error!("Failed to process job for resumeId {}: {:?}", job.resumeId, e);
                 return Err(e);
             }
         }
@@ -214,7 +217,7 @@ impl QueueClient {
         match self.channel
             .basic_ack(delivery.delivery_tag, BasicAckOptions::default())
             .await {
-                Ok(_) => info!("Successfully acknowledged message for resume_id: {}", job.resume_id),
+                Ok(_) => info!("Successfully acknowledged message for resumeId: {}", job.resumeId),
                 Err(e) => error!("Failed to acknowledge message: {}", e),
             }
 
@@ -223,10 +226,12 @@ impl QueueClient {
 
     async fn handle_timeout(&self, job: &ParseJob) -> Result<()> {
         let result = ParseResult {
-            resume_id: job.resume_id.clone(),
-            user_id: job.user_id.clone(),
+            resumeId: job.resumeId.clone(),
+            userId: job.userId.clone(),
             pdf_key: job.pdf_key.clone(),
             status: "timeout".to_string(),
+            parsed_data: ResumeData::default(),
+            confidence: None,
             result_key: None,
             error: Some("Processing timed out".to_string()),
             timestamp: chrono::Utc::now().to_rfc3339(),
@@ -237,7 +242,7 @@ impl QueueClient {
 
     async fn process_job(&self, job: ParseJob, retry_count: u32) -> Result<()> {
         info!("Starting to process resume for user: {}, pdf: {}, attempt: {}", 
-            job.user_id, job.pdf_key, retry_count);
+            job.userId, job.pdf_key, retry_count);
 
         let s3_client = match S3Client::new().await {
             Ok(client) => {
@@ -276,37 +281,32 @@ impl QueueClient {
             }
         };
 
-        // Store results in S3
-        info!("Storing parsing results in S3");
-        let result_key = match s3_client
-            .store_results(&job.user_id, &job.pdf_key, &serde_json::to_vec(&resume_data)?)
-            .await {
-                Ok(key) => {
-                    info!("Successfully stored results in S3");
-                    key
-                },
-                Err(e) => {
-                    error!("Failed to store results in S3: {}", e);
-                    return Err(e);
-                }
-            };
-
-        // Send completion notification
-        info!("Sending completion notification");
-        let result = ParseResult {
-            resume_id: job.resume_id.clone(),
-            user_id: job.user_id.clone(),
+        // Send notification to backend
+        let notification = ParseResult {
+            resumeId: job.resumeId,
+            userId: job.userId,
             pdf_key: job.pdf_key.clone(),
             status: "completed".to_string(),
-            result_key: Some(result_key),
+            parsed_data: resume_data,
+            confidence: Some(0.8),
+            result_key: None,
             error: None,
-            timestamp: chrono::Utc::now().to_rfc3339(),
+            timestamp: Utc::now().to_rfc3339(),
         };
 
-        match self.notification_client.notify_completion(result).await {
-            Ok(_) => info!("Successfully sent completion notification"),
-            Err(e) => error!("Failed to send completion notification: {}", e),
+        let client = reqwest::Client::new();
+        let response = client
+            .post(&job.callback_url)
+            .json(&notification)
+            .send()
+            .await?;
+
+        if !response.status().is_success() {
+            error!("Failed to send notification: {}", response.status());
+            return Err(ParserError::Http("Failed to send notification".to_string()));
         }
+
+        info!("Successfully sent parse notification");
 
         Ok(())
     }
