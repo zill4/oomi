@@ -9,22 +9,7 @@ export const handleParseCompletion = async (req: Request, res: Response) => {
     const result: ParseResult = req.body
     console.log('Received parse completion:', result)
 
-    // Store directly in MongoDB (parsed data comes in the notification)
-    await collections.parsedResumes.updateOne(
-      { resumeId: result.resumeId },
-      { 
-        $set: {
-          userId: result.userId,
-          parsedData: result.parsed_data, // Direct from parser
-          confidence: result.confidence ?? 0,
-          version: 1,
-          updatedAt: new Date()
-        }
-      },
-      { upsert: true }
-    )
-
-    // Update resume status in PostgreSQL
+    // Update resume status first (most critical)
     await prisma.resume.update({
       where: { id: result.resumeId },
       data: {
@@ -33,12 +18,37 @@ export const handleParseCompletion = async (req: Request, res: Response) => {
       }
     })
 
-    // Emit websocket event
-    io.emit('resumeParseComplete', {
-      resumeId: result.resumeId,
-      status: result.status,
-      error: result.error
-    })
+    // Then try to store in MongoDB
+    try {
+      await collections.parsedResumes.updateOne(
+        { resumeId: result.resumeId },
+        { 
+          $set: {
+            userId: result.userId,
+            parsedData: result.parsed_data,
+            confidence: result.confidence ?? 0,
+            version: 1,
+            updatedAt: new Date()
+          }
+        },
+        { upsert: true }
+      )
+    } catch (mongoError) {
+      console.error('MongoDB storage failed:', mongoError)
+      // Don't fail the whole request, just log the error
+    }
+
+    // Finally try websocket notification
+    try {
+      io.emit('resumeParseComplete', {
+        resumeId: result.resumeId,
+        status: result.status,
+        error: result.error
+      })
+    } catch (socketError) {
+      console.error('WebSocket notification failed:', socketError)
+      // Don't fail the whole request, just log the error
+    }
 
     res.json({ success: true })
   } catch (error) {

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useApi } from '../hooks/useApi'
+import { useApi } from '../lib/api'
 import { toast } from 'react-hot-toast'
 
 export const ResumeItem = ({ resume }) => {
@@ -13,7 +13,9 @@ export const ResumeItem = ({ resume }) => {
       setIsLoading(true)
       if (isRetry) setIsRetrying(true)
       
-      const response = await api.post(`/resumes/${resume.id}/parse`)
+      const response = await api.post(`/resumes/${resume.id}/parse`, {
+        retry: isRetry
+      })
       setParseStatus('PARSING')
       
       // Poll for status updates
@@ -50,21 +52,27 @@ export const ResumeItem = ({ resume }) => {
       <div className="flex gap-2">
         <button
           onClick={() => handleParse(false)}
-          disabled={isLoading || parseStatus === 'PARSING'}
-          className="px-4 py-2 bg-blue-500 text-white rounded-md disabled:opacity-50"
+          disabled={isLoading}
+          className={`px-4 py-2 rounded-md transition-colors
+            ${isLoading 
+              ? 'bg-gray-300 cursor-not-allowed' 
+              : 'bg-blue-500 hover:bg-blue-600 text-white'
+            }`}
         >
           {isLoading ? 'Processing...' : 'Parse Resume'}
         </button>
         
-        {(parseStatus === 'ERROR' || parseStatus === 'PARSED') && (
-          <button
-            onClick={() => handleParse(true)}
-            disabled={isRetrying}
-            className="px-4 py-2 bg-gray-500 text-white rounded-md disabled:opacity-50 hover:bg-gray-600"
-          >
-            {isRetrying ? 'Retrying...' : 'Retry Parse'}
-          </button>
-        )}
+        <button
+          onClick={() => handleParse(true)}
+          disabled={isRetrying}
+          className={`px-4 py-2 rounded-md transition-colors
+            ${isRetrying 
+              ? 'bg-gray-300 cursor-not-allowed' 
+              : 'bg-orange-500 hover:bg-orange-600 text-white'
+            }`}
+        >
+          {isRetrying ? 'Retrying...' : 'Retry Parse'}
+        </button>
       </div>
     </div>
   )

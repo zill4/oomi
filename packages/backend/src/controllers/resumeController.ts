@@ -109,11 +109,16 @@ export const parseResume = async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Resume not found' })
     }
 
-    // Update resume status to PARSING
+    // Log the parse request
+    console.log(`Starting parse for resume: ${id}`);
+    
     await prisma.resume.update({
       where: { id },
-      data: { status: 'PARSING' }
-    })
+      data: { 
+        status: 'PARSING',
+        updatedAt: new Date()
+      }
+    });
 
     // Connect to RabbitMQ
     connection = await amqp.connect('amqp://guest:guest@rabbitmq:5672')
@@ -143,10 +148,10 @@ export const parseResume = async (req: Request, res: Response) => {
       userId: userId,
       pdf_key,
       callback_url: `${process.env.API_URL}/notifications/parse-complete`,
-      retries: 3
+      retries: 0
     }
 
-    console.log('Sending message to queue:', JSON.stringify(message, null, 2))
+    console.log('Sending to queue:', message);
 
     const success = channel.sendToQueue(
       'resume_parsing',

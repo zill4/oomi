@@ -14,6 +14,8 @@ use chrono::Utc;
 use crate::models::ResumeData;
 
 const PROCESSING_TIMEOUT: Duration = Duration::from_secs(300); // 5 minutes
+const MAX_RETRIES: u32 = 3;
+const BASE_RETRY_DELAY_MS: u64 = 1000; // Start with 1 second
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ParseJob {
@@ -171,55 +173,85 @@ impl QueueClient {
     }
 
     async fn handle_job(&self, delivery: &Delivery) -> Result<()> {
-        const MAX_RETRIES: u32 = 3;
-        
-        info!("Received message: {}", String::from_utf8_lossy(&delivery.data));
-        
         let job: ParseJob = match serde_json::from_slice(&delivery.data) {
-            Ok(job) => {
-                info!("Successfully parsed job data: {:?}", job);
-                job
-            },
+            Ok(job) => job,
             Err(e) => {
-                error!("Failed to parse job data: {}", e);
+                error!("Failed to deserialize job: {}", e);
+                self.channel
+                    .basic_reject(delivery.delivery_tag, BasicRejectOptions::default())
+                    .await?;
                 return Err(ParserError::Queue {
-                    message: format!("Failed to parse job data: {}", e),
-                    source: None,
+                    message: "Invalid job format".to_string(),
+                    source: Some(Box::new(e)),
                 });
             }
         };
 
-        let attempt = job.retries.unwrap_or(0) + 1;
-        info!("Processing attempt {} for resumeId: {}", attempt, job.resumeId);
+        let attempt = job.retries.unwrap_or(0);
+        info!("Processing attempt {} for resumeId: {}", attempt + 1, job.resumeId);
 
-        if attempt > MAX_RETRIES {
-            error!("Job exceeded maximum retry attempts: {}", serde_json::to_string(&job)?);
-            return Err(ParserError::Queue { 
-                message: "Max retries exceeded".to_string(),
-                source: None 
-            });
+        if attempt >= MAX_RETRIES {
+            error!("Job exceeded maximum retry attempts");
+            // Send failure notification
+            let client = reqwest::Client::new();
+            let notification = ParseResult {
+                resumeId: job.resumeId.clone(),
+                userId: job.userId.clone(),
+                pdf_key: job.pdf_key.clone(),
+                status: "failed".to_string(),
+                parsed_data: ResumeData::default(),
+                confidence: None,
+                result_key: None,
+                error: Some("Maximum retry attempts exceeded".to_string()),
+                timestamp: Utc::now().to_rfc3339(),
+            };
+
+            let response = client
+                .post(&job.callback_url)
+                .json(&notification)
+                .send()
+                .await?;
+
+            if !response.status().is_success() {
+                error!("Failed to send notification: {}", response.status());
+            }
+
+            // Acknowledge and remove from queue
+            self.channel
+                .basic_ack(delivery.delivery_tag, BasicAckOptions::default())
+                .await?;
+            return Ok(());
         }
 
-        info!("Processing job for resumeId: {}", job.resumeId);
-
-        // Process the job
-        match self.process_job(job.clone(), attempt).await {
+        // Calculate exponential backoff delay
+        let delay = Duration::from_millis(BASE_RETRY_DELAY_MS * 2u64.pow(attempt));
+        
+        match self.process_job(job.clone()).await {
             Ok(_) => {
                 info!("Successfully processed job for resumeId: {}", job.resumeId);
+                self.channel
+                    .basic_ack(delivery.delivery_tag, BasicAckOptions::default())
+                    .await?;
             }
             Err(e) => {
-                error!("Failed to process job for resumeId {}: {:?}", job.resumeId, e);
+                error!("Failed to process job: {:?}", e);
+                
+                // Wait for backoff period
+                tokio::time::sleep(delay).await;
+
+                // Requeue with incremented retry count
+                let mut job = job;
+                job.retries = Some(attempt + 1);
+                
+                self.channel
+                    .basic_reject(delivery.delivery_tag, BasicRejectOptions {
+                        requeue: true,
+                    })
+                    .await?;
+                
                 return Err(e);
             }
         }
-
-        // Acknowledge the message
-        match self.channel
-            .basic_ack(delivery.delivery_tag, BasicAckOptions::default())
-            .await {
-                Ok(_) => info!("Successfully acknowledged message for resumeId: {}", job.resumeId),
-                Err(e) => error!("Failed to acknowledge message: {}", e),
-            }
 
         Ok(())
     }
@@ -240,9 +272,9 @@ impl QueueClient {
         self.notification_client.notify_completion(result).await
     }
 
-    async fn process_job(&self, job: ParseJob, retry_count: u32) -> Result<()> {
-        info!("Starting to process resume for user: {}, pdf: {}, attempt: {}", 
-            job.userId, job.pdf_key, retry_count);
+    async fn process_job(&self, job: ParseJob) -> Result<()> {
+        info!("Starting to process resume for user: {}, pdf: {}", 
+            job.userId, job.pdf_key);
 
         let s3_client = match S3Client::new().await {
             Ok(client) => {
@@ -309,5 +341,29 @@ impl QueueClient {
         info!("Successfully sent parse notification");
 
         Ok(())
+    }
+
+    async fn send_notification(&self, result: ParseResult, callback_url: &str) -> Result<()> {
+        let client = reqwest::Client::new();
+        info!("Sending notification to: {}", callback_url);
+        
+        match client.post(callback_url)
+            .json(&result)
+            .send()
+            .await 
+        {
+            Ok(response) => {
+                if !response.status().is_success() {
+                    error!("Notification failed with status: {}", response.status());
+                    return Err(ParserError::Http(format!("Notification failed with status: {}", response.status())));
+                }
+                info!("Notification sent successfully");
+                Ok(())
+            },
+            Err(e) => {
+                error!("Failed to send notification: {}", e);
+                Err(ParserError::Http(e.to_string()))
+            }
+        }
     }
 }

@@ -60,7 +60,7 @@ pub struct SkillCategory {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct StoredResume {
     pub id: i32,
-    pub user_id: uuid::Uuid,
+    pub userId: uuid::Uuid,
     pub pdf_key: String,
     pub data: serde_json::Value,
     pub created_at: chrono::DateTime<chrono::Utc>,

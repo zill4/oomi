@@ -112,3 +112,5 @@ To test the resume parser:
 2. Compose storyboard for release video
 3. Branding update - There are a lot of similarties to dating and finding a job. Interviewing is kind of like dating, and getting a job is like soft-marriage.
 Lot of risk/reward, wasted time and money, and hard feelings on both sides.
+
+  oomi
