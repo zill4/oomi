@@ -147,7 +147,7 @@ export const parseResume = async (req: Request, res: Response) => {
       resumeId: id,
       userId: userId,
       pdf_key,
-      callback_url: `${process.env.API_URL}/notifications/parse-complete`,
+      callback_url: `${process.env.API_URL}/api/notifications/parse-complete`,
       retries: 0
     }
 

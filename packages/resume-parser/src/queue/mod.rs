@@ -7,7 +7,7 @@ use lapin::{
 };
 use serde::{Deserialize, Serialize};
 use tokio::time::Duration;
-use tracing::{error, info};
+use tracing::{error, info, debug};
 use crate::parser::ResumeParser;
 use crate::storage::S3Client;
 use chrono::Utc;
@@ -326,19 +326,32 @@ impl QueueClient {
             timestamp: Utc::now().to_rfc3339(),
         };
 
+        info!("Attempting to send notification to: {}", &job.callback_url);
+        debug!("Notification payload: {:?}", &notification);
+
         let client = reqwest::Client::new();
         let response = client
             .post(&job.callback_url)
             .json(&notification)
             .send()
-            .await?;
+            .await;
 
-        if !response.status().is_success() {
-            error!("Failed to send notification: {}", response.status());
-            return Err(ParserError::Http("Failed to send notification".to_string()));
+        match response {
+            Ok(res) => {
+                if !res.status().is_success() {
+                    error!(
+                        "Failed to send notification: Status: {}, Response: {:?}",
+                        res.status(),
+                        res.text().await.unwrap_or_default()
+                    );
+                } else {
+                    info!("Successfully sent notification");
+                }
+            },
+            Err(e) => {
+                error!("Error sending notification: {}", e);
+            }
         }
-
-        info!("Successfully sent parse notification");
 
         Ok(())
     }
