@@ -1,14 +1,18 @@
 import { useState } from 'react'
 import { useApi } from '../hooks/useApi'
+import { toast } from 'react-hot-toast'
 
 export const ResumeItem = ({ resume }) => {
   const [parseStatus, setParseStatus] = useState(resume.status)
   const [isLoading, setIsLoading] = useState(false)
+  const [isRetrying, setIsRetrying] = useState(false)
   const api = useApi()
 
-  const handleParse = async () => {
+  const handleParse = async (isRetry = false) => {
     try {
       setIsLoading(true)
+      if (isRetry) setIsRetrying(true)
+      
       const response = await api.post(`/resumes/${resume.id}/parse`)
       setParseStatus('PARSING')
       
@@ -18,15 +22,22 @@ export const ResumeItem = ({ resume }) => {
         setParseStatus(statusResponse.data.status)
         
         if (statusResponse.data.status === 'PARSED' || 
-            statusResponse.data.status === 'PARSE_ERROR') {
+            statusResponse.data.status === 'ERROR') {
           clearInterval(intervalId)
+          setIsLoading(false)
+          setIsRetrying(false)
+          
+          if (statusResponse.data.status === 'ERROR') {
+            toast.error('Failed to parse resume')
+          } else {
+            toast.success('Resume parsed successfully')
+          }
         }
       }, 2000)
-
     } catch (error) {
-      console.error('Parse error:', error)
-    } finally {
       setIsLoading(false)
+      setIsRetrying(false)
+      toast.error('Failed to start parsing')
     }
   }
 
@@ -38,12 +49,22 @@ export const ResumeItem = ({ resume }) => {
       </div>
       <div className="flex gap-2">
         <button
-          onClick={handleParse}
+          onClick={() => handleParse(false)}
           disabled={isLoading || parseStatus === 'PARSING'}
           className="px-4 py-2 bg-blue-500 text-white rounded-md disabled:opacity-50"
         >
           {isLoading ? 'Processing...' : 'Parse Resume'}
         </button>
+        
+        {(parseStatus === 'ERROR' || parseStatus === 'PARSED') && (
+          <button
+            onClick={() => handleParse(true)}
+            disabled={isRetrying}
+            className="px-4 py-2 bg-gray-500 text-white rounded-md disabled:opacity-50 hover:bg-gray-600"
+          >
+            {isRetrying ? 'Retrying...' : 'Retry Parse'}
+          </button>
+        )}
       </div>
     </div>
   )

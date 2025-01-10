@@ -46,24 +46,33 @@ export default function ResumeList() {
   })
 
   // Add a ref to track if we need to poll
-  const hasParsingResumes = resumes.some(resume => resume.status === 'PARSING')
+  // const hasParsingResumes = resumes.some(resume => resume.status === 'PARSING')
 
   useEffect(() => {
     loadResumes()
 
-    // Set up socket connection
-    const socket = io(process.env.NEXT_PUBLIC_API_URL || '')
+    // Add debug logging for socket connection
+    const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:8080')
+    
+    socket.on('connect', () => {
+      console.log('Socket connected!')
+    })
+
+    socket.on('connect_error', (error) => {
+      console.error('Socket connection error:', error)
+    })
 
     socket.on('resumeParseComplete', async ({ resumeId, status, error }) => {
+      console.log('Received parse completion:', { resumeId, status, error })
       if (error) {
         toast.error(`Parse error: ${error}`)
       } else {
         toast.success('Resume parsing completed')
       }
       
+      // Refresh the resumes list
       await loadResumes()
       
-      // If the parsed resume is currently selected, fetch its parsed data
       if (selectedResume?.id === resumeId) {
         await fetchParsedData(resumeId)
       }
@@ -74,16 +83,16 @@ export default function ResumeList() {
     }
   }, [selectedResume])
 
-  // Polling effect for parsing status
-  useEffect(() => {
-    if (!hasParsingResumes) return
+  // // Polling effect for parsing status
+  // useEffect(() => {
+  //   if (!hasParsingResumes) return
 
-    const pollParseStatus = setInterval(async () => {
-      await loadResumes()
-    }, 5000)
+  //   const pollParseStatus = setInterval(async () => {
+  //     await loadResumes()
+  //   }, 5000)
 
-    return () => clearInterval(pollParseStatus)
-  }, [hasParsingResumes])
+  //   return () => clearInterval(pollParseStatus)
+  // }, [hasParsingResumes])
 
   const fetchParsedData = async (resumeId: string) => {
     try {
@@ -107,9 +116,9 @@ export default function ResumeList() {
     }
   }
 
-  useEffect(() => {
-    loadResumes()
-  }, [])
+  // useEffect(() => {
+  //   loadResumes()
+  // }, [])
 
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]

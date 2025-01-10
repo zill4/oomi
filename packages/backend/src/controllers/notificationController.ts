@@ -6,6 +6,7 @@ import { ParseResult } from '../types/queue.js'
 export const handleParseCompletion = async (req: Request, res: Response) => {
   try {
     const result: ParseResult = req.body
+    console.log('Received parse completion:', result)
 
     // Update resume status in database
     await prisma.resume.update({
@@ -18,6 +19,7 @@ export const handleParseCompletion = async (req: Request, res: Response) => {
     })
 
     // Emit websocket event to connected clients
+    console.log('Emitting resumeParseComplete event')
     io.emit('resumeParseComplete', {
       resumeId: result.resume_id,
       status: result.status,
