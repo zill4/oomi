@@ -8,7 +8,8 @@ pub struct ResumeParser;
 
 impl ResumeParser {
     pub async fn parse_from_bytes(pdf_data: &[u8]) -> crate::error::Result<ResumeData> {
-        let text = String::from_utf8_lossy(pdf_data);
+        let text = pdf_extract::extract_text_from_mem(pdf_data)
+            .map_err(|e| crate::error::ParserError::PdfExtraction(e.to_string()))?;
         Ok(parse_resume(&text))
     }
 
@@ -56,8 +57,9 @@ pub fn parse_resume(text: &str) -> ResumeData {
     let experience = extract_experience(&sections);
     let skills = extract_skills(&sections);
 
-    // Store metadata
-    let metadata = HashMap::new();
+    // Create metadata without raw_text
+    let mut metadata = HashMap::new();
+    // Add any other metadata fields here if needed
     
     ResumeData {
         personal_info,
@@ -65,7 +67,7 @@ pub fn parse_resume(text: &str) -> ResumeData {
         experience,
         skills,
         metadata,
-        raw_text: text.to_string()
+        raw_text: text.to_string()  // Move raw text to the proper field
     }
 }
 

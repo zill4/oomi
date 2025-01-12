@@ -11,30 +11,33 @@ export interface ParseResult {
   userId: string
   status: 'completed' | 'error' | string
   parsed_data: {
-    personalInfo: {
-      name?: string
-      email?: string
-      phone?: string
-      location?: string
-      linkedin?: string
-      github?: string
-      website?: string
+    personal_info: {
+      name?: string | null
+      email?: string | null
+      phone?: string | null
+      location?: string | null
+      linkedin?: string | null
+      github?: string | null
+      website?: string | null
     }
+    education: Array<{
+      institution: string
+      degree?: string | null
+      field?: string | null
+      graduation_date?: string | null
+    }>
     experience: Array<{
       company: string
       title: string
-      location?: string
-      startDate?: string
-      endDate?: string
+      location?: string | null
+      start_date?: string | null
+      end_date?: string | null
       achievements: string[]
-    }>
-    education: Array<{
-      institution: string
-      degree?: string
-      field?: string
-      graduationDate?: string
+      technologies: string[]
     }>
     skills: string[]
+    metadata: Record<string, any>
+    raw_text: string
   }
   confidence?: number
   error?: string

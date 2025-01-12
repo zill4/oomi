@@ -1,15 +1,15 @@
 db = db.getSiblingDB('oomi');
 
 // Create collections with schema validation
-db.createCollection('resumes', {
+db.createCollection('parsedResumes', {
   validator: {
     $jsonSchema: {
       bsonType: 'object',
-      required: ['userId', 'pdf_key', 'data'],
+      required: ['resumeId', 'userId', 'parsedData'],
       properties: {
+        resumeId: { bsonType: 'string' },
         userId: { bsonType: 'string' },
-        pdf_key: { bsonType: 'string' },
-        data: {
+        parsedData: {
           bsonType: 'object',
           required: ['personal_info', 'education', 'experience', 'skills', 'metadata', 'raw_text'],
           properties: {
@@ -52,18 +52,14 @@ db.createCollection('resumes', {
                 }
               }
             },
-            skills: {
-              bsonType: 'array',
-              items: { bsonType: 'string' }
-            },
-            metadata: {
-              bsonType: 'object'
-            },
+            skills: { bsonType: 'array', items: { bsonType: 'string' } },
+            metadata: { bsonType: 'object' },
             raw_text: { bsonType: 'string' }
           }
         },
-        created_at: { bsonType: 'date' },
-        updated_at: { bsonType: 'date' }
+        confidence: { bsonType: 'double' },
+        version: { bsonType: 'int' },
+        updatedAt: { bsonType: 'date' }
       }
     }
   }

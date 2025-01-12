@@ -13,43 +13,45 @@ const client = new MongoClient(uri, {
 
 export const mongodb = client.db('oomi')
 
-// Updated to match ParseResult type
+// Updated to match MongoDB schema validation
 export interface ParsedResume {
   _id?: string
   resumeId: string
   userId: string
   parsedData: {
-    personalInfo: {
-      name?: string
-      email?: string
-      phone?: string
-      location?: string
-      linkedin?: string
-      github?: string
-      website?: string
+    personal_info: {
+      name?: string | null
+      email?: string | null
+      phone?: string | null
+      location?: string | null
+      linkedin?: string | null
+      github?: string | null
+      website?: string | null
     }
+    education: Array<{
+      institution: string
+      degree?: string | null
+      field?: string | null
+      graduation_date?: string | null
+    }>
     experience: Array<{
       company: string
       title: string
-      location?: string
-      startDate?: string
-      endDate?: string
+      location?: string | null
+      start_date?: string | null
+      end_date?: string | null
       achievements: string[]
-    }>
-    education: Array<{
-      institution: string
-      degree?: string
-      field?: string
-      graduationDate?: string
+      technologies: string[]
     }>
     skills: string[]
+    metadata: Record<string, any>
+    raw_text: string
   }
   confidence: number
   version: number
-  createdAt: Date
   updatedAt: Date
 }
 
 export const collections = {
-  parsedResumes: mongodb.collection<ParsedResume>('parsed_resumes')
+  parsedResumes: mongodb.collection<ParsedResume>('parsedResumes')
 } 

@@ -3,7 +3,7 @@ import { prisma } from '../lib/prisma.js'
 import { storageService } from '../services/storageService.js'
 import * as amqp from 'amqplib'
 import { ParseJob } from '../types/queue.js'
-import { collections } from '../lib/mongodb.js'
+import { collections, mongodb } from '../lib/mongodb.js'
 
 const MAX_RESUMES = 5
 
@@ -257,4 +257,46 @@ export const getParsedResumeData = async (req: Request, res: Response) => {
     console.error('Error fetching parsed resume data:', error)
     res.status(500).json({ error: 'Failed to fetch parsed resume data' })
   }
-} 
+}
+
+export const getParsedResume = async (req: Request, res: Response) => {
+  try {
+    const { resumeId } = req.params
+    const userId = req.user?.id
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' })
+    }
+    console.log('checking for resume', resumeId, userId);
+    // First verify ownership using Prisma
+    const resume = await prisma.resume.findFirst({
+      where: {
+        id: resumeId,
+        userId
+      }
+    })
+
+    if (!resume) {
+      return res.status(404).json({ error: 'Resume not found' })
+    }
+
+    // Then get parsed data from MongoDB
+    const parsedResume = await collections.parsedResumes.findOne({ resumeId })
+    console.log('Found parsed resume:', parsedResume)
+
+    if (!parsedResume) {
+      return res.status(404).json({ 
+        error: 'Parsed resume data not found',
+        resumeId 
+      })
+    }
+
+    res.json({ 
+      success: true, 
+      data: parsedResume.parsedData 
+    })
+  } catch (error) {
+    console.error('Error fetching parsed resume:', error)
+    res.status(500).json({ error: 'Failed to fetch parsed resume' })
+  }
+}

@@ -251,6 +251,23 @@ export default function ResumeList() {
               </div>
               <div className="flex space-x-3">
                 <button
+                  onClick={async () => {
+                    try {
+                      const response = await fetchWithAuth(`/resumes/${resume.id}/parsed`)
+                      console.log('Parsed Resume Data:', response.data)
+                      toast.success('Parsed data loaded to console')
+                    } catch (error) {
+                      console.error('Error fetching parsed data:', error)
+                      toast.error('Failed to fetch parsed data')
+                    }
+                  }}
+                  disabled={resume.status !== 'PARSED'}
+                  className="text-green-500 hover:text-green-600 p-2 disabled:opacity-50"
+                  title="View Parsed Data"
+                >
+                  <DocumentMagnifyingGlassIcon className="h-5 w-5" />
+                </button>
+                <button
                   onClick={() => handleParse(resume.id)}
                   disabled={resume.status === 'PARSING'}
                   className="text-blue-500 hover:text-blue-600 p-2 disabled:opacity-50"

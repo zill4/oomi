@@ -5,7 +5,8 @@ import {
   uploadResume,
   deleteResume, 
   parseResume,
-  getParseStatus
+  getParseStatus,
+  getParsedResume
 } from '../controllers/resumeController.js'
 import multer from 'multer'
 
@@ -20,5 +21,6 @@ router.post('/', upload.single('resume'), uploadResume)
 router.delete('/:id', deleteResume)
 router.post('/:id/parse', parseResume)
 router.get('/:id/parse-status', getParseStatus)
+router.get('/:resumeId/parsed', getParsedResume)
 
 export default router 
