@@ -1,17 +1,20 @@
 import { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
 import { env } from '../config/env.js'
+import { Session } from 'express-session'
 
 interface JwtPayload {
   userId: string
 }
 
-declare global {
-  namespace Express {
-    interface Request {
-      user?: {
-        id: string
-      }
+declare module 'express' {
+  interface Request {
+    user?: {
+      id: string
+    }
+    session: Session & {
+      trialId?: string
+      trialStarted?: number
     }
   }
 }

@@ -83,4 +83,15 @@ enum JobApplicationStatus {
   INTERVIEWING
   REJECTED
   ACCEPTED
+}
+
+model TrialSession {
+  id          String   @id
+  ipAddress   String
+  resumeId    String?
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([ipAddress])
 } 

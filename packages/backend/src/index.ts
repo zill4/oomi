@@ -9,6 +9,8 @@ import storageRoutes from './routes/storage.js';
 import resumeRoutes from './routes/resumes.js';
 import notificationRoutes from './routes/notifications.js';
 import jobApplicationRoutes from './routes/jobApplications.js'
+import session from 'express-session'
+import trialRoutes from './routes/trial.js'
 import { app, server } from './lib/socket.js';
 
 const prisma = new PrismaClient();
@@ -16,7 +18,18 @@ const prisma = new PrismaClient();
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'your-secret-key',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { 
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
+}))
 
+// Add with your other routes
+app.use('/api/trial', trialRoutes)
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);

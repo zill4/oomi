@@ -1,4 +1,10 @@
 import { Link } from 'react-router-dom'
+import { 
+  DocumentArrowUpIcon, 
+  UserCircleIcon, 
+  BriefcaseIcon, 
+  DocumentCheckIcon 
+} from '@heroicons/react/24/outline'
 
 export default function Home() {
   return (
@@ -34,7 +40,7 @@ export default function Home() {
           {/* Step 1 */}
           <div className="relative rounded-lg border border-gray-200 p-8">
             <div className="flex justify-center mb-6">
-              <img src="/images/resume-upload.svg" alt="Upload Resume" className="h-24 w-24" />
+              <DocumentArrowUpIcon className="h-24 w-24 text-seafoam-500" />
             </div>
             <h2 className="text-xl font-semibold mb-4">1. Provide Resume as PDF</h2>
             <p className="text-gray-600">Upload your existing resume to get started effortlessly.</p>
@@ -43,7 +49,7 @@ export default function Home() {
           {/* Step 2 */}
           <div className="relative rounded-lg border border-gray-200 p-8">
             <div className="flex justify-center mb-6">
-              <img src="/images/write-bio.svg" alt="Write Bio" className="h-24 w-24" />
+              <UserCircleIcon className="h-24 w-24 text-seafoam-500" />
             </div>
             <h2 className="text-xl font-semibold mb-4">2. Write a Quick Bio</h2>
             <p className="text-gray-600">Craft a personalized bio that stands out to employers.</p>
@@ -52,7 +58,7 @@ export default function Home() {
           {/* Step 3 */}
           <div className="relative rounded-lg border border-gray-200 p-8">
             <div className="flex justify-center mb-6">
-              <img src="/images/job-posting.svg" alt="Job Posting" className="h-24 w-24" />
+              <BriefcaseIcon className="h-24 w-24 text-seafoam-500" />
             </div>
             <h2 className="text-xl font-semibold mb-4">3. Provide Job Posting</h2>
             <p className="text-gray-600">Input the job details to tailor your CV precisely.</p>
@@ -61,7 +67,7 @@ export default function Home() {
           {/* Step 4 */}
           <div className="relative rounded-lg border border-gray-200 p-8">
             <div className="flex justify-center mb-6">
-              <img src="/images/download-cv.svg" alt="Download CV" className="h-24 w-24" />
+              <DocumentCheckIcon className="h-24 w-24 text-seafoam-500" />
             </div>
             <h2 className="text-xl font-semibold mb-4">4. Download Curated CV</h2>
             <p className="text-gray-600">Get a professionally curated CV ready for submission.</p>

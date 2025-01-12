@@ -13,10 +13,10 @@ export default function Layout({ children }: LayoutProps) {
           <div className="flex justify-between h-16">
             <div className="flex">
               <Link to="/" className="flex-shrink-0 flex items-center">
-                <span className="text-2xl font-bold text-seafoam-500">OOMI.AI</span>
+                <span className="text-2xl font-bold text-seafoam-500">OOMI</span>
               </Link>
             </div>
-            <div className="flex items-center">
+            {/* <div className="flex items-center">
               <Link
                 to="/resume"
                 className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
@@ -29,7 +29,7 @@ export default function Layout({ children }: LayoutProps) {
               >
                 Apply to Jobs
               </Link>
-            </div>
+            </div> */}
           </div>
         </div>
       </nav>

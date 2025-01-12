@@ -10,6 +10,42 @@ export const handleParseCompletion = async (req: Request, res: Response) => {
     const result: ParseResult = req.body
     console.log('1. Received parse completion with data:', JSON.stringify(result, null, 2))
 
+    // Check if this is a trial resume
+    if (result.resumeId.startsWith('trial/')) {
+      console.log('2. Processing trial resume:', result.resumeId)
+      // Store trial resume data in MongoDB with proper schema
+      await collections.parsedResumes.updateOne(
+        { resumeId: result.resumeId },
+        { 
+          $set: {
+            resumeId: result.resumeId,
+            userId: result.userId,
+            parsedData: {
+              personal_info: result.parsed_data.personal_info || {
+                name: null,
+                email: null,
+                phone: null,
+                location: null,
+                linkedin: null,
+                github: null,
+                website: null
+              },
+              education: result.parsed_data.education || [],
+              experience: result.parsed_data.experience || [],
+              skills: result.parsed_data.skills || [],
+              metadata: result.parsed_data.metadata || {},
+              raw_text: result.parsed_data.raw_text || ''
+            },
+            confidence: result.confidence ?? 0,
+            version: 1,
+            updatedAt: new Date()
+          }
+        },
+        { upsert: true }
+      )
+      return res.json({ success: true })
+    }
+
     // Update resume status first (most critical)
     await prisma.resume.update({
       where: { id: result.resumeId },
