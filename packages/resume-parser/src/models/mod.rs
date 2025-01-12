@@ -1,4 +1,3 @@
-use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -9,7 +8,8 @@ pub struct ResumeData {
     pub education: Vec<EducationEntry>,
     pub experience: Vec<ExperienceEntry>,
     pub skills: Vec<String>,
-    pub metadata: HashMap<String, String>
+    pub metadata: HashMap<String, String>,
+    pub raw_text: String
 }
 
 #[derive(Debug, Serialize, Deserialize, Default, Clone)]

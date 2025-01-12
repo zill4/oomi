@@ -123,22 +123,17 @@ impl ResumeScorer {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use chrono::NaiveDate;
 
     #[test]
     fn test_education_scoring() {
-        let entry = EducationEntry {
-            institution: "University of Example".to_string(),
-            degree: "Bachelor of Science".to_string(),
+        let education = vec![EducationEntry {
+            institution: "Example University".to_string(),
+            degree: Some("Bachelor of Science".to_string()),
             field: Some("Computer Science".to_string()),
-            start_date: Some(NaiveDate::from_ymd_opt(2020, 1, 1).unwrap()),
-            end_date: Some(NaiveDate::from_ymd_opt(2024, 1, 1).unwrap()),
-            gpa: Some(3.8),
-            location: Some("Example City".to_string()),
-            achievements: vec!["Dean's List".to_string()],
-        };
+            graduation_date: Some("2024-01-01".to_string()),
+        }];
 
-        let score = ResumeScorer::score_education(&entry);
+        let score = ResumeScorer::score_education(&education[0]);
         assert!(score.score > 0.8, "Expected high confidence score for complete education entry");
     }
 
@@ -148,7 +143,7 @@ mod tests {
             company: "Example Corp".to_string(),
             title: "Software Engineer".to_string(),
             location: Some("Example City".to_string()),
-            start_date: Some(NaiveDate::from_ymd_opt(2020, 1, 1).unwrap()),
+            start_date: Some("2020-01-01".to_string()),
             end_date: None,
             achievements: vec!["Built scalable systems".to_string()],
             technologies: vec!["Rust".to_string(), "Docker".to_string()],

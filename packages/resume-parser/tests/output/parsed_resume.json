@@ -1,0 +1,35 @@
+{
+  "personal_info": {
+    "name": null,
+    "email": "Justin@crispcode.io",
+    "phone": null,
+    "location": null,
+    "linkedin": null,
+    "github": null,
+    "website": null
+  },
+  "education": [],
+  "experience": [
+    {
+      "company": "Samsung May 2019",
+      "title": "businesses for partnerships to populate the Bixby Marketplace.",
+      "location": null,
+      "start_date": "Oct. 2020",
+      "end_date": "",
+      "achievements": [],
+      "technologies": []
+    },
+    {
+      "company": "RingCentral July 2017",
+      "title": "NPS survey responses to prioritize bug fixes and product roadmap decisions.",
+      "location": null,
+      "start_date": "June 2018",
+      "end_date": "",
+      "achievements": [],
+      "technologies": []
+    }
+  ],
+  "skills": [],
+  "metadata": {},
+  "raw_text": "\n\nJustin Crisp Justin@crispcode.io - (949) 873-3619 - Austin, TX - crispcode.io\n\nEXPERIENC E\nCubex Aug. 2023 – July 2024\nSoftware Engineer\nRemote\n▪ Deployed discrepancy reporting service as an A zure pipeline using Bicep via TDD leveraging services such as\nKey Vault, SFTP, and Storage Accounts.\n▪ Implemented bug fixes faced by users by adding endpoints and services in C # with .NET.\n▪ Added unit-testing for TDD of .NET backend endpoints/services via walking skeleton methodology keeping in mind\ndependency injection and polymorphism best practices.\n▪ Manually updated deprecated packages from Node 16 to No de 20 over 100+ changes, bringing the application out\nof deprecation.\n\nShotcall Nov. 2021 – April 2023\nSoftware Developer\nSeattle, WA\n▪ Led development on iOS and A n dro id mobile app improving the experience of 80% of users.\n▪ Increased file upload from ~10MB to o ver 2GB by using A WS MediaConvert to trigger Lambda HLS conversion\nfor video content, developed across the stack;Java Spring, Python Lambda, and TypeScript React.\n▪ Helped refactor legacy A n gular codebase to current React best practices with Redux, TypeScript, and\nTailwindCSS.\n▪ Helped ship features such as Events, Messaging, Feed, Discord Bot, Subscriptions, and bank linking.\n\nSamsung May 2019 – Oct. 2020\nDeveloper Relations\nMountain View, CA\n▪ Helped populate the Bixby Marketplace from initial Capsule count of less than 20 live Capsules to o ver 150, over\n700% gro wth, in less than 6-mo n ths.\n▪ Built 10+ template projects using JavaScrip t and Bixby IDE for potential developers, content creators, and small\nbusinesses for partnerships to populate the Bixby Marketplace.\n\nRingCentral July 2017 – June 2018\nProduct Analyst\nBelmont, CA\n▪ Used Wo rd Vecto r NLP mo del to accurately capture user sentiment targeting specific product features based on\nNPS survey responses to prioritize bug fixes and product roadmap decisions.\n\nED UC A TION\n42 Silicon Valley June 2018 - March 2019\nComputer Science\nFremont, CA\n▪ Student event ambassador, volunteer AV team, volunteer student kitchen, co-founded video game club.\n\nDe Anza College Sept. 2015 - Dec. 2017\nCupertino, CA\n\nA C HIEVEMENTS, SKILLS & INTERESTS\nAchievements: Owl Hack 2017 - 1st Place, Samsung SXR Hackathon - 3rd Place, Samsung Bixby Hackathon at 42\nSilicon Valley - 1st Place\nSkills:React, .NET, Spring, Unreal Engine 5, Flask, Azure, AWS, TypeScript, C#, C++, Python, C"
+}

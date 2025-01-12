@@ -1,76 +1,69 @@
 db = db.getSiblingDB('oomi');
 
 // Create collections with schema validation
-db.createCollection('parsed_resumes', {
+db.createCollection('resumes', {
   validator: {
     $jsonSchema: {
-      bsonType: "object",
-      required: ["resumeId", "userId", "parsedData"],
+      bsonType: 'object',
+      required: ['userId', 'pdf_key', 'data'],
       properties: {
-        resumeId: {
-          bsonType: "string",
-          description: "must be a string and is required"
-        },
-        userId: {
-          bsonType: "string",
-          description: "must be a string and is required"
-        },
-        parsedData: {
-          bsonType: "object",
-          required: ["personalInfo", "experience", "education", "skills"],
+        userId: { bsonType: 'string' },
+        pdf_key: { bsonType: 'string' },
+        data: {
+          bsonType: 'object',
+          required: ['personal_info', 'education', 'experience', 'skills', 'metadata', 'raw_text'],
           properties: {
-            personalInfo: {
-              bsonType: "object",
+            personal_info: {
+              bsonType: 'object',
               properties: {
-                name: { bsonType: "string" },
-                email: { bsonType: "string" },
-                phone: { bsonType: "string" },
-                location: { bsonType: "string" },
-                linkedin: { bsonType: "string" },
-                github: { bsonType: "string" },
-                website: { bsonType: "string" }
-              }
-            },
-            experience: {
-              bsonType: "array",
-              items: {
-                bsonType: "object",
-                required: ["company", "title"],
-                properties: {
-                  company: { bsonType: "string" },
-                  title: { bsonType: "string" },
-                  location: { bsonType: "string" },
-                  startDate: { bsonType: "string" },
-                  endDate: { bsonType: "string" },
-                  achievements: { 
-                    bsonType: "array",
-                    items: { bsonType: "string" }
-                  }
-                }
+                name: { bsonType: ['string', 'null'] },
+                email: { bsonType: ['string', 'null'] },
+                phone: { bsonType: ['string', 'null'] },
+                location: { bsonType: ['string', 'null'] },
+                linkedin: { bsonType: ['string', 'null'] },
+                github: { bsonType: ['string', 'null'] },
+                website: { bsonType: ['string', 'null'] }
               }
             },
             education: {
-              bsonType: "array",
+              bsonType: 'array',
               items: {
-                bsonType: "object",
+                bsonType: 'object',
                 properties: {
-                  institution: { bsonType: "string" },
-                  degree: { bsonType: "string" },
-                  field: { bsonType: "string" },
-                  graduationDate: { bsonType: "string" }
+                  institution: { bsonType: 'string' },
+                  degree: { bsonType: ['string', 'null'] },
+                  field: { bsonType: ['string', 'null'] },
+                  graduation_date: { bsonType: ['string', 'null'] }
+                }
+              }
+            },
+            experience: {
+              bsonType: 'array',
+              items: {
+                bsonType: 'object',
+                properties: {
+                  company: { bsonType: 'string' },
+                  title: { bsonType: 'string' },
+                  location: { bsonType: ['string', 'null'] },
+                  start_date: { bsonType: ['string', 'null'] },
+                  end_date: { bsonType: ['string', 'null'] },
+                  achievements: { bsonType: 'array', items: { bsonType: 'string' } },
+                  technologies: { bsonType: 'array', items: { bsonType: 'string' } }
                 }
               }
             },
             skills: {
-              bsonType: "array",
-              items: { bsonType: "string" }
-            }
+              bsonType: 'array',
+              items: { bsonType: 'string' }
+            },
+            metadata: {
+              bsonType: 'object'
+            },
+            raw_text: { bsonType: 'string' }
           }
         },
-        confidence: { bsonType: "number" },
-        version: { bsonType: "number" },
-        createdAt: { bsonType: "date" },
-        updatedAt: { bsonType: "date" }
+        created_at: { bsonType: 'date' },
+        updated_at: { bsonType: 'date' }
       }
     }
   }
