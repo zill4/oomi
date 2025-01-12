@@ -8,6 +8,7 @@ import userRoutes from './routes/users.js';
 import storageRoutes from './routes/storage.js';
 import resumeRoutes from './routes/resumes.js';
 import notificationRoutes from './routes/notifications.js';
+import jobApplicationRoutes from './routes/jobApplications.js'
 import { app, server } from './lib/socket.js';
 
 const prisma = new PrismaClient();
@@ -22,6 +23,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/storage', storageRoutes);
 app.use('/api/resumes', resumeRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/job-applications', jobApplicationRoutes)
 
 // Health check endpoint
 app.get('/health', (_req, res) => {

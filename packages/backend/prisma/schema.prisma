@@ -35,19 +35,30 @@ model Resume {
   updatedAt   DateTime  @updatedAt
   user        User      @relation(fields: [userId], references: [id])
   parsedResumes ResumeParse[]
+  jobApplications JobApplication[]
 
   @@index([userId])
 }
 
 model JobApplication {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  company   String
-  title     String
-  status    String   @default("PENDING")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String    @id @default(cuid())
+  userId        String
+  resumeId      String
+  jobTitle      String
+  company       String
+  jobUrl        String?
+  jobDescription String   @db.Text
+  status        JobApplicationStatus @default(APPLIED)
+  coverLetter   String?   @db.Text
+  generatedResume String? @db.Text
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user          User      @relation(fields: [userId], references: [id])
+  resume        Resume    @relation(fields: [resumeId], references: [id])
+
+  @@index([userId])
+  @@index([resumeId])
 }
 
 model ResumeParse {
@@ -65,4 +76,11 @@ model ResumeParse {
 
   @@index([resumeId])
   @@index([userId])
+}
+
+enum JobApplicationStatus {
+  APPLIED
+  INTERVIEWING
+  REJECTED
+  ACCEPTED
 } 
