@@ -1,0 +1,22 @@
+name: oomi-app
+services:
+  - name: web
+    dockerfile_path: Dockerfile.prod
+    source_dir: .
+    github:
+      branch: main
+      deploy_on_push: true
+    health_check:
+      http_path: /health
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        value: ${db.DATABASE_URL}
+    databases:
+      - name: db
+        engine: PG
+        version: "15"
+      - name: mongodb
+        engine: MONGODB
+        version: "6.0" 

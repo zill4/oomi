@@ -1,7 +1,34 @@
 import { z } from 'zod'
 import dotenv from 'dotenv'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
-dotenv.config()
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const rootDir = path.resolve(__dirname, '../../')
+
+// Only try to load .env file if we're not in production
+if (process.env.NODE_ENV !== 'production') {
+  const envFile = '.env'
+  const envPath = path.resolve(rootDir, envFile)
+  
+  console.log('Loading environment from file:', envPath)
+  const result = dotenv.config({ path: envPath })
+  
+  if (result.error) {
+    console.warn('Warning: Error loading .env file:', result.error)
+  }
+}
+
+// Log all environment variables (safely)
+console.log('Environment variables loaded:', {
+  NODE_ENV: process.env.NODE_ENV,
+  DATABASE_URL: process.env.DATABASE_URL ? '[REDACTED]' : undefined,
+  BUCKET_NAME: process.env.BUCKET_NAME || 'NOT_SET',
+  AWS_REGION: process.env.AWS_REGION || 'NOT_SET',
+  AWS_ENDPOINT_URL_S3: process.env.AWS_ENDPOINT_URL_S3 ? '[SET]' : 'NOT_SET',
+  AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID ? '[SET]' : 'NOT_SET',
+  AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY ? '[SET]' : 'NOT_SET',
+})
 
 // Define the environment schema
 const envSchema = z.object({
@@ -18,14 +45,23 @@ const envSchema = z.object({
   AWS_REGION: z.string().min(1),
   
   // MongoDB Configuration
-  MONGODB_URI: z.string().url().default('mongodb://root:example@mongodb:27017/oomi?authSource=admin'),
+  MONGODB_URI: z.string().url(),
   
   // RabbitMQ Configuration
-  RABBITMQ_URL: z.string().url().default('amqp://guest:guest@rabbitmq:5672'),
+  RABBITMQ_URL: z.string().url(),
 })
 
-// Parse and validate environment variables
-export const env = envSchema.parse(process.env)
-
 // Export the schema type for use in other parts of the application
-export type Env = z.infer<typeof envSchema> 
+export type Env = z.infer<typeof envSchema>
+
+// Validate environment variables
+let env: z.infer<typeof envSchema>
+try {
+  env = envSchema.parse(process.env)
+  console.log('Environment validation successful')
+} catch (error) {
+  console.error('Environment validation failed:', error)
+  throw error
+}
+
+export { env } 

@@ -18,3 +18,11 @@ coverage
 **/build
 **/.git
 **/target
+node_modules
+.git
+.env
+*.log
+coverage
+.next
+dist
+build

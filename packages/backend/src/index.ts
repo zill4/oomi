@@ -39,9 +39,9 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/job-applications', jobApplicationRoutes)
 
 // Health check endpoint
-app.get('/health', (_req, res) => {
-  res.status(200).json({ status: 'ok' });
-});
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() })
+})
 
 // Protected route example
 app.get('/protected', authenticateToken, (_req, res) => {
