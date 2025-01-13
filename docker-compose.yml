@@ -102,8 +102,13 @@ services:
 
   resume-parser:
     build:
-      context: ./packages/resume-parser
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: packages/resume-parser/Dockerfile
+      cache_from:
+        - rust:1.83-slim
+    env_file: .env
+    volumes:
+      - cargo-cache:/usr/local/cargo/registry
     ports:
       - "3001:3001"
     environment:
@@ -171,6 +176,7 @@ volumes:
   postgres_data:
   resume_parser_target:
   mongodb_data:
+  cargo-cache:
 
 networks:
   app-network:

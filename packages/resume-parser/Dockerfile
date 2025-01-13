@@ -1,46 +1,25 @@
-FROM rust:1.83 as builder
+FROM rust:1.83-slim as builder
+WORKDIR /app
 
-WORKDIR /usr/src/app
+# Install dependencies
+RUN apt-get update && \
+    apt-get install -y pkg-config libssl-dev && \
+    rm -rf /var/lib/apt/lists/*
 
-# Copy the Cargo files first
-COPY Cargo.toml Cargo.lock ./
+# Copy the entire resume-parser directory
+COPY packages/resume-parser .
 
-# Create a dummy main.rs to build dependencies
-RUN mkdir src && \
-    echo "fn main() {}" > src/main.rs && \
-    cargo build --release
-
-# Now copy the actual source code
-COPY . .
-
-# Build again with actual source
+# Build the release version
 RUN cargo build --release
 
 FROM debian:bookworm-slim
-
-# Install necessary runtime dependencies
-RUN apt-get update && apt-get install -y \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
-
 WORKDIR /app
+RUN apt-get update && \
+    apt-get install -y libssl3 ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
 
-# Copy the built binary
-COPY --from=builder /usr/src/app/target/release/resume-parser /app/resume-parser
+COPY --from=builder /app/target/release/resume-parser /app/resume-parser
+COPY packages/resume-parser/config /app/config/
+RUN chmod -R 755 /app/config/
 
-# Copy configuration
-COPY config /app/config/
-
-# Create config directory if it doesn't exist
-RUN mkdir -p /app/config
-
-ENV RUST_LOG=info
-
-CMD ["./resume-parser"] 
-
-# Copy configuration files
-COPY config /app/config/
-RUN ls -la /app/config/
-
-# Set permissions
-RUN chmod -R 755 /app/config/ 
+CMD ["/app/resume-parser"] 
