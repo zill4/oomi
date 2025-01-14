@@ -51,16 +51,24 @@ export default function ResumeList() {
   useEffect(() => {
     loadResumes()
 
-    // Add debug logging for socket connection
-    const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:8080')
-    
-    socket.on('connect', () => {
-      console.log('Socket connected!')
-    })
+    // Update socket connection to use the public URL
+    const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:8080', {
+      withCredentials: true,
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+      path: '/socket.io'
+    });
 
-    socket.on('connect_error', (error) => {
-      console.error('Socket connection error:', error)
-    })
+    // Socket connection logic
+    socket.on('connect', () => {
+      console.log('Socket connected successfully');
+    });
+
+    socket.on('error', (error) => {
+      console.error('Socket connection error:', error);
+    });
 
     socket.on('resumeParseComplete', async ({ resumeId, status, error }) => {
       console.log('Received parse completion:', { resumeId, status, error })
@@ -79,8 +87,8 @@ export default function ResumeList() {
     })
 
     return () => {
-      socket.disconnect()
-    }
+      socket.disconnect();
+    };
   }, [selectedResume])
 
   // // Polling effect for parsing status

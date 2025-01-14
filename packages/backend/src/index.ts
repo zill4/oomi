@@ -16,7 +16,10 @@ import { app, server } from './lib/socket.js';
 const prisma = new PrismaClient();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ['http://frontend', 'http://localhost:3000'],
+  credentials: true
+}));
 app.use(express.json());
 app.use(session({
   secret: process.env.SESSION_SECRET || 'your-secret-key',

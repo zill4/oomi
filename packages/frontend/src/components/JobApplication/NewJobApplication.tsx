@@ -18,7 +18,11 @@ interface User {
   lastName: string
 }
 
-export function NewJobApplication() {
+interface NewJobApplicationProps {
+  onApplicationCreated: () => void;
+}
+
+export function NewJobApplication({ onApplicationCreated }: NewJobApplicationProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [resumes, setResumes] = useState<Resume[]>([])
   const [loading, setLoading] = useState(false)
@@ -77,7 +81,7 @@ export function NewJobApplication() {
 
     setLoading(true)
     try {
-      const response = await fetchWithAuth('/job-applications', {
+      await fetchWithAuth('/job-applications', {
         method: 'POST',
         body: JSON.stringify({
           ...formData,
@@ -87,6 +91,7 @@ export function NewJobApplication() {
 
       toast.success('Job application created!')
       setIsOpen(false)
+      onApplicationCreated()
     } catch (error) {
       console.error('Error creating application:', error)
       toast.error('Failed to create job application')

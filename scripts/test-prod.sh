@@ -35,11 +35,5 @@ while ! docker-compose -f docker-compose.prod.yml ps | grep backend | grep "heal
     sleep 5
 done
 
-echo "🔍 Running database migrations..."
-docker-compose -f docker-compose.prod.yml exec -T backend npx prisma migrate deploy
-
 echo "🔍 Checking container status..."
-docker-compose -f docker-compose.prod.yml ps
-
-echo "📋 Viewing logs..."
-docker-compose -f docker-compose.prod.yml logs -f 
+docker-compose -f docker-compose.prod.yml ps 

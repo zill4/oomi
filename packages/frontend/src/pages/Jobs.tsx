@@ -169,7 +169,7 @@ export default function Jobs() {
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Job Applications</h1>
-        <NewJobApplication onApplicationCreated={() => loadJobApplications()} />
+        <NewJobApplication onApplicationCreated={loadJobApplications} />
       </div>
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
