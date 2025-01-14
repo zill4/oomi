@@ -87,8 +87,6 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=oomi
-      - LANG=en_US.utf8
-      - LC_ALL=en_US.utf8
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d oomi"]
       interval: 10s
@@ -97,14 +95,6 @@ services:
       start_period: 10s
     networks:
       - app-network
-    command: >
-      postgres
-      -c logging_collector=on
-      -c log_directory=/var/log/postgresql
-      -c log_filename=postgresql-%Y-%m-%d_%H%M%S.log
-      -c log_statement=all
-      -c log_connections=on
-      -c log_disconnections=on
 
   mongodb:
     image: mongodb/mongodb-community-server:6.0-ubi8
@@ -169,6 +159,7 @@ volumes:
   postgres_data:
   mongodb_data:
   rabbitmq_data:
+  postgres_logs:
 
 networks:
   app-network:
