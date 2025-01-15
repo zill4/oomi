@@ -11,12 +11,6 @@ services:
       - app-network
     depends_on:
       - backend
-    deploy:
-      resources:
-        limits:
-          memory: 150M
-        reservations:
-          memory: 100M
 
   backend:
     build:
@@ -72,12 +66,6 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-    deploy:
-      resources:
-        limits:
-          memory: 250M
-        reservations:
-          memory: 150M
 
   resume-parser:
     build:
@@ -96,16 +84,6 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
-    deploy:
-      resources:
-        limits:
-          memory: 300M
-        reservations:
-          memory: 200M
-    build:
-      args:
-        CARGO_BUILD_JOBS: "1"
-        RUSTFLAGS: "-C codegen-units=1"
 
   db:
     image: postgres:15-alpine
@@ -124,17 +102,6 @@ services:
       start_period: 10s
     networks:
       - app-network
-    deploy:
-      resources:
-        limits:
-          memory: 200M
-        reservations:
-          memory: 100M
-    command: [
-      "-c", "shared_buffers=128MB",
-      "-c", "work_mem=16MB",
-      "-c", "maintenance_work_mem=128MB"
-    ]
 
   mongodb:
     image: mongo:latest
@@ -155,13 +122,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 20s
-    deploy:
-      resources:
-        limits:
-          memory: 200M
-        reservations:
-          memory: 100M
-    command: ["mongod", "--wiredTigerCacheSizeGB", "0.25"]
 
   rabbitmq:
     image: rabbitmq:3-alpine
