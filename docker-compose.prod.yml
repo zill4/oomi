@@ -70,7 +70,7 @@ services:
   resume-parser:
     build:
       context: ./packages/resume-parser
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.prod
     environment:
       - BUCKET_NAME=${BUCKET_NAME}
       - AWS_REGION=${AWS_REGION}

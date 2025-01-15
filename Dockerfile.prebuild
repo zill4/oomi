@@ -1,0 +1,14 @@
+FROM debian:bookworm-slim
+
+# Install runtime dependencies only
+RUN apt-get update && \
+    apt-get install -y openssl ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /usr/local/bin
+
+# We'll copy our pre-built binary and config
+COPY resume-parser .
+COPY config ./config
+
+CMD ["resume-parser"]
