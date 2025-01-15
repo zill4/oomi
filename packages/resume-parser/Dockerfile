@@ -14,7 +14,7 @@ ENV RUSTFLAGS="-C codegen-units=1"
 WORKDIR /usr/src/app
 
 # Copy only dependency files first
-COPY Cargo.toml Cargo.lock ./
+COPY ./Cargo.toml ./Cargo.lock ./
 
 # Create dummy main.rs to build dependencies
 RUN mkdir src && \
