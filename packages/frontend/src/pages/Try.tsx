@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useApi } from '../lib/api'
 import { toast } from 'react-hot-toast'
 import { ClipboardIcon } from '@heroicons/react/24/outline'
+import { trialManager } from '../lib/trialManager'
 
 export default function Try() {
   const [step, setStep] = useState(1)
@@ -37,42 +38,65 @@ export default function Try() {
   }
 
   const handleSubmit = async () => {
-    setLoading(true)
+    if (!file) {
+      toast.error('Please select a resume file');
+      return;
+    }
+
+    if (!trialManager.hasTrialsRemaining()) {
+      toast.error('Trial limit reached. Please create an account to continue.');
+      return;
+    }
+
+    if (loading) {
+      return; // Prevent multiple submissions
+    }
+
+    setLoading(true);
     try {
-      // Start trial session
+      // Start trial session and get ID
       const trialResponse = await fetchWithAuth('/trial/start', {
         method: 'POST'
       })
-
-      // Upload resume
-      const formData = new FormData()
-      if (file) {
-        formData.append('file', file)
+      
+      console.log('Trial response:', trialResponse);  // Debug log
+      const { trialId } = trialResponse;
+      
+      if (!trialId) {
+        console.error('No trialId received from /trial/start');  // Debug log
+        throw new Error('No trial ID received');
       }
-      const uploadResponse = await fetchWithAuth('/trial/resume', {
+
+      // Upload resume with trial ID
+      const formData = new FormData()
+      formData.append('file', file)
+      
+      const uploadUrl = `/trial/resume/${trialId}`;
+      console.log('Attempting upload to:', uploadUrl);  // Debug log
+      
+      const uploadResponse = await fetchWithAuth(uploadUrl, {
         method: 'POST',
         body: formData,
       })
 
-      // Wait for resume parsing to complete (poll every 2 seconds for up to 30 seconds)
+      // Wait for resume parsing to complete
       const maxAttempts = 15
       let attempts = 0
       let parseComplete = false
       
       while (attempts < maxAttempts && !parseComplete) {
         try {
-          // Check if parsing is complete
-          const checkResponse = await fetchWithAuth('/trial/check-parse-status', {
+          const checkResponse = await fetchWithAuth(`/trial/check-parse-status/${trialId}`, {
             method: 'GET'
           })
           if (checkResponse.status === 'completed') {
-            parseComplete = true // Set flag to break the loop
-            break // Exit the loop immediately
+            parseComplete = true
+            break
           }
         } catch (error) {
           console.log('Waiting for parse completion...')
         }
-        if (!parseComplete) { // Only wait if we haven't completed
+        if (!parseComplete) {
           await new Promise(resolve => setTimeout(resolve, 2000))
           attempts++
         }
@@ -82,44 +106,32 @@ export default function Try() {
         throw new Error('Resume parsing timed out')
       }
 
-      // Generate cover letter
-      const generateResponse = await fetchWithAuth('/trial/generate', {
-        method: 'POST',
-        body: JSON.stringify({
-          bio,
-          jobTitle,
-          company,
-          jobDescription
+      if (parseComplete) {
+        console.log('Generating cover letter with:', { jobTitle, company, jobDescription });
+        const coverLetterResponse = await fetchWithAuth(`/trial/generate?trialId=${trialId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            jobTitle,
+            company,
+            jobDescription,
+            bio
+          })
         })
-      })
 
-      if (!generateResponse?.coverLetter) {
-        throw new Error('No cover letter generated')
+        if (coverLetterResponse.success) {
+          setCoverLetter(coverLetterResponse.coverLetter)
+          trialManager.incrementTrial(); // Move this inside success condition
+          setStep(4); // Transition to final step
+        } else {
+          toast.error('Failed to generate cover letter')
+        }
       }
-
-      setCoverLetter(generateResponse.coverLetter)
-      setStep(4)
     } catch (error) {
       console.error('Error:', error)
-      
-      // Handle trial limit error
-      if (error.status === 429) {
-        const data = await error.json()
-        toast.error(
-          <div>
-            <p>{data.error}</p>
-            <button 
-              onClick={() => navigate('/sign-up')}
-              className="mt-2 text-seafoam-500 hover:text-seafoam-400 font-medium"
-            >
-              Create Account →
-            </button>
-          </div>,
-          { duration: 5000 }
-        )
-      } else {
-        toast.error('Something went wrong. Please try again.')
-      }
+      toast.error('Something went wrong')
     } finally {
       setLoading(false)
     }
@@ -307,13 +319,20 @@ export default function Try() {
               </button>
               <button
                 onClick={handleNext}
-                disabled={!company.trim() || !jobTitle.trim() || !jobDescription.trim()}
+                disabled={!company.trim() || !jobTitle.trim() || !jobDescription.trim() || loading}
                 className={`w-full py-3 rounded-md text-white font-medium transition-colors
-                  ${(company.trim() && jobTitle.trim() && jobDescription.trim())
+                  ${(company.trim() && jobTitle.trim() && jobDescription.trim() && !loading)
                     ? 'bg-seafoam-500 hover:bg-seafoam-400' 
                     : 'bg-gray-300 cursor-not-allowed'}`}
               >
-                Generate Cover Letter
+                {loading ? (
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                    Generating...
+                  </div>
+                ) : (
+                  'Generate Cover Letter'
+                )}
               </button>
             </div>
           </div>

@@ -54,7 +54,7 @@ export default function Settings() {
   return (
     <div className="space-y-6 max-w-4xl">
       {/* News & Updates */}
-      <div className="bg-white rounded-lg shadow p-6">
+      {/* <div className="bg-white rounded-lg shadow p-6">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-lg font-medium text-gray-900">News & Updates</h2>
@@ -74,10 +74,10 @@ export default function Settings() {
             } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`} />
           </Switch>
         </div>
-      </div>
+      </div> */}
 
       {/* Job Notifications */}
-      <div className="bg-white rounded-lg shadow p-6">
+      {/* <div className="bg-white rounded-lg shadow p-6">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-lg font-medium text-gray-900">Job</h2>
@@ -97,10 +97,10 @@ export default function Settings() {
             } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`} />
           </Switch>
         </div>
-      </div>
+      </div> */}
 
       {/* Message Notifications */}
-      <div className="bg-white rounded-lg shadow p-6">
+      {/* <div className="bg-white rounded-lg shadow p-6">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-lg font-medium text-gray-900">Message</h2>
@@ -120,10 +120,10 @@ export default function Settings() {
             } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`} />
           </Switch>
         </div>
-      </div>
+      </div> */}
 
       {/* Networking Notifications */}
-      <div className="bg-white rounded-lg shadow p-6">
+      {/* <div className="bg-white rounded-lg shadow p-6">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-lg font-medium text-gray-900">Networking</h2>
@@ -143,10 +143,10 @@ export default function Settings() {
             } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`} />
           </Switch>
         </div>
-      </div>
+      </div> */}
 
       {/* Subscription */}
-      <div className="bg-white rounded-lg shadow p-6">
+      {/* <div className="bg-white rounded-lg shadow p-6">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-lg font-medium text-gray-900">Subscription</h2>
@@ -160,7 +160,7 @@ export default function Settings() {
             Update
           </button>
         </div>
-      </div>
+      </div> */}
 
       {/* Account Actions */}
       <div className="bg-white rounded-lg shadow p-6">

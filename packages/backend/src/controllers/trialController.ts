@@ -6,6 +6,8 @@ import { Anthropic } from '@anthropic-ai/sdk'
 import { collections } from '../lib/mongodb.js'
 import amqp from 'amqplib'
 import { env } from '../config/env.js'
+import { ParseJob } from '../types/queue.js'
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY
@@ -13,16 +15,12 @@ const anthropic = new Anthropic({
 
 export const startTrial = async (req: Request, res: Response) => {
   try {
-    // Create a temporary session if one doesn't exist
-    if (!req.session.trialId) {
-      req.session.trialId = uuidv4()
-      req.session.trialStarted = Date.now()
-    }
-
+    const trialId = uuidv4()
+    
     // Create temporary storage for the trial
     const trialData = await prisma.trialSession.create({
       data: {
-        id: req.session.trialId,
+        id: trialId,
         ipAddress: req.ip,
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
       }
@@ -41,73 +39,79 @@ export const startTrial = async (req: Request, res: Response) => {
 
 export const uploadTrialResume = async (req: Request, res: Response) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ error: 'No file provided' })
-    }
-
-    const trialId = req.session.trialId
+    const { trialId } = req.params
+    
     if (!trialId) {
-      return res.status(400).json({ error: 'Trial session not found' })
+      console.error('Trial ID missing from params');
+      return res.status(400).json({ error: 'Trial ID is required' });
     }
 
-    // Upload file to S3 - pass the buffer and filename separately
-    const fileName = `trial/${trialId}/${Date.now()}-${req.file.originalname}`
-    const fileUrl = await storageService.uploadFile(req.file, fileName)
+    console.log(`Processing resume for trial ${trialId}`);
 
-    // Create or update trial session with resume info
-    await prisma.trialSession.upsert({
-      where: { id: trialId },
-      create: {
-        id: trialId,
-        ipAddress: req.ip,
-        resumeId: fileName,
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
-      },
-      update: {
-        resumeId: fileName,
-        updatedAt: new Date()
-      }
+    // Verify trial exists and hasn't expired
+    const trial = await prisma.trialSession.findUnique({
+      where: { id: trialId }
     })
 
-    // Submit parse job to queue
-    const connection = await amqp.connect(env.RABBITMQ_URL)
-    const channel = await connection.createChannel()
-    
-    const parseJob = {
-      resumeId: fileName,
-      userId: trialId, // Use trialId as userId for trial sessions
-      pdf_key: fileName,
-      callback_url: `${process.env.API_URL}/api/notifications/parse-complete`, 
-      attempt: 0
+    if (!trial) {
+      console.error(`Trial ${trialId} not found`);
+      return res.status(404).json({ error: 'Trial session not found' });
     }
 
-    await channel.assertQueue('resume_parsing')
-    await channel.sendToQueue(
-      'resume_parsing',
-      Buffer.from(JSON.stringify(parseJob)),
-      { persistent: true }
-    )
+    if (trial.expiresAt < new Date()) {
+      console.error(`Trial ${trialId} expired at ${trial.expiresAt}`);
+      return res.status(400).json({ error: 'Trial session expired' });
+    }
 
+    // Upload file using storageService
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    const path = `trials/${trialId}/resume.pdf`
+    console.log(`Uploading resume to S3: ${path}`);
+    
+    const fileUrl = await storageService.uploadFile(req.file, path)
+    
+    // Use existing ParseJob structure
+    const connection = await amqp.connect(process.env.RABBITMQ_URL!)
+    const channel = await connection.createChannel()
+    
+    const message: ParseJob = {
+      resumeId: trialId,
+      userId: trialId,
+      pdf_key: path,
+      callback_url: `${process.env.API_URL}/api/notifications/parse-complete`,
+      retries: 0
+    }
+
+    console.log('Sending parse job to queue:', message);
+    await channel.assertQueue('resume_parsing', {
+      durable: true,
+      autoDelete: false
+    })
+    await channel.sendToQueue('resume_parsing', Buffer.from(JSON.stringify(message)))
+    
     await channel.close()
     await connection.close()
 
-    res.json({
-      success: true,
-      fileUrl,
-      fileName
+    await prisma.trialSession.update({
+      where: { id: trialId },
+      data: { resumeId: path }
     })
 
+    res.json({ success: true })
   } catch (error) {
-    console.error('Error uploading trial resume:', error)
-    res.status(500).json({ error: 'Failed to upload resume' })
+    console.error('Error processing trial resume:', error)
+    res.status(500).json({ error: 'Failed to process resume' })
   }
 }
 
 export const generateTrialCoverLetter = async (req: Request, res: Response) => {
   try {
-    const trialId = req.session.trialId
-    if (!trialId) {
-      return res.status(400).json({ error: 'Trial session not found' })
+    const { trialId } = req.query
+    if (!trialId || typeof trialId !== 'string') {
+      return res.status(400).json({ error: 'Trial ID is required' })
     }
 
     const { bio, jobTitle, company, jobDescription } = req.body
@@ -124,13 +128,13 @@ export const generateTrialCoverLetter = async (req: Request, res: Response) => {
       where: { id: trialId }
     })
 
-    if (!trialSession?.resumeId) {
-      return res.status(400).json({ error: 'Resume not found for trial' })
+    if (!trialSession) {
+      return res.status(400).json({ error: 'Trial session not found' })
     }
 
-    // Get parsed resume data from MongoDB using your collections
+    // Get parsed resume data from MongoDB using resumeId
     const parsedResume = await collections.parsedResumes.findOne({
-      resumeId: trialSession.resumeId
+      resumeId: trialId
     })
 
     if (!parsedResume) {
@@ -171,30 +175,21 @@ export const generateTrialCoverLetter = async (req: Request, res: Response) => {
 
 export const checkParseStatus = async (req: Request, res: Response) => {
   try {
-    const trialId = req.session.trialId
+    const { trialId } = req.params
+    
     if (!trialId) {
-      return res.status(400).json({ error: 'Trial session not found' })
+      return res.status(400).json({ error: 'Trial ID is required' })
     }
 
-    const trialSession = await prisma.trialSession.findUnique({
-      where: { id: trialId }
-    })
-
-    if (!trialSession?.resumeId) {
-      return res.status(404).json({ error: 'Resume not found for trial' })
+    // Check MongoDB for parsed data
+    const parsedResume = await collections.parsedResumes.findOne({ resumeId: trialId })
+    
+    if (parsedResume) {
+      return res.json({ status: 'completed' })
     }
 
-    // Check if resume has been parsed
-    const parsedResume = await collections.parsedResumes.findOne({
-      resumeId: trialSession.resumeId
-    })
-
-    if (!parsedResume) {
-      return res.json({ status: 'pending' })
-    }
-
-    return res.json({ status: 'completed' })
-
+    // If not found, it's still processing
+    return res.json({ status: 'processing' })
   } catch (error) {
     console.error('Error checking parse status:', error)
     res.status(500).json({ error: 'Failed to check parse status' })

@@ -7,43 +7,56 @@ import { MongoError } from 'mongodb'
 
 export const handleParseCompletion = async (req: Request, res: Response) => {
   try {
-    const result: ParseResult = req.body
-    console.log('1. Received parse completion with data:', JSON.stringify(result, null, 2))
+    const result = req.body
+    console.log('1. Received parse completion notification:', result)
 
     // Check if this is a trial resume
-    if (result.resumeId.startsWith('trial/')) {
-      console.log('2. Processing trial resume:', result.resumeId)
-      // Store trial resume data in MongoDB with proper schema
-      await collections.parsedResumes.updateOne(
-        { resumeId: result.resumeId },
-        { 
-          $set: {
-            resumeId: result.resumeId,
-            userId: result.userId,
-            parsedData: {
-              personal_info: result.parsed_data.personal_info || {
-                name: null,
-                email: null,
-                phone: null,
-                location: null,
-                linkedin: null,
-                github: null,
-                website: null
-              },
-              education: result.parsed_data.education || [],
-              experience: result.parsed_data.experience || [],
-              skills: result.parsed_data.skills || [],
-              metadata: result.parsed_data.metadata || {},
-              raw_text: result.parsed_data.raw_text || ''
+    const trial = await prisma.trialSession.findUnique({
+      where: { id: result.resumeId }
+    })
+
+    if (trial) {
+      console.log('Processing trial resume completion');
+      try {
+        // Prepare the document with all required fields
+        const parsedDocument = {
+          resumeId: result.resumeId,
+          userId: result.userId,
+          parsedData: {
+            personal_info: result.parsed_data.personal_info || {
+              name: null,
+              email: null,
+              phone: null,
+              location: null,
+              linkedin: null,
+              github: null,
+              website: null
             },
-            confidence: result.confidence ?? 0,
-            version: 1,
-            updatedAt: new Date()
-          }
-        },
-        { upsert: true }
-      )
-      return res.json({ success: true })
+            education: result.parsed_data.education || [],
+            experience: result.parsed_data.experience || [],
+            skills: result.parsed_data.skills || [],
+            metadata: result.parsed_data.metadata || {},
+            raw_text: result.parsed_data.raw_text || ''
+          },
+          confidence: result.confidence ?? 0,
+          version: 1,
+          updatedAt: new Date()
+        }
+        
+        console.log('3. Attempting MongoDB write for trial with document:', JSON.stringify(parsedDocument, null, 2))
+
+        const writeResult = await collections.parsedResumes.updateOne(
+          { resumeId: result.resumeId },
+          { $set: parsedDocument },
+          { upsert: true }
+        )
+
+        console.log('4. MongoDB write result for trial:', JSON.stringify(writeResult, null, 2))
+        return res.json({ success: true })
+      } catch (error) {
+        console.error('Error storing trial parsed data:', error)
+        return res.status(500).json({ error: 'Failed to store parsed data for trial' })
+      }
     }
 
     // Update resume status first (most critical)
@@ -120,7 +133,7 @@ export const handleParseCompletion = async (req: Request, res: Response) => {
 
     res.json({ success: true })
   } catch (error) {
-    console.error('8. Overall error in handleParseCompletion:', error)
+    console.error('Parse completion error:', error)
     res.status(500).json({ error: 'Failed to handle parse completion' })
   }
 } 

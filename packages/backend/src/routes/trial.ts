@@ -11,8 +11,8 @@ import {
 const router = Router()
 
 router.post('/start', trialLimiter, startTrial)
-router.post('/resume', trialLimiter, uploadResume.single('file'), uploadTrialResume)
+router.post('/resume/:trialId', trialLimiter, uploadResume.single('file'), uploadTrialResume)
 router.post('/generate', trialLimiter, generateTrialCoverLetter)
-router.get('/check-parse-status', checkParseStatus)
+router.get('/check-parse-status/:trialId', checkParseStatus)
 
 export default router 
