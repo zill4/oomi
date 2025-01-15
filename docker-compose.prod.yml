@@ -134,8 +134,8 @@ services:
       - app-network
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
-      interval: 5s
-      timeout: 5s
+      interval: 20s
+      timeout: 10s
       retries: 5
 
   prisma-studio:
