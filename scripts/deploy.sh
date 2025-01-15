@@ -7,7 +7,7 @@ set -e
 docker-compose -f docker-compose.prod.yml build
 
 # Log in to DO Container Registry
-./../../doctl.exe registry login
+#./../../doctl.exe registry login
 
 # Tag and push each service
 docker tag oomi-frontend:latest registry.digitalocean.com/oomi/frontend:latest
