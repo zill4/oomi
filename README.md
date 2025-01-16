@@ -16,7 +16,7 @@ Currently implementing core features for MVP (Minimum Viable Product).
 ### 2. Document Management 🚀
 - [x] Resume PDF upload
 - [x] Resume parsing service
-- [ ] Cover letter generation
+- [X] Cover letter generation
 - [ ] Document version control
 
 ### 3. Resume Processing (In Progress)
@@ -40,23 +40,23 @@ Currently implementing core features for MVP (Minimum Viable Product).
 - [ ] Application tracking
 
 ### 6. AI Integration
-- [ ] Cover letter generation
+- [X] Cover letter generation
 - [ ] Resume optimization
 - [ ] Skills gap analysis
 - [ ] Interview preparation
 
 ### 7. Frontend Enhancement
 - [ ] Dashboard analytics
-- [ ] Progress tracking
+- [X] Progress tracking
 - [ ] Interactive resume builder
-- [ ] Real-time status updates
+- [X] Real-time status updates
 
 ### 8. DevOps & Infrastructure
 - [x] Docker configuration
 - [x] Basic CI/CD
 - [ ] Monitoring and logging
 - [ ] Performance optimization
-- [ ] Domain configuration
+- [X] Domain configuration
 
 ### 9. Payment Processing
 - [ ] Stripe integration
@@ -108,9 +108,12 @@ To test the resume parser:
 4. Check S3 for stored files
 
 ### TODO
-1. Make sure to update fly deployment.
-2. Compose storyboard for release video
-3. Branding update - There are a lot of similarties to dating and finding a job. Interviewing is kind of like dating, and getting a job is like soft-marriage.
+1. Branding update - There are a lot of similarties to dating and finding a job. Interviewing is kind of like dating, and getting a job is like soft-marriage.
 Lot of risk/reward, wasted time and money, and hard feelings on both sides.
-
+2. fix issue with password regex
+3. copy/paste doesn't work on mac it seems (cover letter)
+4. Simplify the flow when a user creates an account
+5. Add resume builder using LaTeX? (maybe)
+6. Optimize consideration of using users
+7. Chrome extension
   oomi
