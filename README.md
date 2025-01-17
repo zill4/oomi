@@ -90,22 +90,7 @@ Apply migration
 `docker-compose exec backend sh -c "cd packages/backend && npx prisma migrate deploy"`
 Restart backend
 `docker-compose restart backend`
-users/
-├── profile-pictures/
-│ └── {userid}/
-├── resumes/
-│ ├── uploaded/
-│ │ └── {userid}/
-│ └── parsed/
-│ └── {userid}/
-└── cover-letters/
-└── {userid}/
-## Testing
-To test the resume parser:
-1. Upload a resume through the frontend interface
-2. Monitor the parsing status in the UI
-3. Verify parsed data in the database
-4. Check S3 for stored files
+
 
 ### TODO
 1. Branding update - There are a lot of similarties to dating and finding a job. Interviewing is kind of like dating, and getting a job is like soft-marriage.
