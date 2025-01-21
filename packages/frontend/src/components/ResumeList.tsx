@@ -203,7 +203,7 @@ export default function ResumeList() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold">Resume</h2>
-        <label className="inline-flex items-center px-4 py-2 bg-seafoam-500 text-white rounded-md hover:bg-seafoam-600 cursor-pointer transition-colors">
+        <label className="inline-flex items-center px-4 py-2 bg-sigma-500 text-white rounded-md hover:bg-sigma-600 cursor-pointer transition-colors">
           <span className="mr-2">Upload New Resume</span>
           <input
             type="file"
@@ -223,7 +223,7 @@ export default function ResumeList() {
 
       {isUploading && (
         <div className="text-center py-4">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-seafoam-500 border-t-transparent"></div>
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-sigma-500 border-t-transparent"></div>
         </div>
       )}
 
@@ -293,7 +293,7 @@ export default function ResumeList() {
                 </button>
                 <button
                   onClick={() => downloadResume(resume)}
-                  className="text-seafoam-500 hover:text-seafoam-600 p-2"
+                  className="text-sigma-500 hover:text-sigma-600 p-2"
                   title="Download"
                 >
                   <ArrowDownTrayIcon className="h-5 w-5" />

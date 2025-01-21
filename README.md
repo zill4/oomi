@@ -101,4 +101,4 @@ Lot of risk/reward, wasted time and money, and hard feelings on both sides.
 5. Add resume builder using LaTeX? (maybe)
 6. Optimize consideration of using users
 7. Chrome extension
-  oomi
+oomi

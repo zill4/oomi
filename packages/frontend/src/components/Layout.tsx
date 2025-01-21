@@ -13,7 +13,7 @@ export default function Layout({ children }: LayoutProps) {
           <div className="flex justify-between h-16">
             <div className="flex">
               <Link to="/" className="flex-shrink-0 flex items-center">
-                <span className="text-2xl font-bold text-seafoam-500">OOMI</span>
+                <img src="/images/oomi.png" alt="OOMI" className="h-8 w-auto" />
               </Link>
             </div>
             {/* <div className="flex items-center">

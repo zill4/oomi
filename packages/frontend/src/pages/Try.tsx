@@ -179,7 +179,7 @@ export default function Try() {
               onDragOver={handleDragOver}
             >
               {file ? (
-                <div className="text-seafoam-500">
+                <div className="text-sigma-500">
                   <p className="font-medium">{file.name}</p>
                   <button 
                     onClick={() => setFile(null)}
@@ -200,7 +200,7 @@ export default function Try() {
                   />
                   <label
                     htmlFor="resume-upload"
-                    className="inline-block bg-seafoam-500 text-white px-6 py-3 rounded-md cursor-pointer hover:bg-seafoam-400 transition-colors"
+                    className="inline-block bg-sigma-500 text-white px-6 py-3 rounded-md cursor-pointer hover:bg-sigma-400 transition-colors"
                   >
                     Upload Resume
                   </label>
@@ -214,7 +214,7 @@ export default function Try() {
                 disabled={!file}
                 className={`w-full py-3 rounded-md text-white font-medium transition-colors
                   ${file 
-                    ? 'bg-seafoam-500 hover:bg-seafoam-400' 
+                    ? 'bg-sigma-500 hover:bg-sigma-400' 
                     : 'bg-gray-300 cursor-not-allowed'}`}
               >
                 Next
@@ -234,7 +234,7 @@ export default function Try() {
             <textarea
               value={bio}
               onChange={(e) => setBio(e.target.value)}
-              className="w-full h-48 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-seafoam-500 focus:border-transparent resize-none mb-6"
+              className="w-full h-48 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sigma-500 focus:border-transparent resize-none mb-6"
               placeholder="Write your introduction here..."
             />
 
@@ -250,7 +250,7 @@ export default function Try() {
                 disabled={!bio.trim()}
                 className={`w-full py-3 rounded-md text-white font-medium transition-colors
                   ${bio.trim() 
-                    ? 'bg-seafoam-500 hover:bg-seafoam-400' 
+                    ? 'bg-sigma-500 hover:bg-sigma-400' 
                     : 'bg-gray-300 cursor-not-allowed'}`}
               >
                 Next
@@ -277,7 +277,7 @@ export default function Try() {
                   type="text"
                   value={company}
                   onChange={(e) => setCompany(e.target.value)}
-                  className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-seafoam-500 focus:border-transparent"
+                  className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sigma-500 focus:border-transparent"
                   placeholder="Enter company name"
                 />
               </div>
@@ -291,7 +291,7 @@ export default function Try() {
                   type="text"
                   value={jobTitle}
                   onChange={(e) => setJobTitle(e.target.value)}
-                  className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-seafoam-500 focus:border-transparent"
+                  className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sigma-500 focus:border-transparent"
                   placeholder="Enter job title"
                 />
               </div>
@@ -304,7 +304,7 @@ export default function Try() {
                   id="jobDescription"
                   value={jobDescription}
                   onChange={(e) => setJobDescription(e.target.value)}
-                  className="w-full h-48 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-seafoam-500 focus:border-transparent resize-none"
+                  className="w-full h-48 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sigma-500 focus:border-transparent resize-none"
                   placeholder="Paste the job description here..."
                 />
               </div>
@@ -322,7 +322,7 @@ export default function Try() {
                 disabled={!company.trim() || !jobTitle.trim() || !jobDescription.trim() || loading}
                 className={`w-full py-3 rounded-md text-white font-medium transition-colors
                   ${(company.trim() && jobTitle.trim() && jobDescription.trim() && !loading)
-                    ? 'bg-seafoam-500 hover:bg-seafoam-400' 
+                    ? 'bg-sigma-500 hover:bg-sigma-400' 
                     : 'bg-gray-300 cursor-not-allowed'}`}
               >
                 {loading ? (
@@ -378,7 +378,7 @@ export default function Try() {
               
               <button
                 onClick={() => navigate('/sign-up')}
-                className="w-full py-3 rounded-md text-white font-medium bg-seafoam-500 hover:bg-seafoam-400 transition-colors"
+                className="w-full py-3 rounded-md text-white font-medium bg-sigma-500 hover:bg-sigma-400 transition-colors"
               >
                 Create Account
               </button>

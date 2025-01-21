@@ -80,7 +80,7 @@ export default function Login() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="block w-full rounded-md border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-500 focus:border-seafoam-500 focus:ring-seafoam-500"
+                className="block w-full rounded-md border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-500 focus:border-sigma-500 focus:ring-sigma-500"
                 placeholder="Email"
                 disabled={isLoading}
               />
@@ -95,7 +95,7 @@ export default function Login() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="block w-full rounded-md border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-500 focus:border-seafoam-500 focus:ring-seafoam-500"
+                className="block w-full rounded-md border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-500 focus:border-sigma-500 focus:ring-sigma-500"
                 placeholder="Password"
                 disabled={isLoading}
               />
@@ -104,7 +104,7 @@ export default function Login() {
             <div>
               <button
                 type="submit"
-                className="w-full rounded-md bg-seafoam-500 py-3 px-4 font-medium text-white hover:bg-seafoam-400 focus:outline-none focus:ring-2 focus:ring-seafoam-500 focus:ring-offset-2"
+                className="w-full rounded-md bg-sigma-500 py-3 px-4 font-medium text-white hover:bg-sigma-400 focus:outline-none focus:ring-2 focus:ring-sigma-500 focus:ring-offset-2"
                 disabled={isLoading}
               >
                 {isLoading ? 'Logging in...' : 'Login'}
@@ -154,7 +154,7 @@ export default function Login() {
 
           <p className="mt-6 text-center text-sm text-gray-500">
             Don't have an account?{' '}
-            <Link to="/sign-up" className="font-medium text-seafoam-500 hover:text-seafoam-400">
+            <Link to="/sign-up" className="font-medium text-sigma-500 hover:text-sigma-400">
               Sign Up
             </Link>
           </p>

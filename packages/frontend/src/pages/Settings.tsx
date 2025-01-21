@@ -66,7 +66,7 @@ export default function Settings() {
             checked={notifications.news}
             onChange={() => handleNotificationChange('news')}
             className={`${
-              notifications.news ? 'bg-seafoam-500' : 'bg-gray-200'
+              notifications.news ? 'bg-sigma-500' : 'bg-gray-200'
             } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none`}
           >
             <span className={`${
@@ -89,7 +89,7 @@ export default function Settings() {
             checked={notifications.jobs}
             onChange={() => handleNotificationChange('jobs')}
             className={`${
-              notifications.jobs ? 'bg-seafoam-500' : 'bg-gray-200'
+              notifications.jobs ? 'bg-sigma-500' : 'bg-gray-200'
             } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none`}
           >
             <span className={`${
@@ -112,7 +112,7 @@ export default function Settings() {
             checked={notifications.messages}
             onChange={() => handleNotificationChange('messages')}
             className={`${
-              notifications.messages ? 'bg-seafoam-500' : 'bg-gray-200'
+              notifications.messages ? 'bg-sigma-500' : 'bg-gray-200'
             } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none`}
           >
             <span className={`${
@@ -135,7 +135,7 @@ export default function Settings() {
             checked={notifications.networking}
             onChange={() => handleNotificationChange('networking')}
             className={`${
-              notifications.networking ? 'bg-seafoam-500' : 'bg-gray-200'
+              notifications.networking ? 'bg-sigma-500' : 'bg-gray-200'
             } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none`}
           >
             <span className={`${
@@ -223,7 +223,7 @@ export default function Settings() {
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Type your message here.."
-          className="w-full h-32 p-3 border border-gray-300 rounded-md focus:ring-seafoam-500 focus:border-seafoam-500"
+          className="w-full h-32 p-3 border border-gray-300 rounded-md focus:ring-sigma-500 focus:border-sigma-500"
         />
         <button
           className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"

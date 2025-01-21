@@ -57,7 +57,7 @@ export default function Privacy() {
             <h2 className="text-xl font-semibold mb-4">Contact Us</h2>
             <p className="mb-4">
               If you have any questions about our privacy policy, please contact us at{' '}
-              <a href="mailto:justin@crispcode.io" className="text-seafoam-500 hover:text-seafoam-600">
+              <a href="mailto:justin@crispcode.io" className="text-sigma-500 hover:text-sigma-600">
                 justin@crispcode.io
               </a>
             </p>
@@ -65,7 +65,7 @@ export default function Privacy() {
         </div>
 
         <div className="mt-8 pt-8 border-t border-gray-200">
-          <Link to="/" className="text-seafoam-500 hover:text-seafoam-600">
+          <Link to="/" className="text-sigma-500 hover:text-sigma-600">
             ← Back to Home
           </Link>
         </div>

@@ -178,7 +178,7 @@ export default function Profile() {
         <h2 className="text-2xl font-bold mb-6">Profile</h2>
         <div className="flex items-center space-x-4">
           <div className="relative group">
-            <div className="w-16 h-16 rounded-full bg-seafoam-100 flex items-center justify-center overflow-hidden">
+            <div className="w-16 h-16 rounded-full bg-sigma-100 flex items-center justify-center overflow-hidden">
               {avatarUrl ? (
                 <img
                   src={avatarUrl}
@@ -206,10 +206,10 @@ export default function Profile() {
             </div>
             {isUploading && (
               <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 rounded-full">
-                <div className="w-5 h-5 border-2 border-seafoam-500 border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-5 h-5 border-2 border-sigma-500 border-t-transparent rounded-full animate-spin"></div>
               </div>
             )}
-            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-seafoam-500 rounded-full border-2 border-white flex items-center justify-center">
+            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-sigma-500 rounded-full border-2 border-white flex items-center justify-center">
               <span className="text-white text-xs">🌊</span>
             </div>
           </div>
@@ -225,7 +225,7 @@ export default function Profile() {
                       className={`w-full px-2 py-1 text-sm border rounded-md focus:ring-1 ${
                         errors.some(e => e.field === 'firstName')
                           ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-                          : 'border-gray-300 focus:border-seafoam-500 focus:ring-seafoam-500'
+                          : 'border-gray-300 focus:border-sigma-500 focus:ring-sigma-500'
                       }`}
                       placeholder="First Name"
                     />
@@ -236,7 +236,7 @@ export default function Profile() {
                       className={`w-full px-2 py-1 text-sm border rounded-md focus:ring-1 ${
                         errors.some(e => e.field === 'lastName')
                           ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-                          : 'border-gray-300 focus:border-seafoam-500 focus:ring-seafoam-500'
+                          : 'border-gray-300 focus:border-sigma-500 focus:ring-sigma-500'
                       }`}
                       placeholder="Last Name"
                     />
@@ -255,7 +255,7 @@ export default function Profile() {
                       Cancel
                     </button>
                     <button
-                      className="p-1 text-seafoam-500 hover:text-seafoam-400"
+                      className="p-1 text-sigma-500 hover:text-sigma-400"
                       onClick={handleNameUpdate}
                     >
                       Save
@@ -268,7 +268,7 @@ export default function Profile() {
                     {user?.firstName} {user?.lastName}
                   </h3>
                   <button 
-                    className="p-1 text-gray-400 hover:text-seafoam-500 transition-colors"
+                    className="p-1 text-gray-400 hover:text-sigma-500 transition-colors"
                     onClick={() => setIsEditingName(true)}
                   >
                     <PencilIcon className="w-4 h-4" />
@@ -292,7 +292,7 @@ export default function Profile() {
           <h2 className="text-2xl font-bold">Bio</h2>
           {!isEditingBio && (
             <button
-              className="p-1.5 text-gray-400 hover:text-seafoam-500 transition-colors"
+              className="p-1.5 text-gray-400 hover:text-sigma-500 transition-colors"
               onClick={() => setIsEditingBio(true)}
             >
               <PencilIcon className="w-4 h-4" />
@@ -312,7 +312,7 @@ export default function Profile() {
               <textarea
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
-                className="w-full min-h-[200px] p-2 border border-gray-300 rounded-md focus:border-seafoam-500 focus:ring-1 focus:ring-seafoam-500"
+                className="w-full min-h-[200px] p-2 border border-gray-300 rounded-md focus:border-sigma-500 focus:ring-1 focus:ring-sigma-500"
                 placeholder="Tell us your story..."
                 maxLength={10000}
               />
@@ -335,7 +335,7 @@ export default function Profile() {
                     Cancel
                   </button>
                   <button
-                    className="px-3 py-1.5 text-sm text-white bg-seafoam-500 rounded-md hover:bg-seafoam-400"
+                    className="px-3 py-1.5 text-sm text-white bg-sigma-500 rounded-md hover:bg-sigma-400"
                     onClick={handleBioUpdate}
                   >
                     Save
@@ -352,7 +352,7 @@ export default function Profile() {
                     {user.bio.split(' ').length > 100 && (
                       <button
                         onClick={() => setShowFullBio(!showFullBio)}
-                        className="mt-2 flex items-center text-seafoam-500 hover:text-seafoam-600 transition-colors"
+                        className="mt-2 flex items-center text-sigma-500 hover:text-sigma-600 transition-colors"
                       >
                         {showFullBio ? (
                           <>

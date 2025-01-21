@@ -69,7 +69,7 @@ export default function Terms() {
             <h2 className="text-xl font-semibold mb-4">8. Contact</h2>
             <p className="mb-4">
               For questions about these terms, please contact{' '}
-              <a href="mailto:justin@crispcode.io" className="text-seafoam-500 hover:text-seafoam-600">
+              <a href="mailto:justin@crispcode.io" className="text-sigma-500 hover:text-sigma-600">
                 justin@crispcode.io
               </a>
             </p>
@@ -77,7 +77,7 @@ export default function Terms() {
         </div>
 
         <div className="mt-8 pt-8 border-t border-gray-200">
-          <Link to="/" className="text-seafoam-500 hover:text-seafoam-600">
+          <Link to="/" className="text-sigma-500 hover:text-sigma-600">
             ← Back to Home
           </Link>
         </div>

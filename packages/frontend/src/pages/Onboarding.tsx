@@ -37,7 +37,7 @@ export default function Onboarding() {
 
   const steps: Step[] = [
     {
-      title: "Welcome to Oomi! 👋",
+      title: "Welcome to oomi! 👋",
       description: "Let's get to know you better. First, tell us your name.",
       isRequired: true,
       component: (
@@ -51,7 +51,7 @@ export default function Onboarding() {
               id="firstName"
               value={formData.firstName}
               onChange={(e) => handleInputChange('firstName', e.target.value)}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-4 py-3 focus:border-seafoam-500 focus:ring-seafoam-500"
+              className="mt-1 block w-full rounded-md border border-gray-300 px-4 py-3 focus:border-sigma-500 focus:ring-sigma-500"
               required
               placeholder="Enter your first name"
             />
@@ -65,7 +65,7 @@ export default function Onboarding() {
               id="lastName"
               value={formData.lastName}
               onChange={(e) => handleInputChange('lastName', e.target.value)}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-4 py-3 focus:border-seafoam-500 focus:ring-seafoam-500"
+              className="mt-1 block w-full rounded-md border border-gray-300 px-4 py-3 focus:border-sigma-500 focus:ring-sigma-500"
               required
               placeholder="Enter your last name"
             />
@@ -87,7 +87,7 @@ export default function Onboarding() {
             value={formData.bio}
             onChange={(e) => handleInputChange('bio', e.target.value)}
             rows={6}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-4 py-3 focus:border-seafoam-500 focus:ring-seafoam-500"
+            className="mt-1 block w-full rounded-md border border-gray-300 px-4 py-3 focus:border-sigma-500 focus:ring-sigma-500"
             placeholder="Share your professional background, interests, and goals..."
           />
           <p className="mt-2 text-sm text-gray-500">
@@ -152,7 +152,7 @@ export default function Onboarding() {
           <div className="mb-8">
             <div className="h-2 bg-gray-200 rounded-full">
               <div 
-                className="h-2 bg-seafoam-500 rounded-full transition-all duration-300"
+                className="h-2 bg-sigma-500 rounded-full transition-all duration-300"
                 style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
               />
             </div>
@@ -184,7 +184,7 @@ export default function Onboarding() {
             </button>
             <button
               onClick={handleNext}
-              className="px-6 py-3 text-base font-medium text-white bg-seafoam-500 rounded-lg hover:bg-seafoam-400"
+              className="px-6 py-3 text-base font-medium text-white bg-sigma-500 rounded-lg hover:bg-sigma-400"
             >
               {currentStep === steps.length - 1 ? 'Complete Setup' : 'Continue'}
             </button>

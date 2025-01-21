@@ -22,7 +22,7 @@ export default function Home() {
           <div className="mt-10 flex items-center justify-center gap-x-6">
             <Link
               to="/try"
-              className="rounded-md bg-seafoam-500 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-seafoam-400"
+              className="rounded-md bg-sigma-500 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-sigma-400"
             >
               Try for Free
             </Link>
@@ -40,7 +40,7 @@ export default function Home() {
           {/* Step 1 */}
           <div className="relative rounded-lg border border-gray-200 p-8">
             <div className="flex justify-center mb-6">
-              <DocumentArrowUpIcon className="h-24 w-24 text-seafoam-500" />
+              <DocumentArrowUpIcon className="h-24 w-24 text-sigma-500" />
             </div>
             <h2 className="text-xl font-semibold mb-4">1. Provide Resume as PDF</h2>
             <p className="text-gray-600">Upload your existing resume to get started effortlessly.</p>
@@ -49,7 +49,7 @@ export default function Home() {
           {/* Step 2 */}
           <div className="relative rounded-lg border border-gray-200 p-8">
             <div className="flex justify-center mb-6">
-              <UserCircleIcon className="h-24 w-24 text-seafoam-500" />
+              <UserCircleIcon className="h-24 w-24 text-sigma-500" />
             </div>
             <h2 className="text-xl font-semibold mb-4">2. Write a Quick Bio</h2>
             <p className="text-gray-600">Craft a personalized bio that stands out to employers.</p>
@@ -58,7 +58,7 @@ export default function Home() {
           {/* Step 3 */}
           <div className="relative rounded-lg border border-gray-200 p-8">
             <div className="flex justify-center mb-6">
-              <BriefcaseIcon className="h-24 w-24 text-seafoam-500" />
+              <BriefcaseIcon className="h-24 w-24 text-sigma-500" />
             </div>
             <h2 className="text-xl font-semibold mb-4">3. Provide Job Posting</h2>
             <p className="text-gray-600">Input the job details to tailor your CV precisely.</p>
@@ -67,7 +67,7 @@ export default function Home() {
           {/* Step 4 */}
           <div className="relative rounded-lg border border-gray-200 p-8">
             <div className="flex justify-center mb-6">
-              <DocumentCheckIcon className="h-24 w-24 text-seafoam-500" />
+              <DocumentCheckIcon className="h-24 w-24 text-sigma-500" />
             </div>
             <h2 className="text-xl font-semibold mb-4">4. Download Curated CV</h2>
             <p className="text-gray-600">Get a professionally curated CV ready for submission.</p>
@@ -77,7 +77,7 @@ export default function Home() {
         {/* Footer */}
         <footer className="mt-8 border-t border-gray-200 py-6">
           <div className="flex justify-between text-sm text-gray-500">
-            <p>© 2025 OOMI. All rights reserved.</p>
+            <p>© 2025 oomi. All rights reserved.</p>
             <div className="space-x-4">
               <Link to="/privacy" className="hover:text-gray-900">Privacy Policy</Link>
               <Link to="/terms" className="hover:text-gray-900">Terms of Service</Link>
